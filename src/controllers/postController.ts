@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import Post from "../models/post.model";
+import Post from "../models/postModel";
 
 export const createPost = async (req: Request, res: Response) => {
   const post = await Post.create(req.body);
   res.json(post);
 };
 
-export const getPosts = async (req: Request, res: Response) => {
+export const getAllPosts = async (req: Request, res: Response) => {
   const { sender } = req.query;
   const posts = await Post.find(sender ? { sender } : {});
   res.json(posts);

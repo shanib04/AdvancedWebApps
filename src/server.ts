@@ -1,5 +1,7 @@
+// Itay-Ram-214294373-Shani-Bashari-325953743
+
 import "dotenv/config";
-import app from "./app";
+import app from "./index";
 
 const PORT = process.env.PORT || 3000;
 
