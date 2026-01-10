@@ -1,4 +1,5 @@
-### Create a new post
+###
+# Create a new post
 POST http://localhost:3000/post
 Content-Type: application/json
 
@@ -7,24 +8,24 @@ Content-Type: application/json
   "content": "asdasdsdads"
 }
 
-###
 
-### Get all posts
+###
+# Get all posts
 GET http://localhost:3000/post
 
-###
 
-### Get posts by sender
+###
+# Get posts by sender
 GET http://localhost:3000/post?sender=JohnDoe
 
-###
 
-### Get post by ID
+###
+# Get post by ID
 GET http://localhost:3000/post/{{postId}}
 
-###
 
-### Update post
+###
+# Update post
 PUT http://localhost:3000/post/{{postId}}
 Content-Type: application/json
 
@@ -32,3 +33,46 @@ Content-Type: application/json
   "sender": "JohnDoe",
   "content": "Updated content!"
 }
+
+
+###
+# Create a new comment
+POST http://localhost:3000/comment
+Content-Type: application/json
+
+{
+  "postId": "{{postId}}",
+  "sender": "JaneDoe",
+  "content": "Great post!"
+}
+
+
+###
+# Get all comments
+GET http://localhost:3000/comment
+
+
+###
+# Get comments by post ID
+GET http://localhost:3000/comment?postId={{postId}}
+
+
+###
+# Get comment by ID
+GET http://localhost:3000/comment/{{commentId}}
+
+
+###
+# Update comment
+PUT http://localhost:3000/comment/{{commentId}}
+Content-Type: application/json
+
+{
+  "sender": "JaneDoe",
+  "content": "Updated comment content!"
+}
+
+
+###
+# Delete comment
+DELETE http://localhost:3000/comment/{{commentId}}
