@@ -2,7 +2,7 @@
 
 REST API project for the **Advanced Web Applications** course.
 
-This project implements a Posts API (and prepares infrastructure for a Comments API) using **Node.js**, **Express**, and **MongoDB**. Testing is done manually via **REST Client** (`request.rest`).
+This project implements a Posts API (and prepares infrastructure for a Comments API) using **Node.js**, **Express**, **TypeScript**, and **MongoDB**. Testing is done manually via **REST Client** (`request.rest`).
 
 Repository: [https://github.com/shanib04/AdvancedWebApps.git](https://github.com/shanib04/AdvancedWebApps.git)
 
@@ -12,8 +12,10 @@ Repository: [https://github.com/shanib04/AdvancedWebApps.git](https://github.com
 
 - Node.js (LTS recommended)
 - Express
+- TypeScript
 - MongoDB (remote college server)
 - Mongoose
+- dotenv
 - REST Client (VS Code extension)
 
 ---
@@ -21,7 +23,8 @@ Repository: [https://github.com/shanib04/AdvancedWebApps.git](https://github.com
 ## Prerequisites
 
 - **Node.js (LTS)**: [https://nodejs.org](https://nodejs.org)
-- **VS Code Extension**: REST Client
+- **VS Code**: [https://code.visualstudio.com](https://code.visualstudio.com)
+- **VS Code Extension**: REST Client (by Huachao Mao)
 - **College SSL VPN** (mandatory to access MongoDB)
 
 ### VPN Guides (Official)
@@ -48,31 +51,34 @@ cd AdvancedWebApps
 npm install
 ```
 
-### 3) Verify MongoDB connection (VERY IMPORTANT)
+---
 
-Open `src/config/db.js` and ensure it contains **exactly**:
+## Environment Variables (.env)
 
-```js
-const mongoose = require("mongoose");
+This project uses **dotenv** for configuration.
 
-const connectDB = async () => {
-  await mongoose.connect(
-    "mongodb://admin:bartar20%40CS@10.10.246.32:21771/posts_app?authSource=admin"
-  );
+### 1) Create a `.env` file in the project root
 
-  console.log("MongoDB connected");
-};
+```env
+PORT=3000
 
-module.exports = connectDB;
+MONGO_URI=mongodb://admin:bartar20%40CS@10.10.246.32:21771/posts_app?authSource=admin
 ```
 
-**Notes:**
+### 2) Important notes
 
-- `%40` encodes `@` in the password (`bartar20@CS`)
-- `authSource=admin` is required for authentication
-- `10.10.246.32` is the internal college server
+- `%40` is the encoded form of `@` in the database password
+- `authSource=admin` is required for MongoDB authentication
+- The MongoDB server is accessible **only via VPN**
 
-### 4) Run the server
+### 3) Security
+
+- `.env` is ignored by Git and **must not be committed**
+- Each developer should maintain their own `.env` file
+
+---
+
+## Run the Server (Development)
 
 ```bash
 npm run dev
@@ -82,7 +88,7 @@ Expected output:
 
 ```text
 MongoDB connected
-Server is running on port 4000
+Server is running on port 3000
 ```
 
 ---
@@ -94,32 +100,32 @@ AdvancedWebApps/
 │
 ├── src/
 │   ├── config/
-│   │   └── db.js
-│   │      └─ MongoDB connection configuration (mongoose)
+│   │   └── db.ts
+│   │      └─ MongoDB connection logic (uses MONGO_URI from .env)
 │   │
 │   ├── controllers/
-│   │   ├── post.controller.js
-│   │   │  └─ Business logic for Posts API (create, get, update)
-│   │   └── comment.controller.js
+│   │   ├── post.controller.ts
+│   │   │  └─ Business logic for Posts API (create, read, update)
+│   │   └── comment.controller.ts
 │   │      └─ Business logic for Comments API (implemented by partner)
 │   │
 │   ├── models/
-│   │   ├── post.model.js
+│   │   ├── post.model.ts
 │   │   │  └─ Mongoose schema for Post documents
-│   │   └── comment.model.js
+│   │   └── comment.model.ts
 │   │      └─ Mongoose schema for Comment documents
 │   │
 │   ├── routes/
-│   │   ├── post.routes.js
+│   │   ├── post.routes.ts
 │   │   │  └─ HTTP routes for Posts (maps URLs to controllers)
-│   │   └── comment.routes.js
+│   │   └── comment.routes.ts
 │   │      └─ HTTP routes for Comments
 │   │
-│   ├── app.js
-│   │   └─ Express app configuration (middlewares + routes)
+│   ├── app.ts
+│   │   └─ Express app configuration (middlewares, routes, DB connection)
 │   │
-│   ├── server.js
-│   │   └─ Server entry point (app.listen)
+│   ├── server.ts
+│   │   └─ Application entry point (loads env vars and starts server)
 │   │
 │   └── request.rest
 │       └─ Manual API tests using REST Client (required by the assignment)
@@ -129,6 +135,12 @@ AdvancedWebApps/
 │
 ├── package-lock.json
 │   └─ Exact dependency versions
+│
+├── tsconfig.json
+│   └─ TypeScript compiler configuration
+│
+├── nodemon.json
+│   └─ Nodemon configuration for TypeScript development
 │
 └── README.md
     └─ Project documentation
@@ -140,13 +152,17 @@ AdvancedWebApps/
 
 Open `src/request.rest`.
 
-**Important:** Separate requests with `###` so REST Client recognizes each request.
+**Important:** Each request must be separated using:
+
+```
+###
+```
 
 Example:
 
 ```http
 ### Create a new post
-POST http://localhost:4000/post
+POST http://localhost:3000/post
 Content-Type: application/json
 
 {
@@ -157,7 +173,7 @@ Content-Type: application/json
 ###
 
 ### Get all posts
-GET http://localhost:4000/post
+GET http://localhost:3000/post
 ```
 
 Click **Send Request** above each block.
@@ -166,22 +182,20 @@ Click **Send Request** above each block.
 
 ## Common Issues & Fixes
 
-### No "Send Request" button
+### No "Send Request" button in REST Client
 
-- Add `###` between requests in `request.rest`.
+- Ensure requests are separated by `###`
 
 ### MongoDB timeout / buffering errors
 
-- Connect to **SSL VPN**.
-- Restart the server (`npm run dev`).
+- Ensure **SSL VPN** is connected
+- Restart the server after connecting VPN
 
 ### Authentication failed
 
-- Ensure the connection string includes:
-
-  - `%40` in the password
-  - `authSource=admin`
-  - Correct server IP (`10.10.246.32`)
+- Verify `%40` encoding in password
+- Verify `authSource=admin` exists in the connection string
+- Verify VPN connection
 
 ---
 
@@ -189,5 +203,3 @@ Click **Send Request** above each block.
 
 - **Posts API**: implemented by Itay
 - **Comments API**: implemented by Shani
-
----
