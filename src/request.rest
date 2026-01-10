@@ -1,31 +1,31 @@
 ### Create a new post
-POST http://localhost:4000/post
+POST http://localhost:3000/post
 Content-Type: application/json
 
 {
-  "sender": "JohnDoe2",
+  "sender": "JohnDoe222",
   "content": "asdasdsdads"
 }
 
 ###
 
 ### Get all posts
-GET http://localhost:4000/post
+GET http://localhost:3000/post
 
 ###
 
 ### Get posts by sender
-GET http://localhost:4000/post?sender=JohnDoe
+GET http://localhost:3000/post?sender=JohnDoe
 
 ###
 
 ### Get post by ID
-GET http://localhost:4000/post/{{postId}}
+GET http://localhost:3000/post/{{postId}}
 
 ###
 
 ### Update post
-PUT http://localhost:4000/post/{{postId}}
+PUT http://localhost:3000/post/{{postId}}
 Content-Type: application/json
 
 {
