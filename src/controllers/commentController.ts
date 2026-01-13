@@ -7,7 +7,8 @@ export const createComment = async (req: Request, res: Response) => {
 };
 
 export const getAllComments = async (req: Request, res: Response) => {
-  const comments = await Comment.find();
+  const { sender } = req.query;
+  const comments = await Comment.find(sender ? { sender } : {});
   res.json(comments);
 };
 

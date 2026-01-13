@@ -53,6 +53,11 @@ GET http://localhost:3000/comment
 
 
 ###
+# Get comments by sender
+GET http://localhost:3000/comment?sender=JohnDoe
+
+
+###
 # Get comments by post ID
 GET http://localhost:3000/comment?postId={{postId}}
 
