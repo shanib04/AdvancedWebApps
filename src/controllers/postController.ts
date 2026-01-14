@@ -6,7 +6,7 @@ export const createPost = async (req: Request, res: Response) => {
   try {
     const { sender, content } = req.body;
     if (!sender || !content) {
-      return res.status(400).json({ error: "sender and content are required" });
+      return res.status(422).json({ error: "sender and content are required" });
     }
     const post = await Post.create(req.body);
     res.status(201).json(post);
@@ -29,10 +29,10 @@ export const getPostById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: "Post ID is required" });
+      return res.status(422).json({ error: "Post ID is required" });
     }
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Post ID format" });
+      return res.status(422).json({ error: "Invalid Post ID format" });
     }
     const post = await Post.findById(id);
     if (!post) {
@@ -48,14 +48,13 @@ export const updatePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { sender, content } = req.body;
-    if (!id) {
-      return res.status(400).json({ error: "Post ID is required" });
+    if (!id || !sender || !content) {
+      return res
+        .status(422)
+        .json({ error: "Post ID, sender and content are required" });
     }
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Post ID format" });
-    }
-    if (!sender || !content) {
-      return res.status(400).json({ error: "sender and content are required" });
+      return res.status(422).json({ error: "Invalid Post ID format" });
     }
     const post = await Post.findByIdAndUpdate(id, req.body, {
       new: true,

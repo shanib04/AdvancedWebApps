@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Comment from "../models/commentModel";
+import Post from "../models/postModel";
 import mongoose from "mongoose";
 
 export const createComment = async (req: Request, res: Response) => {
@@ -7,11 +8,15 @@ export const createComment = async (req: Request, res: Response) => {
     const { postId, sender, content } = req.body;
     if (!postId || !sender || !content) {
       return res
-        .status(400)
+        .status(422)
         .json({ error: "postId, sender, and content are required" });
     }
     if (!mongoose.Types.ObjectId.isValid(postId)) {
-      return res.status(400).json({ error: "Invalid postId format" });
+      return res.status(422).json({ error: "Invalid postId format" });
+    }
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
     }
     const comment = await Comment.create(req.body);
     res.status(201).json(comment);
@@ -34,7 +39,7 @@ export const getCommentById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: "Comment ID is required" });
+      return res.status(422).json({ error: "Comment ID is required" });
     }
     const comment = await Comment.findById(id);
     if (!comment) {
@@ -49,13 +54,17 @@ export const getCommentById = async (req: Request, res: Response) => {
 export const getCommentsByPost = async (req: Request, res: Response) => {
   try {
     const { postId } = req.query;
-    if (!mongoose.Types.ObjectId.isValid(postId as string)) {
-      return res.status(400).json({ error: "Invalid postId format" });
-    }
     if (!postId) {
       return res
-        .status(400)
+        .status(422)
         .json({ error: "postId query parameter is required" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(postId as string)) {
+      return res.status(422).json({ error: "Invalid postId format" });
+    }
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
     }
     const comments = await Comment.find({ postId });
     res.json(comments);
@@ -68,11 +77,10 @@ export const updateComment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { sender, content } = req.body;
-    if (!id) {
-      return res.status(400).json({ error: "Comment ID is required" });
-    }
-    if (!sender || !content) {
-      return res.status(400).json({ error: "sender and content are required" });
+    if (!id || !sender || !content) {
+      return res
+        .status(422)
+        .json({ error: "Comment ID, sender and content are required" });
     }
     const comment = await Comment.findByIdAndUpdate(
       id,
@@ -92,7 +100,7 @@ export const deleteComment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ error: "Comment ID is required" });
+      return res.status(422).json({ error: "Comment ID is required" });
     }
     const comment = await Comment.findByIdAndDelete(id);
     if (!comment) {
