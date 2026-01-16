@@ -16,6 +16,11 @@ export const createComment = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
+    if (!req.user || !req.user.id) {
+      return res
+        .status(401)
+        .json({ error: "Unauthenticated: User not authenticated" });
+    }
 
     const comment = await Comment.create({
       user: req.user.id,
@@ -88,6 +93,9 @@ export const updateComment = async (req: Request, res: Response) => {
     const comment = await Comment.findById(id);
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
+    }
+    if (comment.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
     comment.content = content;
     await comment.save();
