@@ -97,7 +97,7 @@ router.get("/:id", controller.getPostById);
  *       404:
  *         description: Post not found
  */
-router.put("/:id", controller.updatePost);
+router.put("/:id", requireAuth, controller.updatePost);
 
 /**
  * @swagger
