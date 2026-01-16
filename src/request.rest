@@ -21,12 +21,12 @@ GET http://localhost:3000/post?sender=JohnDoe
 
 ###
 # Get post by ID
-GET http://localhost:3000/post/{{postId}}
+GET http://localhost:3000/post/POST_ID
 
 
 ###
 # Update post
-PUT http://localhost:3000/post/{{postId}}
+PUT http://localhost:3000/post/POST_ID
 Content-Type: application/json
 
 {
@@ -41,7 +41,7 @@ POST http://localhost:3000/comment
 Content-Type: application/json
 
 {
-  "postId": "{{postId}}",
+  "postId": "POST_ID",
   "sender": "JaneDoe",
   "content": "Great post!"
 }
@@ -59,17 +59,17 @@ GET http://localhost:3000/comment?sender=JohnDoe
 
 ###
 # Get comments by post ID
-GET http://localhost:3000/comment?postId={{postId}}
+GET http://localhost:3000/comment?postId=POST_ID
 
 
 ###
 # Get comment by ID
-GET http://localhost:3000/comment/{{commentId}}
+GET http://localhost:3000/comment/COMMENT_ID
 
 
 ###
 # Update comment
-PUT http://localhost:3000/comment/{{commentId}}
+PUT http://localhost:3000/comment/COMMENT_ID
 Content-Type: application/json
 
 {
@@ -80,4 +80,43 @@ Content-Type: application/json
 
 ###
 # Delete comment
-DELETE http://localhost:3000/comment/{{commentId}}
+DELETE http://localhost:3000/comment/COMMENT_ID
+
+
+###
+# Create a new user
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+
+###
+# Get all users
+GET http://localhost:3000/user
+
+
+###
+# Get user by ID
+GET http://localhost:3000/user/USER_ID
+
+
+###
+# Update user
+PUT http://localhost:3000/user/USER_ID
+Content-Type: application/json
+
+{
+  "username": "john_updated",
+  "email": "john.updated@example.com",
+  "password": "newpassword123"
+}
+
+
+###
+# Delete user
+DELETE http://localhost:3000/user/USER_ID
