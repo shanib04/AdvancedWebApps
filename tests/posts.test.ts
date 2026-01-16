@@ -4,20 +4,20 @@ import mongoose from "mongoose";
 import Post from "../src/models/postModel";
 import Comment from "../src/models/commentModel";
 
+// Mock data
+const mockUserId = new mongoose.Types.ObjectId();
+const mockPostId = new mongoose.Types.ObjectId();
+
 jest.mock("../src/middleware/authMiddleware", () => ({
   requireAuth: (req: any, res: any, next: any) => {
     if (req.headers.authorization) {
-      req.user = { id: new mongoose.Types.ObjectId() };
+      req.user = { id: mockUserId };
       next();
     } else {
       return res.status(401).json({ error: "Authentication required" });
     }
   },
 }));
-
-// Mock data
-const mockUserId = new mongoose.Types.ObjectId();
-const mockPostId = new mongoose.Types.ObjectId();
 
 beforeAll(async () => {
   await Post.create({
@@ -92,7 +92,6 @@ describe("Post Controller Tests", () => {
       .put(`/post/${mockPostId}`)
       .set("Authorization", `Bearer validToken`)
       .send({
-        sender: "Updated Sender",
         content: "Updated content",
       });
 

@@ -4,17 +4,17 @@ import mongoose from "mongoose";
 import Comment from "../src/models/commentModel";
 import Post from "../src/models/postModel";
 
-jest.mock("../src/middleware/authMiddleware", () => ({
-  requireAuth: (req: any, res: any, next: any) => {
-    req.user = { id: new mongoose.Types.ObjectId() };
-    next();
-  },
-}));
-
 // Mock data
 const mockUserId = new mongoose.Types.ObjectId();
 const mockPostId = new mongoose.Types.ObjectId();
 const mockCommentId = new mongoose.Types.ObjectId();
+
+jest.mock("../src/middleware/authMiddleware", () => ({
+  requireAuth: (req: any, res: any, next: any) => {
+    req.user = { id: mockUserId };
+    next();
+  },
+}));
 
 beforeAll(async () => {
   await Post.create({
@@ -95,7 +95,6 @@ describe("Comment Controller Tests", () => {
       .put(`/comment/${mockCommentId}`)
       .set("Authorization", `Bearer validToken`)
       .send({
-        sender: "Updated Sender",
         content: "Updated content",
       });
 
