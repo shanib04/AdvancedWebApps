@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/userModel";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -14,7 +15,8 @@ export const createUser = async (req: Request, res: Response) => {
     if (existingUser) {
       return res.status(409).json({ error: "Username already exists" });
     }
-    const user = await User.create(req.body);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({ username, email, password: hashedPassword });
     res.status(201).json(user);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -23,7 +25,7 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     res.json(users);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -39,7 +41,7 @@ export const getUserById = async (req: Request, res: Response) => {
     if (!mongoose.Types.ObjectId.isValid(id as string)) {
       return res.status(422).json({ error: "Invalid User ID format" });
     }
-    const user = await User.findById(id);
+    const user = await User.findById(id).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
