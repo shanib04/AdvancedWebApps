@@ -75,20 +75,14 @@ export const updatePost = async (req: Request, res: Response) => {
 export const deletePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    console.log("Delete Post - ID:", id);
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
     const post = await Post.findById(id);
-    console.log("Delete Post - Found Post:", post);
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
     if (!req.user || !post.user || post.user.toString() !== req.user.id) {
-      console.log("Delete Post - Unauthorized:", {
-        postUser: post.user,
-        requestUser: req.user ? req.user.id : null,
-      });
       return res.status(403).json({ error: "Unauthorized" });
     }
     await Comment.deleteMany({ post: id }); // Cascade delete comments
