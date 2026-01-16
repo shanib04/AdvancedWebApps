@@ -14,6 +14,10 @@ export const requireAuth = (
   }
 
   const token = authHeader.split(" ")[1];
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is not defined");
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as { id: string };
     req.user = {
