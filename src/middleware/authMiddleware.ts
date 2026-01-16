@@ -22,6 +22,7 @@ export const requireAuth = (
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as { id: string };
     req.user = {
       _id: new mongoose.Types.ObjectId(decoded.id),
+      id: decoded.id,
     } as User;
     next();
   } catch (error) {
