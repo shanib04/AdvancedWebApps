@@ -17,11 +17,6 @@ export const createComment = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    // Ensure req.user.id is a valid ObjectId
-    if (!validateObjectId(req.user.id)) {
-      return res.status(422).json({ error: "Invalid User ID format" });
-    }
-
     const comment = await Comment.create({
       user: req.user.id,
       post: postId,
