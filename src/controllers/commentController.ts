@@ -84,20 +84,18 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
 export const updateComment = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { sender, content } = req.body;
-    if (!id || !sender || !content) {
+    const { content } = req.body;
+    if (!id || !content) {
       return res
         .status(422)
-        .json({ error: "Comment ID, sender and content are required" });
+        .json({ error: "Comment ID and content are required" });
     }
-    const comment = await Comment.findByIdAndUpdate(
-      id,
-      { sender, content },
-      { new: true }
-    );
+    const comment = await Comment.findById(id);
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
     }
+    comment.content = content;
+    await comment.save();
     res.json(comment);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

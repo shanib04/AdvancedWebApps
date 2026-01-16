@@ -51,21 +51,21 @@ export const getPostById = async (req: Request, res: Response) => {
 export const updatePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { sender, content } = req.body;
-    if (!id || !sender || !content) {
+    const { content } = req.body;
+    if (!id || !content) {
       return res
         .status(422)
-        .json({ error: "Post ID, sender and content are required" });
+        .json({ error: "Post ID and content are required" });
     }
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
-    const post = await Post.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
+    post.content = content;
+    await post.save();
     res.json(post);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -89,7 +89,6 @@ export const deletePost = async (req: Request, res: Response) => {
     await post.deleteOne();
     res.json({ message: "Post and related comments deleted successfully" });
   } catch (error: any) {
-    console.error("Delete Post - Error:", error);
     res.status(500).json({ error: error.message });
   }
 };

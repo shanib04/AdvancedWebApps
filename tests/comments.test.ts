@@ -3,10 +3,9 @@ import app from "../src/server";
 import mongoose from "mongoose";
 import Comment from "../src/models/commentModel";
 import Post from "../src/models/postModel";
-import { requireAuth } from "../src/middleware/authMiddleware";
 
 jest.mock("../src/middleware/authMiddleware", () => ({
-  requireAuth: (req, res, next) => {
+  requireAuth: (req: any, res: any, next: any) => {
     req.user = { id: new mongoose.Types.ObjectId() };
     next();
   },
@@ -74,9 +73,44 @@ describe("Comment Controller Tests", () => {
   });
 
   test("Delete Comment - Unauthorized", async () => {
-    const response = await request(app).delete(`/comment/${mockCommentId}`);
+    const unauthorizedCommentId = new mongoose.Types.ObjectId();
+
+    await Comment.create({
+      _id: unauthorizedCommentId,
+      user: mockUserId,
+      post: mockPostId,
+      content: "Mock comment content",
+    });
+
+    const response = await request(app)
+      .delete(`/comment/${unauthorizedCommentId}`)
+      .set("Authorization", `Bearer invalidToken`);
 
     expect(response.status).toBe(403);
     expect(response.body.error).toBe("Unauthorized");
+  });
+
+  test("Update Comment - Valid", async () => {
+    const response = await request(app)
+      .put(`/comment/${mockCommentId}`)
+      .set("Authorization", `Bearer validToken`)
+      .send({
+        sender: "Updated Sender",
+        content: "Updated content",
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("_id", mockCommentId.toString());
+    expect(response.body.content).toBe("Updated content");
+  });
+
+  test("Update Comment - Missing Fields", async () => {
+    const response = await request(app)
+      .put(`/comment/${mockCommentId}`)
+      .set("Authorization", `Bearer validToken`)
+      .send({});
+
+    expect(response.status).toBe(422);
+    expect(response.body.error).toBe("Comment ID and content are required");
   });
 });
