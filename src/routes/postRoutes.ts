@@ -118,6 +118,6 @@ router.put("/:id", requireAuth, controller.updatePost);
  *       404:
  *         description: Post not found
  */
-router.delete("/:id", controller.deletePost);
+router.delete("/:id", requireAuth, controller.deletePost);
 
 export default router;
