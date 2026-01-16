@@ -92,7 +92,7 @@ describe("Post Controller Tests", () => {
       .put(`/post/${mockPostId}`)
       .set("Authorization", `Bearer validToken`)
       .send({
-        sender: "Updated Sender",
+
         content: "Updated content",
       });
 

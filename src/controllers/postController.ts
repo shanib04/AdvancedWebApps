@@ -9,6 +9,9 @@ export const createPost = async (req: Request, res: Response) => {
     if (!content) {
       return res.status(422).json({ error: "Content is required" });
     }
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
     const post = await Post.create({
       user: req.user.id,
       content,
@@ -63,6 +66,9 @@ export const updatePost = async (req: Request, res: Response) => {
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
+    }
+    if (!req.user || !post.user || post.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
     post.content = content;
     await post.save();

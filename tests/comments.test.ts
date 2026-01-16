@@ -95,7 +95,7 @@ describe("Comment Controller Tests", () => {
       .put(`/comment/${mockCommentId}`)
       .set("Authorization", `Bearer validToken`)
       .send({
-        sender: "Updated Sender",
+
         content: "Updated content",
       });
 

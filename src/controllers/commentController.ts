@@ -9,6 +9,9 @@ export const createComment = async (req: Request, res: Response) => {
     if (!content) {
       return res.status(422).json({ error: "Content is required" });
     }
+    if (!postId) {
+      return res.status(422).json({ error: "Post ID is required" });
+    }
     if (!validateObjectId(postId)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
@@ -88,6 +91,9 @@ export const updateComment = async (req: Request, res: Response) => {
     const comment = await Comment.findById(id);
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
+    }
+    if (comment.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
     comment.content = content;
     await comment.save();
