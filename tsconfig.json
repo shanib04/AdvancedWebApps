@@ -3,10 +3,12 @@
     "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "rootDir": "src",
+    "rootDir": "./",
     "outDir": "dist",
     "esModuleInterop": true,
     "verbatimModuleSyntax": false,
-    "strict": false
-  }
+    "strict": false,
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  },
+  "include": ["src/**/*"]
 }

@@ -1,14 +1,21 @@
 import { Request, Response } from "express";
 import Post from "../models/postModel";
-import mongoose from "mongoose";
+import Comment from "../models/commentModel";
+import { validateObjectId } from "./validateId";
 
 export const createPost = async (req: Request, res: Response) => {
   try {
-    const { sender, content } = req.body;
-    if (!sender || !content) {
-      return res.status(422).json({ error: "sender and content are required" });
+    const { content } = req.body;
+    if (!content) {
+      return res.status(422).json({ error: "Content is required" });
     }
-    const post = await Post.create(req.body);
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const post = await Post.create({
+      user: req.user.id,
+      content,
+    });
     res.status(201).json(post);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -31,7 +38,7 @@ export const getPostById = async (req: Request, res: Response) => {
     if (!id) {
       return res.status(422).json({ error: "Post ID is required" });
     }
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
     const post = await Post.findById(id);
@@ -47,22 +54,46 @@ export const getPostById = async (req: Request, res: Response) => {
 export const updatePost = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { sender, content } = req.body;
-    if (!id || !sender || !content) {
+    const { content } = req.body;
+    if (!id || !content) {
       return res
         .status(422)
-        .json({ error: "Post ID, sender and content are required" });
+        .json({ error: "Post ID and content are required" });
     }
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
-    const post = await Post.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
+    if (!req.user || !post.user || post.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    post.content = content;
+    await post.save();
     res.json(post);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deletePost = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!validateObjectId(id)) {
+      return res.status(422).json({ error: "Invalid Post ID format" });
+    }
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    if (!req.user || !post.user || post.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    await Comment.deleteMany({ post: id }); // Cascade delete comments
+    await post.deleteOne();
+    res.json({ message: "Post and related comments deleted successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -36,6 +36,11 @@ Content-Type: application/json
 
 
 ###
+# Delete post
+DELETE http://localhost:3000/post/{{postId}}
+
+
+###
 # Create a new comment
 POST http://localhost:3000/comment
 Content-Type: application/json
@@ -73,7 +78,6 @@ PUT http://localhost:3000/comment/{{commentId}}
 Content-Type: application/json
 
 {
-  "sender": "JaneDoe",
   "content": "Updated comment content!"
 }
 
