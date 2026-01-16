@@ -9,6 +9,9 @@ export const createComment = async (req: Request, res: Response) => {
     if (!content) {
       return res.status(422).json({ error: "Content is required" });
     }
+    if (!postId) {
+      return res.status(422).json({ error: "Post ID is required" });
+    }
     if (!validateObjectId(postId)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
