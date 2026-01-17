@@ -1,17 +1,55 @@
 import { Request, Response } from "express";
-import { createUser } from "./userController";
 import User from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const generateToken = (userId: string): string => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET || "your-secret-key", {
-    expiresIn: "1h",
-  });
+export interface Tokens {
+  token: string;
+  refreshToken: string;
+}
+
+const generateToken = (userId: string): Tokens => {
+  const secret: string = process.env.JWT_SECRET || "your-secret-key";
+  const exp: number = parseInt(process.env.JWT_EXPIRES_IN || "1h");
+  const refreshExp: number = parseInt(
+    process.env.JWT_REFRESH_EXPIRES_IN || "24h"
+  );
+
+  const token = jwt.sign({ userId }, secret, { expiresIn: exp });
+  const refreshToken = jwt.sign({ userId }, secret, { expiresIn: refreshExp });
+
+  return { token, refreshToken };
 };
 
 export const register = async (req: Request, res: Response) => {
-  return createUser(req, res);
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res
+        .status(422)
+        .json({ error: "username, email and password are required" });
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(409).json({ error: "Username already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    const tokens = generateToken(user._id.toString());
+    user.refreshToken.push(tokens.refreshToken);
+    await user.save();
+
+    res.status(201).json(tokens);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 export const login = async (req: Request, res: Response) => {
@@ -30,9 +68,69 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-    const accessToken = generateToken(user._id.toString());
-    res.json({ accessToken });
+
+    const tokens = generateToken(user._id.toString());
+    user.refreshToken.push(tokens.refreshToken);
+    await user.save();
+
+    res.json(tokens);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const refresh = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(401).json({ error: "Refresh token is required" });
+    }
+
+    const secret: string = process.env.JWT_SECRET || "your-secret-key";
+    const decoded: any = jwt.verify(refreshToken, secret);
+
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    if (!user.refreshToken.includes(refreshToken)) {
+      user.refreshToken = [];
+      await user.save();
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    const tokens = generateToken(user._id.toString());
+    user.refreshToken.push(tokens.refreshToken);
+    user.refreshToken = user.refreshToken.filter((rt) => rt !== refreshToken);
+    await user.save();
+
+    res.json(tokens);
+  } catch (error: any) {
+    res.status(401).json({ error: "Invalid refresh token" });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(422).json({ error: "Refresh token is required" });
+    }
+
+    const secret: string = process.env.JWT_SECRET || "your-secret-key";
+    const decoded: any = jwt.verify(refreshToken, secret);
+
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+
+    user.refreshToken = user.refreshToken.filter((rt) => rt !== refreshToken);
+    await user.save();
+
+    res.json({ message: "Logged out successfully" });
+  } catch (error: any) {
+    res.status(401).json({ error: "Invalid refresh token" });
   }
 };
