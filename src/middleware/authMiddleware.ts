@@ -14,7 +14,10 @@ const authMiddleware = (
   }
 
   const token = authHeader.split(" ")[1];
-  const secret: string = process.env.JWT_SECRET || "your-secret-key";
+  const secret: string = process.env.JWT_SECRET;
+  if (!secret) {
+    return res.status(500).json({ error: "JWT_SECRET is not configured" });
+  }
 
   try {
     const decoded = jwt.verify(token, secret) as {
