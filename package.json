@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "jest --detectOpenHandles --forceExit --coverage"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,12 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.2.0",
     "nodemon": "^3.1.11",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2"
   }
 }
