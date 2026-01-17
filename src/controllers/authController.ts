@@ -4,12 +4,10 @@ import User from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const generateToken = (userId: string, username: string): string => {
-  return jwt.sign(
-    { userId, username },
-    process.env.JWT_SECRET || "your-secret-key",
-    { expiresIn: "1h" }
-  );
+const generateToken = (userId: string): string => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET || "your-secret-key", {
+    expiresIn: "1h",
+  });
 };
 
 export const register = async (req: Request, res: Response) => {
@@ -32,7 +30,7 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-    const accessToken = generateToken(user._id.toString(), user.username);
+    const accessToken = generateToken(user._id.toString());
     res.json({ accessToken });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
