@@ -6,11 +6,10 @@ import { validateObjectId } from "./validateId";
 export const createComment = async (req: Request, res: Response) => {
   try {
     const { post: postId, content } = req.body;
-    if (!content) {
-      return res.status(422).json({ error: "Content is required" });
-    }
-    if (!postId) {
-      return res.status(422).json({ error: "Post ID is required" });
+    if (!postId || !content) {
+      return res
+        .status(422)
+        .json({ error: "Post ID and content are required" });
     }
     if (!validateObjectId(postId)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
