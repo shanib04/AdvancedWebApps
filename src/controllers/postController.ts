@@ -24,8 +24,11 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const { sender } = req.query;
-    const posts = await Post.find(sender ? { sender } : {});
+    const { user } = req.query as { user?: string };
+    if (user && !validateObjectId(user)) {
+      return res.status(422).json({ error: "Invalid User ID format" });
+    }
+    const posts = await Post.find(user ? { user } : {});
     res.json(posts);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

@@ -5,7 +5,8 @@ import { validateObjectId } from "./validateId";
 
 export const createComment = async (req: Request, res: Response) => {
   try {
-    const { post: postId, content } = req.body;
+    const postId = req.body?.post ?? req.body?.postId;
+    const { content } = req.body;
     if (!postId || !content) {
       return res
         .status(422)
@@ -37,8 +38,19 @@ export const createComment = async (req: Request, res: Response) => {
 
 export const getAllComments = async (req: Request, res: Response) => {
   try {
-    const { sender } = req.query;
-    const comments = await Comment.find(sender ? { sender } : {});
+    const { user, post } = req.query as { user?: string; post?: string };
+    if (user && !validateObjectId(user)) {
+      return res.status(422).json({ error: "Invalid User ID format" });
+    }
+    if (post && !validateObjectId(post)) {
+      return res.status(422).json({ error: "Invalid Post ID format" });
+    }
+
+    const filter: Record<string, string> = {};
+    if (user) filter.user = user;
+    if (post) filter.post = post;
+
+    const comments = await Comment.find(filter);
     res.json(comments);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -50,6 +62,9 @@ export const getCommentById = async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!id) {
       return res.status(422).json({ error: "Comment ID is required" });
+    }
+    if (!validateObjectId(id)) {
+      return res.status(422).json({ error: "Invalid Comment ID format" });
     }
     const comment = await Comment.findById(id);
     if (!comment) {
@@ -63,7 +78,7 @@ export const getCommentById = async (req: Request, res: Response) => {
 
 export const getCommentsByPost = async (req: Request, res: Response) => {
   try {
-    const { postId } = req.query;
+    const postId = (req.query.postId ?? req.query.post) as string | undefined;
     if (!postId) {
       return res
         .status(422)
@@ -76,7 +91,7 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    const comments = await Comment.find({ postId });
+    const comments = await Comment.find({ post: postId });
     res.json(comments);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -91,6 +106,14 @@ export const updateComment = async (req: Request, res: Response) => {
       return res
         .status(422)
         .json({ error: "Comment ID and content are required" });
+    }
+    if (!validateObjectId(id)) {
+      return res.status(422).json({ error: "Invalid Comment ID format" });
+    }
+    if (!req.user || !req.user.id) {
+      return res
+        .status(401)
+        .json({ error: "Unauthenticated: User not authenticated" });
     }
     const comment = await Comment.findById(id);
     if (!comment) {
@@ -112,6 +135,11 @@ export const deleteComment = async (req: Request, res: Response) => {
     const { id } = req.params;
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Comment ID format" });
+    }
+    if (!req.user || !req.user.id) {
+      return res
+        .status(401)
+        .json({ error: "Unauthenticated: User not authenticated" });
     }
     const comment = await Comment.findById(id);
     if (!comment) {

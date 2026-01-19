@@ -51,6 +51,25 @@ router.get("/", controller.getAllComments);
 
 /**
  * @swagger
+ * /comment/post:
+ *   get:
+ *     summary: Get comments by post ID
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: query
+ *         name: post
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the post
+ *     responses:
+ *       200:
+ *         description: List of comments for the post
+ */
+router.get("/post", controller.getCommentsByPost);
+
+/**
+ * @swagger
  * /comment/{id}:
  *   get:
  *     summary: Get a comment by ID
@@ -69,25 +88,6 @@ router.get("/", controller.getAllComments);
  *         description: Comment not found
  */
 router.get("/:id", controller.getCommentById);
-
-/**
- * @swagger
- * /comment/post:
- *   get:
- *     summary: Get comments by post ID
- *     tags: [Comments]
- *     parameters:
- *       - in: query
- *         name: post
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the post
- *     responses:
- *       200:
- *         description: List of comments for the post
- */
-router.get("/post", controller.getCommentsByPost);
 
 /**
  * @swagger
