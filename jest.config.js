@@ -1,12 +1,19 @@
 module.exports = {
   preset: "ts-jest",
   testEnvironment: "node",
+  roots: ["./src/tests"],
   testMatch: ["**/tests/**/*.test.ts"],
-  moduleFileExtensions: ["ts", "js"],
-  transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
-  },
-  moduleNameMapper: {
-    "^swagger-ui-express$": "<rootDir>/node_modules/swagger-ui-express",
+  setupFilesAfterEnv: ["./jest.setup.ts"],
+  testTimeout: 30000,
+  maxWorkers: 1,
+  collectCoverageFrom: ["src/**/comment*.ts", "src/**/post*.ts"],
+  coverageDirectory: "coverage",
+  coverageThreshold: {
+    global: {
+      statements: 70,
+      branches: 70,
+      functions: 70,
+      lines: 70,
+    },
   },
 };
