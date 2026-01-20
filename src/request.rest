@@ -1,3 +1,104 @@
+# Authentication Routes
+
+
+###
+# Register a new user
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "Itay",
+  "email": "itay@example.com",
+  "password": "password123"
+}
+
+
+###
+# Login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "password": "password123"
+}
+
+
+###
+# Refresh token
+POST http://localhost:3000/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "REFRESH_TOKEN"
+}
+
+
+###
+# Logout
+POST http://localhost:3000/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "REFRESH_TOKEN"
+}
+
+
+###
+# Get current user info
+GET http://localhost:3000/user/whoami
+Authorization: Bearer ACCESS_TOKEN
+
+
+# User Routes
+
+
+###
+# Create a new user
+POST http://localhost:3000/user
+Content-Type: application/json
+
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+
+###
+# Get all users
+GET http://localhost:3000/user
+Authorization: Bearer ACCESS_TOKEN
+
+
+###
+# Get user by ID
+GET http://localhost:3000/user/USER_ID
+Authorization: Bearer ACCESS_TOKEN
+
+
+###
+# Update user
+PUT http://localhost:3000/user/USER_ID
+Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
+
+{
+  "username": "john_updated",
+  "email": "john.updated@example.com",
+  "password": "newpassword123"
+}
+
+
+###
+# Delete user
+DELETE http://localhost:3000/user/USER_ID
+Authorization: Bearer ACCESS_TOKEN
+
+
+# Post Routes
+
+
 ###
 # Create a new post
 POST http://localhost:3000/post
@@ -21,18 +122,21 @@ GET http://localhost:3000/post?sender=JohnDoe
 
 ###
 # Get post by ID
-GET http://localhost:3000/post/{{postId}}
+GET http://localhost:3000/post/POST_ID
 
 
 ###
 # Update post
-PUT http://localhost:3000/post/{{postId}}
+PUT http://localhost:3000/post/POST_ID
 Content-Type: application/json
 
 {
   "sender": "JohnDoe",
   "content": "Updated content!"
 }
+
+
+# Comment Routes
 
 
 ###
@@ -46,7 +150,7 @@ POST http://localhost:3000/comment
 Content-Type: application/json
 
 {
-  "postId": "{{postId}}",
+  "postId": "POST_ID",
   "sender": "JaneDoe",
   "content": "Great post!"
 }
@@ -64,17 +168,17 @@ GET http://localhost:3000/comment?sender=JohnDoe
 
 ###
 # Get comments by post ID
-GET http://localhost:3000/comment?postId={{postId}}
+GET http://localhost:3000/comment?postId=POST_ID
 
 
 ###
 # Get comment by ID
-GET http://localhost:3000/comment/{{commentId}}
+GET http://localhost:3000/comment/COMMENT_ID
 
 
 ###
 # Update comment
-PUT http://localhost:3000/comment/{{commentId}}
+PUT http://localhost:3000/comment/COMMENT_ID
 Content-Type: application/json
 
 {
@@ -84,4 +188,4 @@ Content-Type: application/json
 
 ###
 # Delete comment
-DELETE http://localhost:3000/comment/{{commentId}}
+DELETE http://localhost:3000/comment/COMMENT_ID
