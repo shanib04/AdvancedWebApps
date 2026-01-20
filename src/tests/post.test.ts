@@ -50,7 +50,7 @@ describe("postController coverage", () => {
       const resEmptyUser = mockRes();
       await createPost(
         { body: { content: "x" }, user: {} } as any,
-        resEmptyUser
+        resEmptyUser,
       );
       expectStatusJson(resEmptyUser, 401, { error: "Unauthorized" });
 
@@ -59,8 +59,8 @@ describe("postController coverage", () => {
       postCreateSpy.mockResolvedValueOnce({ _id: "p1" });
       const resOk = mockRes();
       await createPost(
-        { body: { content: "x" }, user: { id: "u1" } } as any,
-        resOk
+        { body: { content: "x" }, user: { _id: "u1" } } as any,
+        resOk,
       );
       expect(resOk.status).toHaveBeenCalledWith(201);
       expect(resOk.json).toHaveBeenCalledWith({ _id: "p1" });
@@ -68,8 +68,8 @@ describe("postController coverage", () => {
       postCreateSpy.mockRejectedValueOnce(new Error("boom"));
       const resErr = mockRes();
       await createPost(
-        { body: { content: "x" }, user: { id: "u1" } } as any,
-        resErr
+        { body: { content: "x" }, user: { _id: "u1" } } as any,
+        resErr,
       );
       expectStatusJson(resErr, 500, { error: "boom" });
     });
@@ -142,7 +142,7 @@ describe("postController coverage", () => {
       const resMissingContent = mockRes();
       await updatePost(
         { params: { id: validId }, body: {} } as any,
-        resMissingContent
+        resMissingContent,
       );
       expectStatusJson(resMissingContent, 422, {
         error: "Post ID and content are required",
@@ -151,7 +151,7 @@ describe("postController coverage", () => {
       const resInvalidId = mockRes();
       await updatePost(
         { params: { id: "bad" }, body: { content: "x" } } as any,
-        resInvalidId
+        resInvalidId,
       );
       expectStatusJson(resInvalidId, 422, { error: "Invalid Post ID format" });
 
@@ -161,7 +161,7 @@ describe("postController coverage", () => {
       const resNotFound = mockRes();
       await updatePost(
         { params: { id: validId }, body: { content: "x" } } as any,
-        resNotFound
+        resNotFound,
       );
       expectStatusJson(resNotFound, 404, { error: "Post not found" });
     });
@@ -173,7 +173,7 @@ describe("postController coverage", () => {
       const resNoUser = mockRes();
       await updatePost(
         { params: { id: validId }, body: { content: "x" } } as any,
-        resNoUser
+        resNoUser,
       );
       expectStatusJson(resNoUser, 403, { error: "Unauthorized" });
 
@@ -183,9 +183,9 @@ describe("postController coverage", () => {
         {
           params: { id: validId },
           body: { content: "x" },
-          user: { id: "u1" },
+          user: { _id: "u1" },
         } as any,
-        resNoPostUser
+        resNoPostUser,
       );
       expectStatusJson(resNoPostUser, 403, { error: "Unauthorized" });
 
@@ -195,9 +195,9 @@ describe("postController coverage", () => {
         {
           params: { id: validId },
           body: { content: "x" },
-          user: { id: "u2" },
+          user: { _id: "u2" },
         } as any,
-        resNotOwner
+        resNotOwner,
       );
       expectStatusJson(resNotOwner, 403, { error: "Unauthorized" });
 
@@ -212,9 +212,9 @@ describe("postController coverage", () => {
         {
           params: { id: validId },
           body: { content: "new" },
-          user: { id: "u1" },
+          user: { _id: "u1" },
         } as any,
-        resOk
+        resOk,
       );
       expect(postDoc.save).toHaveBeenCalled();
       expect(resOk.json).toHaveBeenCalledWith(postDoc);
@@ -225,9 +225,9 @@ describe("postController coverage", () => {
         {
           params: { id: validId },
           body: { content: "x" },
-          user: { id: "u1" },
+          user: { _id: "u1" },
         } as any,
-        resErr
+        resErr,
       );
       expectStatusJson(resErr, 500, { error: "boom" });
     });
@@ -258,16 +258,16 @@ describe("postController coverage", () => {
       postFindByIdSpy.mockResolvedValueOnce({});
       const resNoPostUser = mockRes();
       await deletePost(
-        { params: { id: validId }, user: { id: "u1" } } as any,
-        resNoPostUser
+        { params: { id: validId }, user: { _id: "u1" } } as any,
+        resNoPostUser,
       );
       expectStatusJson(resNoPostUser, 403, { error: "Unauthorized" });
 
       postFindByIdSpy.mockResolvedValueOnce({ user: { toString: () => "u1" } });
       const resNotOwner = mockRes();
       await deletePost(
-        { params: { id: validId }, user: { id: "u2" } } as any,
-        resNotOwner
+        { params: { id: validId }, user: { _id: "u2" } } as any,
+        resNotOwner,
       );
       expectStatusJson(resNotOwner, 403, { error: "Unauthorized" });
 
@@ -282,8 +282,8 @@ describe("postController coverage", () => {
 
       const resOk = mockRes();
       await deletePost(
-        { params: { id: validId }, user: { id: "u1" } } as any,
-        resOk
+        { params: { id: validId }, user: { _id: "u1" } } as any,
+        resOk,
       );
       expect(commentDeleteManySpy).toHaveBeenCalledWith({ post: validId });
       expect(delPostDoc.deleteOne).toHaveBeenCalled();
@@ -294,8 +294,8 @@ describe("postController coverage", () => {
       postFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
       const resErr = mockRes();
       await deletePost(
-        { params: { id: validId }, user: { id: "u1" } } as any,
-        resErr
+        { params: { id: validId }, user: { _id: "u1" } } as any,
+        resErr,
       );
       expectStatusJson(resErr, 500, { error: "boom" });
     });

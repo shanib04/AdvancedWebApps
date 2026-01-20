@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as controller from "../controllers/commentController";
-import { requireAuth } from "../middleware/authMiddleware";
+import authMiddleware from "../middleware/authMiddleware";
 
 /**
  * @swagger
@@ -35,7 +35,7 @@ const router = Router();
  *       422:
  *         description: Validation error
  */
-router.post("/", requireAuth, controller.createComment);
+router.post("/", authMiddleware, controller.createComment);
 
 /**
  * @swagger
@@ -47,7 +47,7 @@ router.post("/", requireAuth, controller.createComment);
  *       200:
  *         description: List of comments
  */
-router.get("/", controller.getAllComments);
+router.get("/", authMiddleware, controller.getAllComments);
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ router.get("/", controller.getAllComments);
  *       200:
  *         description: List of comments for the post
  */
-router.get("/post", controller.getCommentsByPost);
+router.get("/post", authMiddleware, controller.getCommentsByPost);
 
 /**
  * @swagger
@@ -87,7 +87,7 @@ router.get("/post", controller.getCommentsByPost);
  *       404:
  *         description: Comment not found
  */
-router.get("/:id", controller.getCommentById);
+router.get("/:id", authMiddleware, controller.getCommentById);
 
 /**
  * @swagger
@@ -118,7 +118,7 @@ router.get("/:id", controller.getCommentById);
  *       404:
  *         description: Comment not found
  */
-router.put("/:id", requireAuth, controller.updateComment);
+router.put("/:id", authMiddleware, controller.updateComment);
 
 /**
  * @swagger
@@ -139,6 +139,6 @@ router.put("/:id", requireAuth, controller.updateComment);
  *       404:
  *         description: Comment not found
  */
-router.delete("/:id", requireAuth, controller.deleteComment);
+router.delete("/:id", authMiddleware, controller.deleteComment);
 
 export default router;

@@ -13,9 +13,9 @@ const generateToken = (userId: string): Tokens => {
   if (!secret) {
     throw new Error("JWT_SECRET is not configured");
   }
-  const exp: number = parseInt(process.env.JWT_EXPIRES_IN || "1h");
+  const exp: number = parseInt(process.env.JWT_EXPIRES_IN || "3600");
   const refreshExp: number = parseInt(
-    process.env.JWT_REFRESH_EXPIRES_IN || "24h"
+    process.env.JWT_REFRESH_EXPIRES_IN || "86400",
   );
 
   const token = jwt.sign({ userId }, secret, { expiresIn: exp });

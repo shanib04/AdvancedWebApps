@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as controller from "../controllers/postController";
-import { requireAuth } from "../middleware/authMiddleware";
+import authMiddleware from "../middleware/authMiddleware";
 
 /**
  * @swagger
@@ -33,7 +33,7 @@ const router = Router();
  *       422:
  *         description: Validation error
  */
-router.post("/", requireAuth, controller.createPost);
+router.post("/", authMiddleware, controller.createPost);
 
 /**
  * @swagger
@@ -45,7 +45,7 @@ router.post("/", requireAuth, controller.createPost);
  *       200:
  *         description: List of posts
  */
-router.get("/", controller.getAllPosts);
+router.get("/", authMiddleware, controller.getAllPosts);
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ router.get("/", controller.getAllPosts);
  *       404:
  *         description: Post not found
  */
-router.get("/:id", controller.getPostById);
+router.get("/:id", authMiddleware, controller.getPostById);
 
 /**
  * @swagger
@@ -97,7 +97,7 @@ router.get("/:id", controller.getPostById);
  *       404:
  *         description: Post not found
  */
-router.put("/:id", requireAuth, controller.updatePost);
+router.put("/:id", authMiddleware, controller.updatePost);
 
 /**
  * @swagger
@@ -118,6 +118,6 @@ router.put("/:id", requireAuth, controller.updatePost);
  *       404:
  *         description: Post not found
  */
-router.delete("/:id", requireAuth, controller.deletePost);
+router.delete("/:id", authMiddleware, controller.deletePost);
 
 export default router;

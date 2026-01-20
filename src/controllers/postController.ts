@@ -1,19 +1,20 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import Post from "../models/postModel";
 import Comment from "../models/commentModel";
 import { validateObjectId } from "./validateId";
+import { AuthRequest } from "../middleware/authMiddleware";
 
-export const createPost = async (req: Request, res: Response) => {
+export const createPost = async (req: AuthRequest, res: Response) => {
   try {
     const { content } = req.body;
     if (!content) {
       return res.status(422).json({ error: "Content is required" });
     }
-    if (!req.user || !req.user.id) {
+    if (!req.user?._id) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const post = await Post.create({
-      user: req.user.id,
+      user: req.user._id,
       content,
     });
     res.status(201).json(post);
@@ -22,7 +23,7 @@ export const createPost = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllPosts = async (req: Request, res: Response) => {
+export const getAllPosts = async (req: AuthRequest, res: Response) => {
   try {
     const { user } = req.query as { user?: string };
     if (user && !validateObjectId(user)) {
@@ -35,7 +36,7 @@ export const getAllPosts = async (req: Request, res: Response) => {
   }
 };
 
-export const getPostById = async (req: Request, res: Response) => {
+export const getPostById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
@@ -54,7 +55,7 @@ export const getPostById = async (req: Request, res: Response) => {
   }
 };
 
-export const updatePost = async (req: Request, res: Response) => {
+export const updatePost = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
@@ -70,7 +71,7 @@ export const updatePost = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    if (!req.user || !post.user || post.user.toString() !== req.user.id) {
+    if (!req.user?._id || !post.user || post.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     post.content = content;
@@ -81,7 +82,7 @@ export const updatePost = async (req: Request, res: Response) => {
   }
 };
 
-export const deletePost = async (req: Request, res: Response) => {
+export const deletePost = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     if (!validateObjectId(id)) {
@@ -91,7 +92,7 @@ export const deletePost = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    if (!req.user || !post.user || post.user.toString() !== req.user.id) {
+    if (!req.user?._id || !post.user || post.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     await Comment.deleteMany({ post: id }); // Cascade delete comments

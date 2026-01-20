@@ -1,9 +1,10 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import Comment from "../models/commentModel";
 import Post from "../models/postModel";
 import { validateObjectId } from "./validateId";
+import { AuthRequest } from "../middleware/authMiddleware";
 
-export const createComment = async (req: Request, res: Response) => {
+export const createComment = async (req: AuthRequest, res: Response) => {
   try {
     const postId = req.body?.post ?? req.body?.postId;
     const { content } = req.body;
@@ -19,14 +20,14 @@ export const createComment = async (req: Request, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    if (!req.user || !req.user.id) {
+    if (!req.user?._id) {
       return res
         .status(401)
         .json({ error: "Unauthenticated: User not authenticated" });
     }
 
     const comment = await Comment.create({
-      user: req.user.id,
+      user: req.user._id,
       post: postId,
       content,
     });
@@ -36,7 +37,7 @@ export const createComment = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllComments = async (req: Request, res: Response) => {
+export const getAllComments = async (req: AuthRequest, res: Response) => {
   try {
     const { user, post } = req.query as { user?: string; post?: string };
     if (user && !validateObjectId(user)) {
@@ -57,7 +58,7 @@ export const getAllComments = async (req: Request, res: Response) => {
   }
 };
 
-export const getCommentById = async (req: Request, res: Response) => {
+export const getCommentById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
@@ -76,7 +77,7 @@ export const getCommentById = async (req: Request, res: Response) => {
   }
 };
 
-export const getCommentsByPost = async (req: Request, res: Response) => {
+export const getCommentsByPost = async (req: AuthRequest, res: Response) => {
   try {
     const postId = (req.query.postId ?? req.query.post) as string | undefined;
     if (!postId) {
@@ -98,7 +99,7 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
   }
 };
 
-export const updateComment = async (req: Request, res: Response) => {
+export const updateComment = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
@@ -110,7 +111,7 @@ export const updateComment = async (req: Request, res: Response) => {
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Comment ID format" });
     }
-    if (!req.user || !req.user.id) {
+    if (!req.user?._id) {
       return res
         .status(401)
         .json({ error: "Unauthenticated: User not authenticated" });
@@ -119,7 +120,7 @@ export const updateComment = async (req: Request, res: Response) => {
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
     }
-    if (comment.user.toString() !== req.user.id) {
+    if (comment.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     comment.content = content;
@@ -130,13 +131,13 @@ export const updateComment = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteComment = async (req: Request, res: Response) => {
+export const deleteComment = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Comment ID format" });
     }
-    if (!req.user || !req.user.id) {
+    if (!req.user?._id) {
       return res
         .status(401)
         .json({ error: "Unauthenticated: User not authenticated" });
@@ -145,7 +146,7 @@ export const deleteComment = async (req: Request, res: Response) => {
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
     }
-    if (comment.user.toString() !== req.user.id) {
+    if (comment.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     await comment.deleteOne();

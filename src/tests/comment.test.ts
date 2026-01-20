@@ -47,7 +47,10 @@ describe("commentController coverage", () => {
       });
 
       const resMissingContent = mockRes();
-      await createComment({ body: { postId: validId } } as any, resMissingContent);
+      await createComment(
+        { body: { postId: validId } } as any,
+        resMissingContent,
+      );
       expectStatusJson(resMissingContent, 422, {
         error: "Post ID and content are required",
       });
@@ -55,17 +58,19 @@ describe("commentController coverage", () => {
       const resInvalidPost = mockRes();
       await createComment(
         { body: { post: "bad", content: "x" } } as any,
-        resInvalidPost
+        resInvalidPost,
       );
-      expectStatusJson(resInvalidPost, 422, { error: "Invalid Post ID format" });
+      expectStatusJson(resInvalidPost, 422, {
+        error: "Invalid Post ID format",
+      });
 
       const postFindByIdSpy = jest.spyOn(Post as any, "findById");
 
       postFindByIdSpy.mockResolvedValueOnce(null);
       const resNotFound = mockRes();
       await createComment(
-        { body: { post: validId, content: "x" }, user: { id: "u1" } } as any,
-        resNotFound
+        { body: { post: validId, content: "x" }, user: { _id: "u1" } } as any,
+        resNotFound,
       );
       expectStatusJson(resNotFound, 404, { error: "Post not found" });
 
@@ -73,7 +78,7 @@ describe("commentController coverage", () => {
       const resNoUser = mockRes();
       await createComment(
         { body: { postId: validId, content: "x" } } as any,
-        resNoUser
+        resNoUser,
       );
       expectStatusJson(resNoUser, 401, {
         error: "Unauthenticated: User not authenticated",
@@ -82,7 +87,7 @@ describe("commentController coverage", () => {
       const resEmptyUser = mockRes();
       await createComment(
         { body: { postId: validId, content: "x" }, user: {} } as any,
-        resEmptyUser
+        resEmptyUser,
       );
       expectStatusJson(resEmptyUser, 401, {
         error: "Unauthenticated: User not authenticated",
@@ -94,8 +99,8 @@ describe("commentController coverage", () => {
       commentCreateSpy.mockResolvedValueOnce({ _id: "c1" });
       const resOk = mockRes();
       await createComment(
-        { body: { post: validId, content: "x" }, user: { id: "u1" } } as any,
-        resOk
+        { body: { post: validId, content: "x" }, user: { _id: "u1" } } as any,
+        resOk,
       );
       expect(resOk.status).toHaveBeenCalledWith(201);
       expect(resOk.json).toHaveBeenCalledWith({ _id: "c1" });
@@ -103,8 +108,8 @@ describe("commentController coverage", () => {
       postFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
       const resErr = mockRes();
       await createComment(
-        { body: { post: validId, content: "x" }, user: { id: "u1" } } as any,
-        resErr
+        { body: { post: validId, content: "x" }, user: { _id: "u1" } } as any,
+        resErr,
       );
       expectStatusJson(resErr, 500, { error: "boom" });
     });
@@ -119,7 +124,7 @@ describe("commentController coverage", () => {
       const resBadPost = mockRes();
       await getAllComments(
         { query: { user: validId, post: "bad" } } as any,
-        resBadPost
+        resBadPost,
       );
       expectStatusJson(resBadPost, 422, { error: "Invalid Post ID format" });
 
@@ -135,7 +140,7 @@ describe("commentController coverage", () => {
       const resUserAndPost = mockRes();
       await getAllComments(
         { query: { user: validId, post: validId } } as any,
-        resUserAndPost
+        resUserAndPost,
       );
       expect(commentFindSpy).toHaveBeenLastCalledWith({
         user: validId,
@@ -196,13 +201,19 @@ describe("commentController coverage", () => {
 
       postFindByIdSpy.mockResolvedValueOnce(null);
       const resNotFound = mockRes();
-      await getCommentsByPost({ query: { postId: validId } } as any, resNotFound);
+      await getCommentsByPost(
+        { query: { postId: validId } } as any,
+        resNotFound,
+      );
       expectStatusJson(resNotFound, 404, { error: "Post not found" });
 
       postFindByIdSpy.mockResolvedValueOnce({ _id: "p1" });
       commentFindSpy.mockResolvedValueOnce([{ _id: "c1" }]);
       const resByPostId = mockRes();
-      await getCommentsByPost({ query: { postId: validId } } as any, resByPostId);
+      await getCommentsByPost(
+        { query: { postId: validId } } as any,
+        resByPostId,
+      );
       expect(commentFindSpy).toHaveBeenLastCalledWith({ post: validId });
       expect(resByPostId.json).toHaveBeenCalledWith([{ _id: "c1" }]);
 
@@ -231,7 +242,7 @@ describe("commentController coverage", () => {
       const resMissingContent = mockRes();
       await updateComment(
         { params: { id: validId }, body: {} } as any,
-        resMissingContent
+        resMissingContent,
       );
       expectStatusJson(resMissingContent, 422, {
         error: "Comment ID and content are required",
@@ -240,7 +251,7 @@ describe("commentController coverage", () => {
       const resInvalidId = mockRes();
       await updateComment(
         { params: { id: "bad" }, body: { content: "x" } } as any,
-        resInvalidId
+        resInvalidId,
       );
       expectStatusJson(resInvalidId, 422, {
         error: "Invalid Comment ID format",
@@ -249,7 +260,7 @@ describe("commentController coverage", () => {
       const resNoUser = mockRes();
       await updateComment(
         { params: { id: validId }, body: { content: "x" } } as any,
-        resNoUser
+        resNoUser,
       );
       expectStatusJson(resNoUser, 401, {
         error: "Unauthenticated: User not authenticated",
@@ -260,8 +271,12 @@ describe("commentController coverage", () => {
 
       const resNotFound = mockRes();
       await updateComment(
-        { params: { id: validId }, body: { content: "x" }, user: { id: "u1" } } as any,
-        resNotFound
+        {
+          params: { id: validId },
+          body: { content: "x" },
+          user: { _id: "u1" },
+        } as any,
+        resNotFound,
       );
       expectStatusJson(resNotFound, 404, { error: "Comment not found" });
     });
@@ -269,11 +284,17 @@ describe("commentController coverage", () => {
     test("enforces ownership and handles success/error", async () => {
       const commentFindByIdSpy = jest.spyOn(Comment as any, "findById");
 
-      commentFindByIdSpy.mockResolvedValueOnce({ user: { toString: () => "u1" } });
+      commentFindByIdSpy.mockResolvedValueOnce({
+        user: { toString: () => "u1" },
+      });
       const resNotOwner = mockRes();
       await updateComment(
-        { params: { id: validId }, body: { content: "x" }, user: { id: "u2" } } as any,
-        resNotOwner
+        {
+          params: { id: validId },
+          body: { content: "x" },
+          user: { _id: "u2" },
+        } as any,
+        resNotOwner,
       );
       expectStatusJson(resNotOwner, 403, { error: "Unauthorized" });
 
@@ -285,8 +306,12 @@ describe("commentController coverage", () => {
       commentFindByIdSpy.mockResolvedValueOnce(commentDoc);
       const resOk = mockRes();
       await updateComment(
-        { params: { id: validId }, body: { content: "new" }, user: { id: "u1" } } as any,
-        resOk
+        {
+          params: { id: validId },
+          body: { content: "new" },
+          user: { _id: "u1" },
+        } as any,
+        resOk,
       );
       expect(commentDoc.save).toHaveBeenCalled();
       expect(resOk.json).toHaveBeenCalledWith(commentDoc);
@@ -294,8 +319,12 @@ describe("commentController coverage", () => {
       commentFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
       const resErr = mockRes();
       await updateComment(
-        { params: { id: validId }, body: { content: "x" }, user: { id: "u1" } } as any,
-        resErr
+        {
+          params: { id: validId },
+          body: { content: "x" },
+          user: { _id: "u1" },
+        } as any,
+        resErr,
       );
       expectStatusJson(resErr, 500, { error: "boom" });
     });
@@ -316,7 +345,7 @@ describe("commentController coverage", () => {
       const resEmptyUser = mockRes();
       await deleteComment(
         { params: { id: validId }, user: {} } as any,
-        resEmptyUser
+        resEmptyUser,
       );
       expectStatusJson(resEmptyUser, 401, {
         error: "Unauthenticated: User not authenticated",
@@ -329,16 +358,18 @@ describe("commentController coverage", () => {
       commentFindByIdSpy.mockResolvedValueOnce(null);
       const resNotFound = mockRes();
       await deleteComment(
-        { params: { id: validId }, user: { id: "u1" } } as any,
-        resNotFound
+        { params: { id: validId }, user: { _id: "u1" } } as any,
+        resNotFound,
       );
       expectStatusJson(resNotFound, 404, { error: "Comment not found" });
 
-      commentFindByIdSpy.mockResolvedValueOnce({ user: { toString: () => "u1" } });
+      commentFindByIdSpy.mockResolvedValueOnce({
+        user: { toString: () => "u1" },
+      });
       const resNotOwner = mockRes();
       await deleteComment(
-        { params: { id: validId }, user: { id: "u2" } } as any,
-        resNotOwner
+        { params: { id: validId }, user: { _id: "u2" } } as any,
+        resNotOwner,
       );
       expectStatusJson(resNotOwner, 403, { error: "Unauthorized" });
 
@@ -349,8 +380,8 @@ describe("commentController coverage", () => {
       commentFindByIdSpy.mockResolvedValueOnce(delCommentDoc);
       const resOk = mockRes();
       await deleteComment(
-        { params: { id: validId }, user: { id: "u1" } } as any,
-        resOk
+        { params: { id: validId }, user: { _id: "u1" } } as any,
+        resOk,
       );
       expect(delCommentDoc.deleteOne).toHaveBeenCalled();
       expect(resOk.json).toHaveBeenCalledWith({
@@ -360,8 +391,8 @@ describe("commentController coverage", () => {
       commentFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
       const resErr = mockRes();
       await deleteComment(
-        { params: { id: validId }, user: { id: "u1" } } as any,
-        resErr
+        { params: { id: validId }, user: { _id: "u1" } } as any,
+        resErr,
       );
       expectStatusJson(resErr, 500, { error: "boom" });
     });
