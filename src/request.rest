@@ -141,7 +141,7 @@ Content-Type: application/json
 
 ###
 # Delete post
-DELETE http://localhost:3000/post/{{postId}}
+DELETE http://localhost:3000/post/POST_ID
 
 
 ###
