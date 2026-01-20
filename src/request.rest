@@ -113,22 +113,26 @@ Content-Type: application/json
 ###
 # Get all posts
 GET http://localhost:3000/post
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
-# Get posts by sender
-GET http://localhost:3000/post?sender=JohnDoe
+# Get posts by user
+GET http://localhost:3000/post?user=USER_ID
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Get post by ID
 GET http://localhost:3000/post/POST_ID
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Update post
 PUT http://localhost:3000/post/POST_ID
 Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
 
 {
   "sender": "JohnDoe",
@@ -142,12 +146,14 @@ Content-Type: application/json
 ###
 # Delete post
 DELETE http://localhost:3000/post/POST_ID
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Create a new comment
 POST http://localhost:3000/comment
 Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
 
 {
   "postId": "POST_ID",
@@ -159,27 +165,32 @@ Content-Type: application/json
 ###
 # Get all comments
 GET http://localhost:3000/comment
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
-# Get comments by sender
-GET http://localhost:3000/comment?sender=JohnDoe
+# Get comments by user
+GET http://localhost:3000/comment?user=USER_ID
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Get comments by post ID
 GET http://localhost:3000/comment?postId=POST_ID
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Get comment by ID
 GET http://localhost:3000/comment/COMMENT_ID
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Update comment
 PUT http://localhost:3000/comment/COMMENT_ID
 Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
 
 {
   "content": "Updated comment content!"
@@ -189,3 +200,4 @@ Content-Type: application/json
 ###
 # Delete comment
 DELETE http://localhost:3000/comment/COMMENT_ID
+Authorization: Bearer ACCESS_TOKEN

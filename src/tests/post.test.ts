@@ -43,17 +43,6 @@ describe("postController coverage", () => {
       await createPost({ body: {} } as any, resMissing);
       expectStatusJson(resMissing, 422, { error: "Content is required" });
 
-      const resNoUser = mockRes();
-      await createPost({ body: { content: "x" } } as any, resNoUser);
-      expectStatusJson(resNoUser, 401, { error: "Unauthorized" });
-
-      const resEmptyUser = mockRes();
-      await createPost(
-        { body: { content: "x" }, user: {} } as any,
-        resEmptyUser,
-      );
-      expectStatusJson(resEmptyUser, 401, { error: "Unauthorized" });
-
       const postCreateSpy = jest.spyOn(Post as any, "create");
 
       postCreateSpy.mockResolvedValueOnce({ _id: "p1" });
@@ -169,14 +158,6 @@ describe("postController coverage", () => {
     test("enforces ownership and handles success/error", async () => {
       const postFindByIdSpy = jest.spyOn(Post as any, "findById");
 
-      postFindByIdSpy.mockResolvedValueOnce({ user: { toString: () => "u1" } });
-      const resNoUser = mockRes();
-      await updatePost(
-        { params: { id: validId }, body: { content: "x" } } as any,
-        resNoUser,
-      );
-      expectStatusJson(resNoUser, 403, { error: "Unauthorized" });
-
       postFindByIdSpy.mockResolvedValueOnce({});
       const resNoPostUser = mockRes();
       await updatePost(
@@ -249,11 +230,6 @@ describe("postController coverage", () => {
 
     test("enforces ownership, cascades delete, and handles error", async () => {
       const postFindByIdSpy = jest.spyOn(Post as any, "findById");
-
-      postFindByIdSpy.mockResolvedValueOnce({ user: { toString: () => "u1" } });
-      const resNoUser = mockRes();
-      await deletePost({ params: { id: validId } } as any, resNoUser);
-      expectStatusJson(resNoUser, 403, { error: "Unauthorized" });
 
       postFindByIdSpy.mockResolvedValueOnce({});
       const resNoPostUser = mockRes();

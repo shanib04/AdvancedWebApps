@@ -20,11 +20,6 @@ export const createComment = async (req: AuthRequest, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    if (!req.user?._id) {
-      return res
-        .status(401)
-        .json({ error: "Unauthenticated: User not authenticated" });
-    }
 
     const comment = await Comment.create({
       user: req.user._id,
@@ -111,15 +106,11 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Comment ID format" });
     }
-    if (!req.user?._id) {
-      return res
-        .status(401)
-        .json({ error: "Unauthenticated: User not authenticated" });
-    }
     const comment = await Comment.findById(id);
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
     }
+
     if (comment.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
@@ -137,15 +128,11 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Comment ID format" });
     }
-    if (!req.user?._id) {
-      return res
-        .status(401)
-        .json({ error: "Unauthenticated: User not authenticated" });
-    }
     const comment = await Comment.findById(id);
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
     }
+
     if (comment.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }

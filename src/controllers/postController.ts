@@ -10,9 +10,6 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     if (!content) {
       return res.status(422).json({ error: "Content is required" });
     }
-    if (!req.user?._id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
     const post = await Post.create({
       user: req.user._id,
       content,
@@ -71,7 +68,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    if (!req.user?._id || !post.user || post.user.toString() !== req.user._id) {
+    if (!post.user || post.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     post.content = content;
@@ -92,7 +89,7 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    if (!req.user?._id || !post.user || post.user.toString() !== req.user._id) {
+    if (!post.user || post.user.toString() !== req.user._id) {
       return res.status(403).json({ error: "Unauthorized" });
     }
     await Comment.deleteMany({ post: id }); // Cascade delete comments

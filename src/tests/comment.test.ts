@@ -75,23 +75,6 @@ describe("commentController coverage", () => {
       expectStatusJson(resNotFound, 404, { error: "Post not found" });
 
       postFindByIdSpy.mockResolvedValue({ _id: "p1" });
-      const resNoUser = mockRes();
-      await createComment(
-        { body: { postId: validId, content: "x" } } as any,
-        resNoUser,
-      );
-      expectStatusJson(resNoUser, 401, {
-        error: "Unauthenticated: User not authenticated",
-      });
-
-      const resEmptyUser = mockRes();
-      await createComment(
-        { body: { postId: validId, content: "x" }, user: {} } as any,
-        resEmptyUser,
-      );
-      expectStatusJson(resEmptyUser, 401, {
-        error: "Unauthenticated: User not authenticated",
-      });
 
       const commentCreateSpy = jest.spyOn(Comment as any, "create");
 
@@ -257,15 +240,6 @@ describe("commentController coverage", () => {
         error: "Invalid Comment ID format",
       });
 
-      const resNoUser = mockRes();
-      await updateComment(
-        { params: { id: validId }, body: { content: "x" } } as any,
-        resNoUser,
-      );
-      expectStatusJson(resNoUser, 401, {
-        error: "Unauthenticated: User not authenticated",
-      });
-
       const commentFindByIdSpy = jest.spyOn(Comment as any, "findById");
       commentFindByIdSpy.mockResolvedValueOnce(null);
 
@@ -335,21 +309,6 @@ describe("commentController coverage", () => {
       const resInvalid = mockRes();
       await deleteComment({ params: { id: "bad" } } as any, resInvalid);
       expectStatusJson(resInvalid, 422, { error: "Invalid Comment ID format" });
-
-      const resNoUser = mockRes();
-      await deleteComment({ params: { id: validId } } as any, resNoUser);
-      expectStatusJson(resNoUser, 401, {
-        error: "Unauthenticated: User not authenticated",
-      });
-
-      const resEmptyUser = mockRes();
-      await deleteComment(
-        { params: { id: validId }, user: {} } as any,
-        resEmptyUser,
-      );
-      expectStatusJson(resEmptyUser, 401, {
-        error: "Unauthenticated: User not authenticated",
-      });
     });
 
     test("handles not-found/ownership/success/error", async () => {
