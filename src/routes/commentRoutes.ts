@@ -43,6 +43,17 @@ router.post("/", authMiddleware, controller.createComment);
  *   get:
  *     summary: Get all comments
  *     tags: [Comments]
+ *     parameters:
+ *       - in: query
+ *         name: user
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: post
+ *         required: false
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: List of comments

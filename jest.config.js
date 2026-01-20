@@ -6,7 +6,7 @@ module.exports = {
   setupFilesAfterEnv: ["./jest.setup.ts"],
   testTimeout: 30000,
   maxWorkers: 1,
-  collectCoverageFrom: ["src/**/comment*.ts", "src/**/post*.ts"],
+  collectCoverageFrom: ["src/**/*.ts"],
   coverageDirectory: "coverage",
   coverageThreshold: {
     global: {

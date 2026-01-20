@@ -41,6 +41,12 @@ router.post("/", authMiddleware, controller.createPost);
  *   get:
  *     summary: Get all posts
  *     tags: [Posts]
+ *     parameters:
+ *       - in: query
+ *         name: user
+ *         required: false
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: List of posts
