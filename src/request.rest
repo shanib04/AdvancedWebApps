@@ -57,6 +57,7 @@ Authorization: Bearer ACCESS_TOKEN
 # Create a new user
 POST http://localhost:3000/user
 Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
 
 {
   "username": "john_doe",
@@ -103,9 +104,9 @@ Authorization: Bearer ACCESS_TOKEN
 # Create a new post
 POST http://localhost:3000/post
 Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
 
 {
-  "sender": "JohnDoe222",
   "content": "asdasdsdads"
 }
 
@@ -135,7 +136,6 @@ Content-Type: application/json
 Authorization: Bearer ACCESS_TOKEN
 
 {
-  "sender": "JohnDoe",
   "content": "Updated content!"
 }
 
@@ -156,8 +156,7 @@ Content-Type: application/json
 Authorization: Bearer ACCESS_TOKEN
 
 {
-  "postId": "POST_ID",
-  "sender": "JaneDoe",
+  "post": "POST_ID",
   "content": "Great post!"
 }
 
@@ -176,7 +175,7 @@ Authorization: Bearer ACCESS_TOKEN
 
 ###
 # Get comments by post ID
-GET http://localhost:3000/comment?postId=POST_ID
+GET http://localhost:3000/comment?post=POST_ID
 Authorization: Bearer ACCESS_TOKEN
 
 
