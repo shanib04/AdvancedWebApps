@@ -21,6 +21,10 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
  *             properties:
  *               username:
  *                 type: string
@@ -34,7 +38,9 @@ const router = Router();
  *                 description: The password for the new account
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         description: User registered successfully, returns access and refresh tokens
+ *       409:
+ *         description: Username or email already exists
  *       422:
  *         description: Validation error
  */
@@ -52,6 +58,9 @@ router.post("/register", controller.register);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - password
  *             properties:
  *               username:
  *                 type: string
@@ -81,6 +90,8 @@ router.post("/login", controller.login);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - refreshToken
  *             properties:
  *               refreshToken:
  *                 type: string
@@ -105,6 +116,8 @@ router.post("/refresh", controller.refresh);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - refreshToken
  *             properties:
  *               refreshToken:
  *                 type: string

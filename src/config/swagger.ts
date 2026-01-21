@@ -39,28 +39,47 @@ const options: swaggerJsDoc.Options = {
               format: "email",
               example: "user@example.com",
             },
-            password: { type: "string", minLength: 6, example: "password123" },
+            password: { type: "string", example: "password123" },
+            refreshToken: {
+              type: "array",
+              items: { type: "string" },
+              example: ["token1", "token2"],
+            },
           },
         },
         Post: {
           type: "object",
-          required: ["sender", "content"],
+          required: ["user", "content"],
           properties: {
             _id: { type: "string", example: "507f1f77bcf86cd799439011" },
-            sender: { type: "string", example: "testuser" },
+            user: {
+              type: "string",
+              description: "User ID of the post creator",
+              example: "507f1f77bcf86cd799439012",
+            },
             content: { type: "string", example: "This is a post" },
             createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
           },
         },
         Comment: {
           type: "object",
-          required: ["sender", "content", "postId"],
+          required: ["user", "post", "content"],
           properties: {
             _id: { type: "string", example: "507f1f77bcf86cd799439011" },
-            sender: { type: "string", example: "commenter" },
+            user: {
+              type: "string",
+              description: "User ID of the comment creator",
+              example: "507f1f77bcf86cd799439012",
+            },
+            post: {
+              type: "string",
+              description: "Post ID that this comment belongs to",
+              example: "507f1f77bcf86cd799439013",
+            },
             content: { type: "string", example: "Great post!" },
-            postId: { type: "string", example: "507f1f77bcf86cd799439011" },
             createdAt: { type: "string", format: "date-time" },
+            updatedAt: { type: "string", format: "date-time" },
           },
         },
         Error: {

@@ -24,6 +24,10 @@ const router = Router();
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
  *             properties:
  *               username:
  *                 type: string
@@ -38,6 +42,8 @@ const router = Router();
  *     responses:
  *       201:
  *         description: User created successfully
+ *       409:
+ *         description: Username or email already exists
  *       422:
  *         description: Validation error
  */
@@ -115,6 +121,10 @@ router.get("/:id", authMiddleware, controller.getUserById);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
  *             properties:
  *               username:
  *                 type: string
