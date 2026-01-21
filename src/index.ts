@@ -5,7 +5,7 @@ import userRoutes from "./routes/userRoutes";
 import postRoutes from "./routes/postRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import swaggerUi from "swagger-ui-express";
-import swaggerJsDoc from "swagger-jsdoc";
+import { specs } from "./config/swagger";
 
 const app = express();
 
@@ -21,28 +21,20 @@ app.use("/post", postRoutes);
 app.use("/comment", commentRoutes);
 
 // Swagger documentation
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Advanced Web Apps API",
-      version: "1.0.0",
-      description: "API documentation for Posts and Comments",
-    },
-    components: {
-      securitySchemes: {
-        BearerAuth: {
-          type: "http",
-          scheme: "bearer",
-        },
-      },
-    },
-    security: [{ BearerAuth: [] }],
-  },
-  apis: ["./src/routes/*.ts"],
-};
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    explorer: true,
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Advanced Web Apps API Documentation",
+  })
+);
 
-const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// Swagger JSON endpoint
+app.get("/docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(specs);
+});
 
 export default app;
