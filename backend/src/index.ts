@@ -35,7 +35,7 @@ app.use(
     explorer: true,
     customCss: ".swagger-ui .topbar { display: none }",
     customSiteTitle: "Advanced Web Apps API Documentation",
-  })
+  }),
 );
 
 // Swagger JSON endpoint
