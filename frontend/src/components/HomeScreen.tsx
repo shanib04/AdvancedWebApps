@@ -1,0 +1,80 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import apiClient from "../services/api-client";
+
+interface LoggedInUser {
+  username?: string;
+  photoUrl?: string;
+}
+
+function HomeScreen() {
+  const navigate = useNavigate();
+  const accessToken = localStorage.getItem("accessToken");
+  const storedUser = localStorage.getItem("user");
+  const user: LoggedInUser = storedUser ? JSON.parse(storedUser) : {};
+  const username = user.username || "User";
+  const fallbackImage = "http://localhost:3000/public/images/default-user.svg";
+  const profileImage = user.photoUrl || fallbackImage;
+
+  useEffect(() => {
+    if (!accessToken || !storedUser) {
+      navigate("/login", { replace: true });
+    }
+  }, [accessToken, storedUser, navigate]);
+
+  const clearAllCookies = () => {
+    document.cookie.split(";").forEach((cookie) => {
+      const equalPosition = cookie.indexOf("=");
+      const name =
+        equalPosition > -1 ? cookie.substring(0, equalPosition) : cookie;
+      document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+    });
+  };
+
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    try {
+      if (refreshToken) {
+        await apiClient.post("/auth/logout", { refreshToken });
+      }
+    } catch {
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+      clearAllCookies();
+      navigate("/login", { replace: true });
+    }
+  };
+
+  return (
+    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light py-4">
+      <div
+        className="card border-0 shadow-sm p-4 text-center"
+        style={{ maxWidth: "360px", width: "100%" }}
+      >
+        <img
+          src={profileImage}
+          alt="Profile"
+          className="rounded-circle mx-auto mb-3"
+          style={{ width: "96px", height: "96px", objectFit: "cover" }}
+        />
+        <h1 className="h5 fw-bold mb-2">{username}</h1>
+        <p className="text-muted mb-4">Login successful</p>
+        <div className="d-grid gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-danger"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+export default HomeScreen;
