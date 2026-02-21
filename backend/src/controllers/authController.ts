@@ -83,7 +83,6 @@ export const register = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       photoUrl: resolvedPhotoUrl,
-      refresh_tokens: [],
       refreshToken: [],
     });
 
