@@ -163,22 +163,6 @@ function LoginForm() {
                     )}
                   </div>
 
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="remember"
-                      />
-                      <label className="form-check-label" htmlFor="remember">
-                        Remember for 30 days
-                      </label>
-                    </div>
-                    <a href="#" className="text-decoration-none fw-semibold">
-                      Forgot password?
-                    </a>
-                  </div>
-
                   <button
                     type="submit"
                     className="btn btn-primary w-100"
