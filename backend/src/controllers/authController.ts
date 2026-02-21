@@ -17,6 +17,7 @@ const resolveUserPhotoUrl = (req: Request, photoUrl?: string) =>
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// Escapes special regex characters in a string to safely use it for literal text matching in queries.
 const escapeRegex = (value: string) =>
   value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
