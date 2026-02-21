@@ -67,12 +67,10 @@ export const register = async (req: Request, res: Response) => {
         .json({ error: "username, email and password are required" });
     }
 
-    const existingUser = await User.findOne({
-      $or: username ? [{ username }, { email }] : [{ email }],
-    });
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
       const errorMsg =
-        username && existingUser.username === username
+        existingUser.username === username
           ? "Username already exists"
           : "Email already exists";
       return res.status(409).json({ error: errorMsg });
@@ -90,8 +88,7 @@ export const register = async (req: Request, res: Response) => {
     });
 
     const tokens = generateToken(user._id.toString());
-    user.refresh_tokens.push(tokens.refreshToken);
-    user.refreshToken = user.refresh_tokens;
+    user.refreshToken.push(tokens.refreshToken);
     await user.save();
 
     res.status(201).json({
@@ -125,8 +122,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const tokens = generateToken(user._id.toString());
-    user.refresh_tokens.push(tokens.refreshToken);
-    user.refreshToken = user.refresh_tokens;
+    user.refreshToken.push(tokens.refreshToken);
     await user.save();
 
     res.json({
@@ -180,7 +176,6 @@ export const googleSignin = async (req: Request, res: Response) => {
         email,
         password: generatedPassword,
         photoUrl: googlePhotoUrl,
-        refresh_tokens: [],
         refreshToken: [],
       });
     } else {
@@ -191,8 +186,7 @@ export const googleSignin = async (req: Request, res: Response) => {
     }
 
     const tokens = generateToken(user._id.toString());
-    user.refresh_tokens.push(tokens.refreshToken);
-    user.refreshToken = user.refresh_tokens;
+    user.refreshToken.push(tokens.refreshToken);
     await user.save();
 
     return res.status(200).json({
@@ -227,19 +221,15 @@ export const refresh = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!user.refresh_tokens.includes(refreshToken)) {
-      user.refresh_tokens = [];
+    if (!user.refreshToken.includes(refreshToken)) {
       user.refreshToken = [];
       await user.save();
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const tokens = generateToken(user._id.toString());
-    user.refresh_tokens.push(tokens.refreshToken);
-    user.refresh_tokens = user.refresh_tokens.filter(
-      (rt) => rt !== refreshToken,
-    );
-    user.refreshToken = user.refresh_tokens;
+    user.refreshToken.push(tokens.refreshToken);
+    user.refreshToken = user.refreshToken.filter((rt) => rt !== refreshToken);
     await user.save();
 
     res.json(tokens);
@@ -266,10 +256,7 @@ export const logout = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    user.refresh_tokens = user.refresh_tokens.filter(
-      (rt) => rt !== refreshToken,
-    );
-    user.refreshToken = user.refresh_tokens;
+    user.refreshToken = user.refreshToken.filter((rt) => rt !== refreshToken);
     await user.save();
 
     res.json({ message: "Logged out successfully" });

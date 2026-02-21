@@ -5,6 +5,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: false,
     unique: true,
+
+    // only documents that have this field are indexed, so uniqueness is enforced only when the field exists.
     sparse: true,
   },
   email: {
@@ -16,33 +18,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  refreshToken: {
+    type: [String],
+  },
   photoUrl: {
     type: String,
   },
-  refresh_tokens: {
-    type: [String],
-    default: [],
-  },
-  refreshToken: {
-    type: [String],
-    default: [],
-  },
-});
-
-userSchema.pre("save", async function () {
-  const doc = this as typeof this & {
-    refresh_tokens?: string[];
-    refreshToken?: string[];
-  };
-
-  if (doc.refresh_tokens && doc.refresh_tokens.length > 0) {
-    doc.refreshToken = doc.refresh_tokens;
-  } else if (doc.refreshToken && doc.refreshToken.length > 0) {
-    doc.refresh_tokens = doc.refreshToken;
-  } else {
-    doc.refresh_tokens = [];
-    doc.refreshToken = [];
-  }
 });
 
 const User = mongoose.model("User", userSchema);
