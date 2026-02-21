@@ -22,9 +22,13 @@ const router = Router();
  *           schema:
  *             type: object
  *             required:
+ *               - username
  *               - email
  *               - password
  *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The username for the new account
  *               email:
  *                 type: string
  *                 format: email
@@ -58,9 +62,11 @@ router.post("/register", controller.register);
  *           schema:
  *             type: object
  *             required:
- *               - email
  *               - password
  *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The username
  *               email:
  *                 type: string
  *                 description: The email

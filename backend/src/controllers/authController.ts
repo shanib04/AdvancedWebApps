@@ -6,7 +6,6 @@ import { OAuth2Client } from "google-auth-library";
 
 export interface Tokens {
   token: string;
-  accessToken: string;
   refreshToken: string;
 }
 
@@ -29,6 +28,7 @@ const normalizeUsername = (value: string) => {
   return normalized || "user";
 };
 
+// Cleans up the requested name and appends an incrementing number until it finds a username that is completely unique in the database.
 const getUniqueUsername = async (preferredValue: string) => {
   const baseUsername = normalizeUsername(preferredValue);
   let candidate = baseUsername;
@@ -52,10 +52,10 @@ const generateToken = (userId: string): Tokens => {
     process.env.JWT_REFRESH_EXPIRES_IN || "86400",
   );
 
-  const accessToken = jwt.sign({ userId }, secret, { expiresIn: exp });
+  const token = jwt.sign({ userId }, secret, { expiresIn: exp });
   const refreshToken = jwt.sign({ userId }, secret, { expiresIn: refreshExp });
 
-  return { token: accessToken, accessToken, refreshToken };
+  return { token, refreshToken };
 };
 
 export const register = async (req: Request, res: Response) => {

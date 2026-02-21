@@ -3,11 +3,8 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: false,
+    required: true,
     unique: true,
-
-    // only documents that have this field are indexed, so uniqueness is enforced only when the field exists.
-    sparse: true,
   },
   email: {
     type: String,
@@ -20,6 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   refreshToken: {
     type: [String],
+    default: [],
   },
   photoUrl: {
     type: String,
