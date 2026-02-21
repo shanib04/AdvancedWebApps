@@ -137,7 +137,7 @@ function RegisterForm() {
   };
 
   return (
-    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4 bg-light">
+    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4 bg-light overflow-auto">
       <AppToast toasts={toasts} onClose={removeToast} />
       <div
         className="card border-0 shadow-lg w-100"
@@ -148,7 +148,6 @@ function RegisterForm() {
             <div
               className="h-100 w-100"
               style={{
-                minHeight: "700px",
                 backgroundImage: `url(${loginImage})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -174,7 +173,7 @@ function RegisterForm() {
                 </div>
 
                 <form
-                  className="d-flex flex-column gap-3"
+                  className="d-flex flex-column gap-1"
                   onSubmit={handleSubmit(onSubmit)}
                   noValidate
                 >
@@ -188,11 +187,12 @@ function RegisterForm() {
                       className="form-control"
                       {...register("username")}
                     />
-                    {errors.username && (
-                      <p className="text-danger small mt-1">
-                        {errors.username.message}
-                      </p>
-                    )}
+                    <p
+                      className="text-danger small mt-1 mb-0"
+                      style={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.username?.message || "\u00A0"}
+                    </p>
                   </div>
 
                   <div>
@@ -205,11 +205,12 @@ function RegisterForm() {
                       className="form-control"
                       {...register("email")}
                     />
-                    {errors.email && (
-                      <p className="text-danger small mt-1">
-                        {errors.email.message}
-                      </p>
-                    )}
+                    <p
+                      className="text-danger small mt-1 mb-0"
+                      style={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.email?.message || "\u00A0"}
+                    </p>
                   </div>
 
                   <div>
@@ -222,16 +223,21 @@ function RegisterForm() {
                       className="form-control"
                       {...register("password")}
                     />
-                    {errors.password && (
-                      <p className="text-danger small mt-1">
-                        {errors.password.message}
-                      </p>
-                    )}
+                    <p
+                      className="text-danger small mt-1 mb-0"
+                      style={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.password?.message || "\u00A0"}
+                    </p>
                   </div>
 
                   <div>
-                    <label htmlFor="profilePicture" className="form-label">
-                      Profile Picture
+                    <label
+                      htmlFor="profilePicture"
+                      className="form-label d-flex align-items-center gap-2"
+                    >
+                      Profile Picture{" "}
+                      <p className="text-muted small m-0">(Optional)</p>
                     </label>
                     <input
                       id="profilePicture"
@@ -240,12 +246,12 @@ function RegisterForm() {
                       className="form-control"
                       {...register("profilePicture")}
                     />
-                    {errors.profilePicture && (
-                      <p className="text-danger small mt-1">
-                        {errors.profilePicture.message}
-                      </p>
-                    )}
-                    <p className="text-muted small mt-1 mb-0">Optional</p>
+                    <p
+                      className="text-danger small mt-1 mb-0"
+                      style={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.profilePicture?.message || "\u00A0"}
+                    </p>
                   </div>
 
                   <button

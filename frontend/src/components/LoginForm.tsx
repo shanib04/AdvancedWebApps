@@ -84,11 +84,8 @@ function LoginForm() {
   };
 
   return (
-    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4 bg-light">
-      <AppToast
-        toasts={toasts}
-        onClose={removeToast}
-      />
+    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light overflow-auto">
+      <AppToast toasts={toasts} onClose={removeToast} />
       <div
         className="card border-0 shadow-lg w-100"
         style={{ maxWidth: "1100px" }}
@@ -98,7 +95,6 @@ function LoginForm() {
             <div
               className="h-100 w-100"
               style={{
-                minHeight: "700px",
                 backgroundImage: `url(${loginImage})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
@@ -124,7 +120,7 @@ function LoginForm() {
                 </div>
 
                 <form
-                  className="d-flex flex-column gap-3"
+                  className="d-flex flex-column gap-1"
                   onSubmit={handleSubmit(onSubmit)}
                   noValidate
                 >
@@ -139,9 +135,12 @@ function LoginForm() {
                       placeholder="Email address"
                       {...register("email")}
                     />
-                    {errors.email && (
-                      <p className="text-danger">{errors.email.message}</p>
-                    )}
+                    <p
+                      className="text-danger small mt-1 mb-0"
+                      style={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.email?.message || "\u00A0"}
+                    </p>
                   </div>
 
                   <div>
@@ -155,9 +154,12 @@ function LoginForm() {
                       placeholder="Password"
                       {...register("password")}
                     />
-                    {errors.password && (
-                      <p className="text-danger">{errors.password.message}</p>
-                    )}
+                    <p
+                      className="text-danger small mt-1 mb-2"
+                      style={{ minHeight: "1.25rem" }}
+                    >
+                      {errors.password?.message || "\u00A0"}
+                    </p>
                   </div>
 
                   <button
