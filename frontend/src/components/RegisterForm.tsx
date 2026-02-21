@@ -6,6 +6,8 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import loginImage from "../assets/login.png";
+import useAppToast from "../hooks/useAppToast";
+import AppToast from "./AppToast";
 import apiClient from "../services/api-client";
 
 const registerSchema = z.object({
@@ -21,7 +23,7 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 function RegisterForm() {
-  const [apiError, setApiError] = useState("");
+  const { toasts, removeToast, showFailed } = useAppToast();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -34,7 +36,6 @@ function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    setApiError("");
     setIsLoading(true);
 
     try {
@@ -93,9 +94,9 @@ function RegisterForm() {
           err.response?.data?.error ||
           err.response?.data?.message ||
           "Registration failed. Please try again.";
-        setApiError(serverMessage);
+        showFailed(serverMessage);
       } else {
-        setApiError("Registration failed. Please try again.");
+        showFailed("Registration failed. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -105,7 +106,6 @@ function RegisterForm() {
   const handleGoogleSuccess = async (credentialResponse: {
     credential?: string;
   }) => {
-    setApiError("");
     setIsLoading(true);
 
     try {
@@ -123,11 +123,9 @@ function RegisterForm() {
           error.response?.data?.error ||
           error.response?.data?.message ||
           "Google Login Failed";
-        setApiError(serverMessage);
-        console.log("Google Login Failed");
+        showFailed(serverMessage);
       } else {
-        setApiError("Google Login Failed");
-        console.log("Google Login Failed");
+        showFailed("Google Login Failed");
       }
     } finally {
       setIsLoading(false);
@@ -135,12 +133,12 @@ function RegisterForm() {
   };
 
   const handleGoogleError = () => {
-    setApiError("Google Login Failed");
-    console.log("Google Login Failed");
+    showFailed("Google Login Failed");
   };
 
   return (
     <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4 bg-light">
+      <AppToast toasts={toasts} onClose={removeToast} />
       <div
         className="card border-0 shadow-lg w-100"
         style={{ maxWidth: "1100px" }}
@@ -174,10 +172,6 @@ function RegisterForm() {
                     Enter your details to get started.
                   </p>
                 </div>
-
-                {apiError && (
-                  <div className="alert alert-danger">{apiError}</div>
-                )}
 
                 <form
                   className="d-flex flex-column gap-3"

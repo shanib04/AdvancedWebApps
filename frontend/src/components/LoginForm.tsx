@@ -1,11 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { z } from "zod";
 import loginImage from "../assets/login.png";
+import useAppToast from "../hooks/useAppToast";
+import AppToast from "./AppToast";
 import apiClient from "../services/api-client";
 
 const loginSchema = z.object({
@@ -16,7 +17,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 function LoginForm() {
-  const [apiError, setApiError] = useState("");
+  const { toasts, removeToast, showFailed } = useAppToast();
   const navigate = useNavigate();
 
   const {
@@ -28,8 +29,6 @@ function LoginForm() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    setApiError("");
-
     try {
       const response = await apiClient.post("/auth/login", {
         email: data.email,
@@ -46,19 +45,17 @@ function LoginForm() {
           error.response?.data?.error ||
           error.response?.data?.message ||
           "Login failed. Please check your credentials.";
-        setApiError(serverMessage);
+        showFailed(serverMessage);
         return;
       }
 
-      setApiError("Login failed. Please check your credentials.");
+      showFailed("Login failed. Please check your credentials.");
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse: {
     credential?: string;
   }) => {
-    setApiError("");
-
     try {
       const response = await apiClient.post("/auth/google", {
         credential: credentialResponse.credential,
@@ -74,22 +71,24 @@ function LoginForm() {
           error.response?.data?.error ||
           error.response?.data?.message ||
           "Google Login Failed";
-        setApiError(serverMessage);
-        console.log("Google Login Failed");
+        showFailed(serverMessage);
         return;
       }
 
-      setApiError("Google Login Failed");
-      console.log("Google Login Failed");
+      showFailed("Google Login Failed");
     }
   };
 
   const handleGoogleError = () => {
-    console.log("Google Login Failed");
+    showFailed("Google sign-in was canceled or failed.");
   };
 
   return (
     <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center py-4 bg-light">
+      <AppToast
+        toasts={toasts}
+        onClose={removeToast}
+      />
       <div
         className="card border-0 shadow-lg w-100"
         style={{ maxWidth: "1100px" }}
@@ -123,8 +122,6 @@ function LoginForm() {
                     Please enter your details to sign in.
                   </p>
                 </div>
-
-                {apiError && <p className="text-danger mb-3">{apiError}</p>}
 
                 <form
                   className="d-flex flex-column gap-3"
@@ -186,7 +183,7 @@ function LoginForm() {
                   </div>
 
                   <p className="text-center text-muted mt-2 mb-0">
-                    Don&apos;t have an account?{" "}
+                    Don't have an account?{" "}
                     <Link
                       to="/register"
                       className="btn btn-link p-0 text-decoration-none fw-semibold"
