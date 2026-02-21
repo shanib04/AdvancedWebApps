@@ -22,15 +22,6 @@ function HomeScreen() {
     }
   }, [accessToken, storedUser, navigate]);
 
-  const clearAllCookies = () => {
-    document.cookie.split(";").forEach((cookie) => {
-      const equalPosition = cookie.indexOf("=");
-      const name =
-        equalPosition > -1 ? cookie.substring(0, equalPosition) : cookie;
-      document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-    });
-  };
-
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -38,13 +29,13 @@ function HomeScreen() {
       if (refreshToken) {
         await apiClient.post("/auth/logout", { refreshToken });
       }
-    } catch {
+    } catch (error) {
+      console.error("Logout request failed", error);
+      window.alert("Logout completed locally, but server logout failed.");
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
-      sessionStorage.clear();
-      clearAllCookies();
       navigate("/login", { replace: true });
     }
   };

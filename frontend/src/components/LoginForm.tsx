@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { z } from "zod";
+import loginImage from "../assets/login.png";
 import apiClient from "../services/api-client";
 
 const loginSchema = z.object({
@@ -99,8 +100,7 @@ function LoginForm() {
               className="h-100 w-100"
               style={{
                 minHeight: "700px",
-                backgroundImage:
-                  "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDmApdlBnWJh6TuTk4fpYKK00N3q6hJ7Z8w9Nuyzwbjssll0GFwdnbyQGsSQEWXSLnIfU8fQqX23Y1OMiL6EjpSEbBN5lQIYGV2u3_GbOyrBNGkWkxcv35VNF01Q-stwWzSPKaTfmZmfkfJVMs2xhuHtwNY7SLw0DogUZKjl81bNo797ACMdqCHrI0emGSzne4NOfhGsym5xte5HgYdWZ34qEAkVCLI1GHNhazdBsSKe42TLdXdDLFbSt8e4KKARMznLvVewvnfAs2e')",
+                backgroundImage: `url(${loginImage})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
