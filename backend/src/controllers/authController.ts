@@ -17,15 +17,13 @@ const resolveUserPhotoUrl = (req: Request, photoUrl?: string) =>
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const normalizeUsername = (value: string) => {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  return normalized || "user";
+const normalizeUsername = (value: string) => {
+  const normalized = value.trim().replace(/\s+/g, " ");
+
+  return normalized || "User";
 };
 
 // Cleans up the requested name and appends an incrementing number until it finds a username that is completely unique in the database.
@@ -34,8 +32,12 @@ const getUniqueUsername = async (preferredValue: string) => {
   let candidate = baseUsername;
   let suffix = 1;
 
-  while (await User.findOne({ username: candidate })) {
-    candidate = `${baseUsername}_${suffix}`;
+  while (
+    await User.findOne({
+      username: new RegExp(`^${escapeRegex(candidate)}$`, "i"),
+    })
+  ) {
+    candidate = `${baseUsername} ${suffix}`;
     suffix += 1;
   }
 
@@ -67,10 +69,17 @@ export const register = async (req: Request, res: Response) => {
         .json({ error: "username, email and password are required" });
     }
 
-    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    const normalizedUsername = normalizeUsername(username);
+
+    const existingUser = await User.findOne({
+      $or: [
+        { username: new RegExp(`^${escapeRegex(normalizedUsername)}$`, "i") },
+        { email },
+      ],
+    });
     if (existingUser) {
       const errorMsg =
-        existingUser.username === username
+        existingUser.username.toLowerCase() === normalizedUsername.toLowerCase()
           ? "Username already exists"
           : "Email already exists";
       return res.status(409).json({ error: errorMsg });
@@ -79,7 +88,7 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const resolvedPhotoUrl = resolveUserPhotoUrl(req, photoUrl);
     const user = await User.create({
-      username,
+      username: normalizedUsername,
       email,
       password: hashedPassword,
       photoUrl: resolvedPhotoUrl,
@@ -111,7 +120,20 @@ export const login = async (req: Request, res: Response) => {
       return res.status(422).json({ error: "email and password are required" });
     }
 
-    const user = await User.findOne(email ? { email } : { username });
+    const normalizedUsername = username
+      ? normalizeUsername(username)
+      : undefined;
+
+    const user = await User.findOne(
+      email
+        ? { email }
+        : {
+            username: new RegExp(
+              `^${escapeRegex(normalizedUsername || "")}$`,
+              "i",
+            ),
+          },
+    );
     if (!user) {
       return res.status(401).json({ error: "Invalid username or password" });
     }

@@ -186,7 +186,7 @@ function RegisterForm() {
                 >
                   <div>
                     <label htmlFor="username" className="form-label">
-                      Username
+                      Display Name
                     </label>
                     <input
                       id="username"
