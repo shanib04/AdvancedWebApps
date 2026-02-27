@@ -3,6 +3,7 @@ import User from "../models/userModel";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export const createUser = async (req: Request, res: Response) => {
   try {
@@ -27,8 +28,8 @@ export const createUser = async (req: Request, res: Response) => {
       password: hashedPassword,
     });
     res.status(201).json(user);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -36,8 +37,8 @@ export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -55,8 +56,8 @@ export const getUserById = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "User not found" });
     }
     res.json(user);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -67,8 +68,8 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "User not found" });
     }
     res.json(user);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -89,8 +90,8 @@ export const updateUser = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "User not found" });
     }
     res.json(user);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -108,7 +109,7 @@ export const deleteUser = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "User not found" });
     }
     res.json(user);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
