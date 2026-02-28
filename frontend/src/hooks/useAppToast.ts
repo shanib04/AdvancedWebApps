@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 export type ToastVariant = "success" | "failed";
 
@@ -12,11 +12,11 @@ function useAppToast() {
   const [toasts, setToasts] = useState<ToastState[]>([]);
   const toastIdRef = useRef(1);
 
-  const removeToast = (id: number) => {
+  const removeToast = useCallback((id: number) => {
     setToasts((currentToasts) =>
       currentToasts.filter((toast) => toast.id !== id),
     );
-  };
+  }, []);
 
   const addToast = (message: string, variant: ToastVariant) => {
     const toastId = toastIdRef.current;

@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -9,6 +8,11 @@ import loginImage from "../assets/login.png";
 import useAppToast from "../hooks/useAppToast";
 import AppToast from "./AppToast";
 import apiClient from "../services/api-client";
+import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import {
+  setStoredSessionUser,
+  syncStoredUserFromWhoAmI,
+} from "../utils/sessionUser";
 
 const registerSchema = z.object({
   username: z
@@ -84,20 +88,21 @@ function RegisterForm() {
         registerPayload,
       );
 
-      localStorage.setItem("accessToken", registerResponse.data.accessToken);
+      const accessToken = registerResponse.data.accessToken;
+      if (!accessToken) {
+        showFailed("Registration failed. Missing access token.");
+        return;
+      }
+
+      localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", registerResponse.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(registerResponse.data.user));
+      const rawUser = registerResponse.data.user ?? {};
+      setStoredSessionUser(rawUser);
       navigate("/home");
     } catch (err: unknown) {
-      if (err instanceof AxiosError) {
-        const serverMessage =
-          err.response?.data?.error ||
-          err.response?.data?.message ||
-          "Registration failed. Please try again.";
-        showFailed(serverMessage);
-      } else {
-        showFailed("Registration failed. Please try again.");
-      }
+      showFailed(
+        getUserFriendlyApiError(err, "Registration failed. Please try again."),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -113,20 +118,24 @@ function RegisterForm() {
         credential: credentialResponse.credential,
       });
 
-      localStorage.setItem("accessToken", response.data.accessToken);
+      const accessToken = response.data.accessToken;
+      if (!accessToken) {
+        showFailed("Google Login Failed");
+        return;
+      }
+
+      localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", response.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      const baseUser = response.data.user ?? {};
+      const normalizedUser = setStoredSessionUser(baseUser);
+
+      if (!normalizedUser.photoUrl) {
+        await syncStoredUserFromWhoAmI(normalizedUser);
+      }
       navigate("/home");
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        const serverMessage =
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Google Login Failed";
-        showFailed(serverMessage);
-      } else {
-        showFailed("Google Login Failed");
-      }
+      showFailed(getUserFriendlyApiError(error, "Google Login Failed"));
     } finally {
       setIsLoading(false);
     }

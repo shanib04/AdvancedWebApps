@@ -103,7 +103,7 @@ router.get("/:id", authMiddleware, controller.getUserById);
 /**
  * @swagger
  * /user/{id}:
- *   put:
+ *   patch:
  *     summary: Update a user by ID
  *     tags: [Users]
  *     security:
@@ -121,30 +121,31 @@ router.get("/:id", authMiddleware, controller.getUserById);
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - username
- *               - email
- *               - password
  *             properties:
  *               username:
  *                 type: string
- *                 description: The updated username
+ *                 description: The updated username (optional)
  *               email:
  *                 type: string
  *                 format: email
- *                 description: The updated email
+ *                 description: The updated email (optional)
  *               password:
  *                 type: string
- *                 description: The updated password
+ *                 description: The updated password (optional)
+ *               photoUrl:
+ *                 type: string
+ *                 description: The updated profile photo URL (optional)
  *     responses:
  *       200:
  *         description: User updated successfully
+ *       403:
+ *         description: Unauthorized to update another user
  *       422:
  *         description: Validation error
  *       404:
  *         description: User not found
  */
-router.put("/:id", authMiddleware, controller.updateUser);
+router.patch("/:id", authMiddleware, controller.updateUser);
 
 /**
  * @swagger

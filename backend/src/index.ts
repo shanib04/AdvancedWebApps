@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -7,6 +8,7 @@ import userRoutes from "./routes/userRoutes";
 import postRoutes from "./routes/postRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import uploadRoutes from "./routes/uploadRoutes";
+import aiRoutes from "./routes/aiRoutes";
 import swaggerUi from "swagger-ui-express";
 import { specs } from "./config/swagger";
 
@@ -30,6 +32,7 @@ app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/post", postRoutes);
 app.use("/comment", commentRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Swagger documentation
 app.use(

@@ -3,6 +3,7 @@ import Comment from "../models/commentModel";
 import Post from "../models/postModel";
 import { validateObjectId } from "./validateId";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export const createComment = async (req: AuthRequest, res: Response) => {
   try {
@@ -27,8 +28,8 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       content,
     });
     res.status(201).json(comment);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -48,8 +49,8 @@ export const getAllComments = async (req: AuthRequest, res: Response) => {
 
     const comments = await Comment.find(filter);
     res.json(comments);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -67,8 +68,8 @@ export const getCommentById = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Comment not found" });
     }
     res.json(comment);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -89,8 +90,8 @@ export const getCommentsByPost = async (req: AuthRequest, res: Response) => {
     }
     const comments = await Comment.find({ post: postId });
     res.json(comments);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -117,8 +118,8 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
     comment.content = content;
     await comment.save();
     res.json(comment);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -138,7 +139,7 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
     }
     await comment.deleteOne();
     res.json({ message: "Comment deleted successfully" });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
