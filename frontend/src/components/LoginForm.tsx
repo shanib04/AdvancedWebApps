@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
@@ -8,6 +7,11 @@ import loginImage from "../assets/login.png";
 import useAppToast from "../hooks/useAppToast";
 import AppToast from "./AppToast";
 import apiClient from "../services/api-client";
+import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import {
+  setStoredSessionUser,
+  syncStoredUserFromWhoAmI,
+} from "../utils/sessionUser";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address."),
@@ -35,21 +39,24 @@ function LoginForm() {
         password: data.password,
       });
 
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      navigate("/home");
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        const serverMessage =
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Login failed. Please check your credentials.";
-        showFailed(serverMessage);
+      const accessToken = response.data.accessToken;
+      if (!accessToken) {
+        showFailed("Login failed. Missing access token.");
         return;
       }
 
-      showFailed("Login failed. Please check your credentials.");
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+      const rawUser = response.data.user ?? {};
+      setStoredSessionUser(rawUser);
+      navigate("/home");
+    } catch (error: unknown) {
+      showFailed(
+        getUserFriendlyApiError(
+          error,
+          "Login failed. Please check your credentials.",
+        ),
+      );
     }
   };
 
@@ -61,21 +68,24 @@ function LoginForm() {
         credential: credentialResponse.credential,
       });
 
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      navigate("/home");
-    } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        const serverMessage =
-          error.response?.data?.error ||
-          error.response?.data?.message ||
-          "Google Login Failed";
-        showFailed(serverMessage);
+      const accessToken = response.data.accessToken;
+      if (!accessToken) {
+        showFailed("Google login failed. Missing access token.");
         return;
       }
 
-      showFailed("Google Login Failed");
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+
+      const baseUser = response.data.user ?? {};
+      const normalizedUser = setStoredSessionUser(baseUser);
+
+      if (!normalizedUser.photoUrl) {
+        await syncStoredUserFromWhoAmI(normalizedUser);
+      }
+      navigate("/home");
+    } catch (error: unknown) {
+      showFailed(getUserFriendlyApiError(error, "Google Login Failed"));
     }
   };
 
