@@ -1,10 +1,12 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 import connectDB from "./config/db";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import postRoutes from "./routes/postRoutes";
 import commentRoutes from "./routes/commentRoutes";
+import uploadRoutes from "./routes/uploadRoutes";
 import swaggerUi from "swagger-ui-express";
 import { specs } from "./config/swagger";
 
@@ -15,13 +17,15 @@ connectDB();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   }),
 );
 app.use(express.json());
+app.use("/public", express.static(path.join(__dirname, "../public")));
 
 // Routes
+app.use("/upload", uploadRoutes);
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/post", postRoutes);

@@ -36,6 +36,9 @@ const router = Router();
  *               password:
  *                 type: string
  *                 description: The password for the new account
+ *               photoUrl:
+ *                 type: string
+ *                 description: Profile image URL returned by /upload
  *     responses:
  *       201:
  *         description: User registered successfully, returns access and refresh tokens
@@ -59,12 +62,14 @@ router.post("/register", controller.register);
  *           schema:
  *             type: object
  *             required:
- *               - username
  *               - password
  *             properties:
  *               username:
  *                 type: string
  *                 description: The username
+ *               email:
+ *                 type: string
+ *                 description: The email
  *               password:
  *                 type: string
  *                 description: The password
@@ -77,6 +82,32 @@ router.post("/register", controller.register);
  *         description: Invalid credentials
  */
 router.post("/login", controller.login);
+
+/**
+ * @swagger
+ * /auth/google:
+ *   post:
+ *     summary: Sign in with Google credential
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - credential
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 description: Google credential token
+ *     responses:
+ *       200:
+ *         description: Google login successful, returns access and refresh tokens
+ *       401:
+ *         description: Google login failed
+ */
+router.post("/google", controller.googleSignin);
 
 /**
  * @swagger
