@@ -42,7 +42,16 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize);
-    res.json(posts);
+
+    // Fetch comment count for each post
+    const postsWithCommentCount = await Promise.all(
+      posts.map(async (post) => {
+        const comments = await Comment.countDocuments({ post: post._id });
+        return { ...post.toObject(), comments };
+      }),
+    );
+
+    res.json(postsWithCommentCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }

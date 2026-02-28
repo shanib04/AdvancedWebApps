@@ -8,7 +8,7 @@ import { getErrorMessage } from "../utils/getErrorMessage";
 export const createComment = async (req: AuthRequest, res: Response) => {
   try {
     const postId = req.body?.post ?? req.body?.postId;
-    const { content } = req.body;
+    const { content, parentId } = req.body;
     if (!postId || !content) {
       return res
         .status(422)
@@ -16,6 +16,11 @@ export const createComment = async (req: AuthRequest, res: Response) => {
     }
     if (!validateObjectId(postId)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
+    }
+    if (parentId && !validateObjectId(parentId)) {
+      return res
+        .status(422)
+        .json({ error: "Invalid Parent Comment ID format" });
     }
     const post = await Post.findById(postId);
     if (!post) {
@@ -26,8 +31,15 @@ export const createComment = async (req: AuthRequest, res: Response) => {
       user: req.user._id,
       post: postId,
       content,
+      parentId: parentId || null,
     });
-    res.status(201).json(comment);
+
+    const populatedComment = await comment.populate(
+      "user",
+      "username photoUrl",
+    );
+
+    res.status(201).json(populatedComment);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
@@ -47,7 +59,10 @@ export const getAllComments = async (req: AuthRequest, res: Response) => {
     if (user) filter.user = user;
     if (post) filter.post = post;
 
-    const comments = await Comment.find(filter);
+    const comments = await Comment.find(filter).populate(
+      "user",
+      "username photoUrl",
+    );
     res.json(comments);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
@@ -63,7 +78,10 @@ export const getCommentById = async (req: AuthRequest, res: Response) => {
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Comment ID format" });
     }
-    const comment = await Comment.findById(id);
+    const comment = await Comment.findById(id).populate(
+      "user",
+      "username photoUrl",
+    );
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
     }
@@ -88,7 +106,10 @@ export const getCommentsByPost = async (req: AuthRequest, res: Response) => {
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
-    const comments = await Comment.find({ post: postId });
+    const comments = await Comment.find({ post: postId }).populate(
+      "user",
+      "username photoUrl",
+    );
     res.json(comments);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
@@ -134,10 +155,26 @@ export const deleteComment = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: "Comment not found" });
     }
 
-    if (comment.user.toString() !== req.user._id) {
+    const post = await Post.findById(comment.post);
+    const isCommentOwner = comment.user.toString() === req.user._id;
+    const isPostOwner = post?.user?.toString() === req.user._id;
+
+    if (!isCommentOwner && !isPostOwner) {
       return res.status(403).json({ error: "Unauthorized" });
     }
+
+    // Recursively delete all descending replies
+    const deleteDescendants = async (parentId: string) => {
+      const children = await Comment.find({ parentId });
+      for (const child of children) {
+        await deleteDescendants(child._id.toString());
+        await child.deleteOne();
+      }
+    };
+
+    await deleteDescendants(id as string);
     await comment.deleteOne();
+
     res.json({ message: "Comment deleted successfully" });
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
