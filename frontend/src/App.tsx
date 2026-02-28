@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
-import HomeScreen from "./components/HomeScreen";
+import HomeFeed from "./components/HomeFeed";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const accessToken = localStorage.getItem("accessToken");
@@ -16,20 +16,24 @@ function ProtectedRoute({ children }: { children: ReactElement }) {
 }
 
 function App() {
+  const location = useLocation();
+
   return (
-    <Routes>
-      <Route path="/login" element={<LoginForm />} />
-      <Route path="/register" element={<RegisterForm />} />
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <HomeScreen />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+    <div key={location.pathname} className="route-transition">
+      <Routes location={location}>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/register" element={<RegisterForm />} />
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <HomeFeed />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </div>
   );
 }
 
