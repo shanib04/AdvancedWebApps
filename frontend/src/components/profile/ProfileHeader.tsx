@@ -52,6 +52,7 @@ const ProfileHeader = ({
       const updatedUser = updateResponse.data;
       onUserUpdate(updatedUser);
       setShowEditModal(false);
+      resetForm();
     } catch (err: unknown) {
       showFailed(getUserFriendlyApiError(err, "Failed to update profile"));
     } finally {
@@ -65,6 +66,20 @@ const ProfileHeader = ({
       setSelectedFile(file);
       setEditingPhotoUrl(""); // Clear URL if file selected
     }
+  };
+
+  const resetForm = () => {
+    setEditingUsername(user.username);
+    setEditingPhotoUrl(user.photoUrl || "");
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowEditModal(false);
+    resetForm();
   };
 
   return (
@@ -106,7 +121,7 @@ const ProfileHeader = ({
                 <button
                   type="button"
                   className="btn-close"
-                  onClick={() => setShowEditModal(false)}
+                  onClick={handleModalClose}
                 ></button>
               </div>
               <div className="modal-body">
@@ -124,7 +139,7 @@ const ProfileHeader = ({
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Profile Picture</label>
-                  <div className="d-flex gap-2 align-items-center">
+                  <div className="d-flex gap-2 align-items-center mb-2">
                     <input
                       type="text"
                       className="form-control"
@@ -133,9 +148,21 @@ const ProfileHeader = ({
                       onChange={(e) => {
                         setEditingPhotoUrl(e.target.value);
                         setSelectedFile(null); // Clear file if URL entered
+                        if (fileInputRef.current) {
+                          fileInputRef.current.value = "";
+                        }
                       }}
                       disabled={!!selectedFile}
                     />
+                    {editingPhotoUrl && !selectedFile && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => setEditingPhotoUrl("")}
+                      >
+                        Clear
+                      </button>
+                    )}
                     <span className="text-muted">or</span>
                     <input
                       type="file"
@@ -148,15 +175,59 @@ const ProfileHeader = ({
                       type="button"
                       className="btn btn-outline-secondary"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={!!editingPhotoUrl}
+                      disabled={!!selectedFile}
                     >
                       Upload File
                     </button>
                   </div>
                   {selectedFile && (
-                    <small className="text-muted">
-                      Selected: {selectedFile.name}
-                    </small>
+                    <div className="mt-2 d-flex align-items-center gap-2">
+                      <img
+                        src={URL.createObjectURL(selectedFile)}
+                        alt="Preview"
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "cover",
+                          borderRadius: "50%",
+                        }}
+                      />
+                      <div>
+                        <small className="text-muted d-block">
+                          Selected: {selectedFile.name}
+                        </small>
+                        <button
+                          type="button"
+                          className="btn btn-link btn-sm p-0 text-danger"
+                          onClick={() => {
+                            setSelectedFile(null);
+                            if (fileInputRef.current) {
+                              fileInputRef.current.value = "";
+                            }
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {editingPhotoUrl && !selectedFile && (
+                    <div className="mt-2">
+                      <img
+                        src={editingPhotoUrl}
+                        alt="Preview"
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "cover",
+                          borderRadius: "50%",
+                        }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = "none";
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -164,7 +235,7 @@ const ProfileHeader = ({
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
+                  onClick={handleModalClose}
                 >
                   Cancel
                 </button>
