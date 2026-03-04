@@ -50,8 +50,8 @@ const UserProfilePage = () => {
       setPostsLoading(true);
       try {
         let endpoint = `/post?user=${id}`;
-        if (activeTab === "liked") endpoint = `/user/${id}/liked`;
-        else if (activeTab === "saved") endpoint = `/user/${id}/saved`;
+        if (activeTab === "liked") endpoint = `/post/user/${id}/liked`;
+        else if (activeTab === "saved") endpoint = `/post/user/${id}/saved`;
 
         const response = await apiClient.get<Post[]>(endpoint);
         setPosts(response.data || []);
