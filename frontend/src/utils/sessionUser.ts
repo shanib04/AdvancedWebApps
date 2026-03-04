@@ -39,6 +39,12 @@ export const normalizeSessionUser = (user: SessionUser): SessionUser => {
 export const setStoredSessionUser = (user: SessionUser) => {
   const normalized = normalizeSessionUser(user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalized));
+
+  // Dispatch custom event for same-tab updates
+  window.dispatchEvent(
+    new CustomEvent("sessionUserUpdated", { detail: normalized }),
+  );
+
   return normalized;
 };
 

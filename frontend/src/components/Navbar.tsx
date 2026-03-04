@@ -45,8 +45,36 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
 
     syncUser();
 
+    // Listen for storage changes to update user data when profile is updated
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "user" && event.newValue) {
+        try {
+          const updatedUser = JSON.parse(event.newValue) as SessionUser;
+          setUserData(updatedUser);
+        } catch {
+          // Ignore invalid JSON
+        }
+      }
+    };
+
+    // Listen for custom event for same-tab updates
+    const handleSessionUserUpdate = (event: CustomEvent<SessionUser>) => {
+      setUserData(event.detail);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(
+      "sessionUserUpdated",
+      handleSessionUserUpdate as EventListener,
+    );
+
     return () => {
       abortController.abort();
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "sessionUserUpdated",
+        handleSessionUserUpdate as EventListener,
+      );
     };
   }, [initialUser]);
 

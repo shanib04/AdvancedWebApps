@@ -44,11 +44,30 @@ const CommentItem: React.FC<CommentItemProps> = ({
     }
   }, [showReplyBox]);
 
-  const currentUser = getStoredSessionUser();
+  const [currentUser, setCurrentUser] = useState(getStoredSessionUser());
 
   const currentUserPhoto = currentUser
     ? normalizePhotoUrl(currentUser.photoUrl)
     : defaultUserPhotoUrl;
+
+  useEffect(() => {
+    // Listen for session user updates
+    const handleSessionUserUpdate = (event: CustomEvent) => {
+      setCurrentUser(event.detail);
+    };
+
+    window.addEventListener(
+      "sessionUserUpdated",
+      handleSessionUserUpdate as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sessionUserUpdated",
+        handleSessionUserUpdate as EventListener,
+      );
+    };
+  }, []);
 
   // Safely extract the user object from our string | User type union
   const userObj = typeof comment.user === "object" ? comment.user : null;

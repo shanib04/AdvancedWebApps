@@ -4,6 +4,10 @@ import apiClient from "../../services/api-client";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
+import {
+  getStoredSessionUser,
+  setStoredSessionUser,
+} from "../../utils/sessionUser";
 
 interface ProfileHeaderProps {
   user: User;
@@ -51,6 +55,19 @@ const ProfileHeader = ({
 
       const updatedUser = updateResponse.data;
       onUserUpdate(updatedUser);
+
+      // If this is the current user's own profile, update the session user
+      if (isOwnProfile) {
+        const currentSessionUser = getStoredSessionUser();
+        if (currentSessionUser) {
+          setStoredSessionUser({
+            ...currentSessionUser,
+            username: updatedUser.username,
+            photoUrl: updatedUser.photoUrl,
+          });
+        }
+      }
+
       setShowEditModal(false);
       resetForm();
     } catch (err: unknown) {

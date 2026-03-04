@@ -29,11 +29,30 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const mainInputRef = useRef<HTMLInputElement>(null);
 
-  const currentUser = getStoredSessionUser();
+  const [currentUser, setCurrentUser] = useState(getStoredSessionUser());
 
   const currentUserPhoto = currentUser
     ? normalizePhotoUrl(currentUser.photoUrl)
     : defaultUserPhotoUrl;
+
+  useEffect(() => {
+    // Listen for session user updates
+    const handleSessionUserUpdate = (event: CustomEvent) => {
+      setCurrentUser(event.detail);
+    };
+
+    window.addEventListener(
+      "sessionUserUpdated",
+      handleSessionUserUpdate as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "sessionUserUpdated",
+        handleSessionUserUpdate as EventListener,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();

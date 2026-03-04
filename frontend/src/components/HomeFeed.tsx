@@ -81,8 +81,22 @@ function HomeFeed() {
 
     syncCurrentUser();
 
+    // Listen for session user updates
+    const handleSessionUserUpdate = (event: CustomEvent<SessionUser>) => {
+      setCurrentUser(event.detail);
+    };
+
+    window.addEventListener(
+      "sessionUserUpdated",
+      handleSessionUserUpdate as EventListener,
+    );
+
     return () => {
       abortController.abort();
+      window.removeEventListener(
+        "sessionUserUpdated",
+        handleSessionUserUpdate as EventListener,
+      );
     };
   }, [initialUser]);
 
