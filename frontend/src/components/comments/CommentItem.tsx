@@ -4,6 +4,8 @@ import apiClient from "../../services/api-client";
 import type { Comment, CommentTreeItem } from "../../types/models";
 import { getStoredSessionUser } from "../../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
+import useAppToast from "../../hooks/useAppToast";
 
 interface CommentItemProps {
   comment: CommentTreeItem;
@@ -33,6 +35,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const replyInputRef = useRef<HTMLInputElement>(null);
+
+  const { showFailed } = useAppToast();
 
   useEffect(() => {
     if (showReplyBox && replyInputRef.current) {
@@ -81,7 +85,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
       setIsExpanded(true); // Automatically show replies when posting a new one
     } catch (err) {
       console.error(err);
-      alert("Failed to post reply.");
+      showFailed(getUserFriendlyApiError(err, "Failed to post reply."));
     } finally {
       setSubmitting(false);
     }

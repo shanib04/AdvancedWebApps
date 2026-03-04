@@ -3,8 +3,10 @@ import apiClient from "../../services/api-client";
 import type { Comment, CommentTreeItem } from "../../types/models";
 import { getStoredSessionUser } from "../../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import CommentItem from "./CommentItem";
 import Swal from "sweetalert2";
+import useAppToast from "../../hooks/useAppToast";
 
 interface CommentsSectionProps {
   postId: string;
@@ -19,6 +21,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   onCommentsChange,
   autoFocusInput,
 }) => {
+  const { showFailed } = useAppToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -138,7 +141,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       mainInputRef.current?.focus();
     } catch (err) {
       console.error(err);
-      alert("Failed to post comment");
+      showFailed(getUserFriendlyApiError(err, "Failed to post comment"));
     } finally {
       setSubmitting(false);
     }
@@ -158,7 +161,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       );
     } catch (err) {
       console.error(err);
-      alert("Failed to edit comment");
+      showFailed(getUserFriendlyApiError(err, "Failed to edit comment"));
     }
   };
 
@@ -198,7 +201,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       });
     } catch (err) {
       console.error(err);
-      alert("Failed to delete comment");
+      showFailed(getUserFriendlyApiError(err, "Failed to delete comment"));
     }
   };
 

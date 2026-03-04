@@ -193,7 +193,6 @@ const PostDetailsPage = () => {
             </div>
           </div>
 
-          {/* Right Sidebar - Empty for balance as requested */}
           <div className="col-12 col-md-3 d-none d-md-block"></div>
         </div>
       </div>

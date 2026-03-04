@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useAppToast from "../hooks/useAppToast";
 import AppToast from "./AppToast";
 import apiClient from "../services/api-client";
+import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 
 interface LoggedInUser {
   username?: string;
@@ -32,8 +33,8 @@ function HomeScreen() {
       if (refreshToken) {
         await apiClient.post("/auth/logout", { refreshToken });
       }
-    } catch {
-      showFailed("Logout completed locally, but server logout failed.");
+    } catch (err) {
+      showFailed(getUserFriendlyApiError(err, "Logout completed locally, but server logout failed."));
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
