@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Post } from "../hooks/usePosts";
+import type { Post } from "../types/models";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 

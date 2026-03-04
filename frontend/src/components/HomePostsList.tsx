@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import type { Post } from "../hooks/usePosts";
+import type { Post } from "../types/models";
 import PostCard from "./PostCard";
 
 type HomePostsListProps = {

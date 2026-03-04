@@ -2,9 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { Post } from "../hooks/usePosts";
+import type { Post } from "../types/models";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import { defaultUserPhotoUrl } from "../utils/photoUtils";
 
 const createPostSchema = z.object({
   text: z.string().min(1, "Post text is required."),
@@ -26,10 +27,6 @@ function CreatePostBox({
   onActionSuccess,
   onActionFailed,
 }: CreatePostBoxProps) {
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
-  const defaultPhotoUrl = `${apiBaseUrl}/public/images/default-user.svg`;
-
   const [createImageSearchText, setCreateImageSearchText] = useState("");
   const [createImages, setCreateImages] = useState<string[]>([]);
   const [selectedCreateImage, setSelectedCreateImage] = useState<string | null>(
@@ -170,8 +167,8 @@ function CreatePostBox({
           crossOrigin="anonymous"
           onError={(event) => {
             const element = event.currentTarget;
-            if (element.src !== defaultPhotoUrl) {
-              element.src = defaultPhotoUrl;
+            if (element.src !== defaultUserPhotoUrl) {
+              element.src = defaultUserPhotoUrl;
             }
           }}
         />

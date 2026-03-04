@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import usePosts from "../hooks/usePosts";
-import type { Post } from "../hooks/usePosts";
+import type { Post } from "../types/models";
+import { feedCache } from "../utils/feedCache";
 import useAppToast from "../hooks/useAppToast";
 import {
   getStoredSessionUser,
@@ -15,6 +16,7 @@ import LeftSidebar from "./LeftSidebar";
 import Navbar from "./Navbar";
 import RightAIWidget from "./RightAIWidget";
 import "../styles/feed-modern.css";
+import { normalizePhotoUrl } from "../utils/photoUtils";
 
 type InitialDraftPayload = {
   text: string;
@@ -24,30 +26,12 @@ type InitialDraftPayload = {
 };
 
 function HomeFeed() {
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
-  const defaultPhotoUrl = `${apiBaseUrl}/public/images/default-user.svg`;
+  const [page, setPage] = useState(feedCache.page);
 
-  const normalizePhotoUrl = useCallback(
-    (value?: string) => {
-      if (!value) {
-        return defaultPhotoUrl;
-      }
+  useEffect(() => {
+    feedCache.page = page;
+  }, [page]);
 
-      if (/^https?:\/\//i.test(value)) {
-        return value;
-      }
-
-      if (value.startsWith("/")) {
-        return `${apiBaseUrl}${value}`;
-      }
-
-      return value;
-    },
-    [apiBaseUrl, defaultPhotoUrl],
-  );
-
-  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDraftMode, setIsDraftMode] = useState(false);
   const [draftPayload, setDraftPayload] = useState<InitialDraftPayload | null>(
@@ -70,10 +54,7 @@ function HomeFeed() {
 
     const syncCurrentUser = async () => {
       try {
-        const mergedUser = await syncStoredUserFromWhoAmI(
-          initialUser,
-          normalizePhotoUrl,
-        );
+        const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
         if (!abortController.signal.aborted) {
           setCurrentUser(mergedUser);
         }
@@ -89,7 +70,7 @@ function HomeFeed() {
     return () => {
       abortController.abort();
     };
-  }, [initialUser, normalizePhotoUrl]);
+  }, [initialUser]);
 
   const currentUserId = currentUser?._id ?? "";
   const currentUserPhoto = normalizePhotoUrl(currentUser?.photoUrl);
@@ -104,7 +85,9 @@ function HomeFeed() {
       const contentText = post.content ?? "";
       const contentMatch = contentText.toLowerCase().includes(normalized);
       const userName =
-        typeof post.user === "object" ? (post.user.username ?? "") : "";
+        typeof post.user === "object" && post.user !== null
+          ? (post.user.username ?? "")
+          : "";
       const userMatch = userName.toLowerCase().includes(normalized);
       return contentMatch || userMatch;
     });
@@ -217,13 +200,6 @@ function HomeFeed() {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    window.location.href = "/login";
-  };
-
   const handleGoToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -231,15 +207,14 @@ function HomeFeed() {
   return (
     <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
       <AppToast toasts={toasts} onClose={removeToast} />
-      <Navbar
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        onLogout={handleLogout}
-      />
+      <Navbar searchValue={searchTerm} onSearchChange={setSearchTerm} />
 
       <div className="container">
         <div className="row g-4">
-          <aside className="col-lg-3 d-none d-lg-block">
+          <aside
+            className="col-lg-3 d-none d-lg-block position-sticky"
+            style={{ top: "85px", alignSelf: "start" }}
+          >
             <LeftSidebar />
           </aside>
 

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import type { Post } from "../hooks/usePosts";
+import type { Post, User } from "../types/models";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
 
 const israelDateTimeFormatter = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Asia/Jerusalem",
@@ -17,6 +19,7 @@ const israelDateTimeFormatter = new Intl.DateTimeFormat("en-GB", {
 interface PostCardProps {
   post: Post;
   currentUserId: string;
+  dynamicCommentCount?: number;
   onPostUpdated: (updatedPost: Post) => void;
   onPostDeleted: (postId: string) => void;
   onActionSuccess: (message: string) => void;
@@ -26,30 +29,13 @@ interface PostCardProps {
 function PostCard({
   post,
   currentUserId,
+  dynamicCommentCount,
   onPostUpdated,
   onPostDeleted,
   onActionSuccess,
   onActionFailed,
 }: PostCardProps) {
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
-  const defaultPhotoUrl = `${apiBaseUrl}/public/images/default-user.svg`;
-
-  const normalizePhotoUrl = (value?: string) => {
-    if (!value) {
-      return defaultPhotoUrl;
-    }
-
-    if (/^https?:\/\//i.test(value)) {
-      return value;
-    }
-
-    if (value.startsWith("/")) {
-      return `${apiBaseUrl}${value}`;
-    }
-
-    return value;
-  };
+  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(post.content);
@@ -120,17 +106,52 @@ function PostCard({
     });
   }, [isEditing]);
 
-  const senderId =
-    typeof post.user === "object" && post.user?._id ? post.user._id : "";
+  useEffect(() => {
+    const lastViewed = sessionStorage.getItem("lastViewedPostId");
+    if (lastViewed === post._id && postCardRef.current) {
+      // Images loading above this post can cause layout shifts, so we poll the scroll a few times
+      let attempts = 0;
+      const interval = setInterval(() => {
+        postCardRef.current?.scrollIntoView({
+          behavior: "instant",
+          block: "center",
+        });
+        attempts++;
+        if (attempts >= 6) {
+          // 6 attempts * 150ms = 900ms
+          clearInterval(interval);
+        }
+      }, 150);
+
+      // Fallback in case first interval waits too long
+      postCardRef.current?.scrollIntoView({
+        behavior: "instant",
+        block: "center",
+      });
+
+      sessionStorage.removeItem("lastViewedPostId");
+
+      return () => clearInterval(interval);
+    }
+  }, [post._id]);
+
+  // Safely extract the populated user object from our strict Post model
+  const userObj: User | null =
+    typeof post.user === "object" && post.user !== null
+      ? (post.user as User)
+      : null;
+
+  // Extract ID string if populated object wasn't returned
+  const senderId: string =
+    userObj?._id || (typeof post.user === "string" ? post.user : "");
+
   const isOwner = senderId === currentUserId;
 
-  const senderName =
-    typeof post.user === "object" ? post.user.username || "User" : "User";
+  const senderName = userObj?.username || "Unknown User";
 
-  const senderPhoto =
-    typeof post.user === "object"
-      ? normalizePhotoUrl(post.user.photoUrl)
-      : defaultPhotoUrl;
+  const senderPhoto = userObj
+    ? normalizePhotoUrl(userObj.photoUrl)
+    : defaultUserPhotoUrl;
 
   const handleDeletePost = async () => {
     const result = await Swal.fire({
@@ -241,6 +262,10 @@ function PostCard({
       const updatedPost = response.data?.post as Post | undefined;
 
       if (updatedPost && updatedPost._id) {
+        // Keep the existing comment count when updating via like
+        if (post.comments !== undefined && updatedPost.comments === undefined) {
+          updatedPost.comments = post.comments;
+        }
         onPostUpdated(updatedPost);
       }
     } catch (error: unknown) {
@@ -262,6 +287,10 @@ function PostCard({
       const updatedPost = response.data?.post as Post | undefined;
 
       if (updatedPost && updatedPost._id) {
+        // Keep the existing comment count when updating via save
+        if (post.comments !== undefined && updatedPost.comments === undefined) {
+          updatedPost.comments = post.comments;
+        }
         onPostUpdated(updatedPost);
       }
     } catch (error: unknown) {
@@ -325,27 +354,39 @@ function PostCard({
       <div className="card-body p-4">
         <div className="d-flex justify-content-between align-items-start mb-3">
           <div className="d-flex align-items-center gap-3">
-            <img
-              src={senderPhoto}
-              alt={senderName}
-              className="border rounded-circle"
-              width={40}
-              height={40}
-              referrerPolicy="no-referrer"
-              crossOrigin="anonymous"
-              onError={(event) => {
-                const element = event.currentTarget;
-                if (element.src !== defaultPhotoUrl) {
-                  element.src = defaultPhotoUrl;
-                }
-              }}
-              style={{
-                objectFit: "cover",
-                backgroundColor: "#fff",
-              }}
-            />
+            <Link
+              to={`/profile/${userObj ? userObj._id : "new"}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <img
+                src={senderPhoto}
+                alt={senderName}
+                className="border rounded-circle"
+                width={40}
+                height={40}
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                onError={(event) => {
+                  const element = event.currentTarget;
+                  if (element.src !== defaultUserPhotoUrl) {
+                    element.src = defaultUserPhotoUrl;
+                  }
+                }}
+                style={{
+                  objectFit: "cover",
+                  backgroundColor: "#fff",
+                }}
+              />
+            </Link>
             <div>
-              <h6 className="mb-0 fw-bold">{senderName}</h6>
+              <h6 className="mb-0 fw-bold">
+                <Link
+                  to={`/profile/${userObj ? userObj._id : "new"}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  {senderName}
+                </Link>
+              </h6>
               {post.createdAt && (
                 <small className="text-muted">
                   {israelDateTimeFormatter.format(new Date(post.createdAt))}
@@ -581,15 +622,23 @@ function PostCard({
 
           <button
             type="button"
-            className="btn btn-sm rounded-pill icon-action d-flex align-items-center gap-1"
+            className="btn btn-sm rounded-pill icon-action d-flex align-items-center gap-1 text-secondary"
+            onClick={() => {
+              sessionStorage.setItem("lastViewedPostId", post._id);
+              navigate(`/post/${post._id}`, {
+                state: { focusCommentInput: true },
+              });
+            }}
           >
             <span
-              className="material-symbols-outlined"
+              className="material-symbols-outlined text-secondary"
               style={{ fontSize: "18px" }}
             >
               chat_bubble
             </span>
-            <span>{post.comments ?? 0}</span>
+            <span className="text-secondary">
+              {dynamicCommentCount ?? post.comments ?? 0}
+            </span>
           </button>
 
           <button
