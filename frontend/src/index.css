@@ -9,3 +9,65 @@ body {
   min-width: 320px;
   overflow-x: hidden;
 }
+
+.floating-heart {
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  font-size: 14px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  animation: float-heart-up 1s ease-out forwards;
+}
+
+.floating-heart-1 {
+  margin-left: -14px;
+  animation-delay: 0ms;
+}
+
+.floating-heart-2 {
+  margin-left: 0;
+  animation-delay: 80ms;
+}
+
+.floating-heart-3 {
+  margin-left: 14px;
+  animation-delay: 160ms;
+}
+
+@keyframes float-heart-up {
+  0% {
+    transform: translate(-50%, 0) scale(0.8);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-50%, -34px) scale(1.15);
+    opacity: 0;
+  }
+}
+
+.route-transition {
+  animation: route-fade-slide 0.32s ease;
+}
+
+@keyframes route-fade-slide {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-switch .form-check-input:not(:disabled),
+.form-switch .form-check-label {
+  cursor: pointer;
+}
+
+.form-switch .form-check-input:disabled,
+.form-switch .form-check-input:disabled ~ .form-check-label {
+  cursor: default;
+}

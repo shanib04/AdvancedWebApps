@@ -3,19 +3,55 @@ import User from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
+import { getErrorMessage } from "../utils/getErrorMessage";
+
+type JwtDecodedPayload = {
+  userId: string;
+};
 
 export interface Tokens {
-  token: string;
+  accessToken: string;
   refreshToken: string;
 }
 
 const getDefaultPhotoUrl = (req: Request) =>
   `${req.protocol}://${req.get("host")}/public/images/default-user.svg`;
 
-const resolveUserPhotoUrl = (req: Request, photoUrl?: string) =>
-  photoUrl || getDefaultPhotoUrl(req);
+const resolveUserPhotoUrl = (req: Request, photoUrl?: string) => {
+  const normalized = photoUrl?.trim();
+
+  if (!normalized) {
+    return getDefaultPhotoUrl(req);
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  if (normalized.startsWith("/")) {
+    return `${req.protocol}://${req.get("host")}${normalized}`;
+  }
+
+  return normalized;
+};
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const decodeRefreshToken = (
+  refreshToken: string,
+  secret: string,
+): JwtDecodedPayload | null => {
+  const decoded = jwt.verify(refreshToken, secret);
+
+  if (typeof decoded === "object" && decoded && "userId" in decoded) {
+    const userIdValue = (decoded as Record<string, unknown>).userId;
+    if (typeof userIdValue === "string" && userIdValue.trim()) {
+      return { userId: userIdValue };
+    }
+  }
+
+  return null;
+};
 
 // Escapes special regex characters in a string to safely use it for literal text matching in queries.
 const escapeRegex = (value: string) =>
@@ -55,10 +91,10 @@ const generateToken = (userId: string): Tokens => {
     process.env.JWT_REFRESH_EXPIRES_IN || "86400",
   );
 
-  const token = jwt.sign({ userId }, secret, { expiresIn: exp });
+  const accessToken = jwt.sign({ userId }, secret, { expiresIn: exp });
   const refreshToken = jwt.sign({ userId }, secret, { expiresIn: refreshExp });
 
-  return { token, refreshToken };
+  return { accessToken, refreshToken };
 };
 
 export const register = async (req: Request, res: Response) => {
@@ -109,8 +145,8 @@ export const register = async (req: Request, res: Response) => {
         photoUrl: resolveUserPhotoUrl(req, user.photoUrl),
       },
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -156,8 +192,8 @@ export const login = async (req: Request, res: Response) => {
         photoUrl: resolveUserPhotoUrl(req, user.photoUrl),
       },
     });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
@@ -186,7 +222,6 @@ export const googleSignin = async (req: Request, res: Response) => {
     }
 
     const { email, picture, name } = payload;
-    const googlePhotoUrl = resolveUserPhotoUrl(req, picture);
     const preferredUsername = name || email.split("@")[0];
 
     let user = await User.findOne({ email });
@@ -197,11 +232,11 @@ export const googleSignin = async (req: Request, res: Response) => {
         username: uniqueUsername,
         email,
         password: generatedPassword,
-        photoUrl: googlePhotoUrl,
+        photoUrl: resolveUserPhotoUrl(req, picture),
         refreshToken: [],
       });
     } else {
-      user.photoUrl = googlePhotoUrl;
+      user.photoUrl = resolveUserPhotoUrl(req, picture || user.photoUrl);
       if (!user.username) {
         user.username = await getUniqueUsername(preferredUsername);
       }
@@ -220,7 +255,7 @@ export const googleSignin = async (req: Request, res: Response) => {
         photoUrl: resolveUserPhotoUrl(req, user.photoUrl),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return res.status(401).json({ error: "Google sign-in failed" });
   }
 };
@@ -236,7 +271,10 @@ export const refresh = async (req: Request, res: Response) => {
     if (!secret) {
       return res.status(500).json({ error: "JWT_SECRET is not configured" });
     }
-    const decoded: any = jwt.verify(refreshToken, secret);
+    const decoded = decodeRefreshToken(refreshToken, secret);
+    if (!decoded) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const user = await User.findById(decoded.userId);
     if (!user) {
@@ -255,7 +293,7 @@ export const refresh = async (req: Request, res: Response) => {
     await user.save();
 
     res.json(tokens);
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(401).json({ error: "Unauthorized" });
   }
 };
@@ -271,7 +309,10 @@ export const logout = async (req: Request, res: Response) => {
     if (!secret) {
       return res.status(500).json({ error: "JWT_SECRET is not configured" });
     }
-    const decoded: any = jwt.verify(refreshToken, secret);
+    const decoded = decodeRefreshToken(refreshToken, secret);
+    if (!decoded) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const user = await User.findById(decoded.userId);
     if (!user) {
@@ -282,7 +323,7 @@ export const logout = async (req: Request, res: Response) => {
     await user.save();
 
     res.json({ message: "Logged out successfully" });
-  } catch (error: any) {
+  } catch (error: unknown) {
     res.status(401).json({ error: "Unauthorized" });
   }
 };
