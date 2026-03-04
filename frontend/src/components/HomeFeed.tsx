@@ -261,7 +261,7 @@ function HomeFeed() {
             className="col-lg-3 d-none d-lg-block position-sticky"
             style={{ top: "85px", alignSelf: "start" }}
           >
-            <LeftSidebar />
+            <LeftSidebar activePage={isSavedMode ? "saved" : "home"} />
           </aside>
 
           <section className="col-12 col-lg-6">

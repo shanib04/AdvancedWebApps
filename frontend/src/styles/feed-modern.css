@@ -48,6 +48,11 @@
   box-shadow: 0 0.5rem 1rem rgba(79, 124, 255, 0.3);
 }
 
+.list-group-item-action.active {
+  background-color: #fff;
+  color: var(--bs-list-group-action-hover-color);
+}
+
 .icon-action {
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(255, 255, 255, 0.85);

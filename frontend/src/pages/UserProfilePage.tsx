@@ -99,7 +99,7 @@ const UserProfilePage = () => {
             className="col-lg-3 d-none d-lg-block position-sticky"
             style={{ top: "85px", alignSelf: "start" }}
           >
-            <LeftSidebar />
+            <LeftSidebar activePage="profile" />
           </aside>
           <div className="col-12 col-lg-9">
             <ProfileHeader
