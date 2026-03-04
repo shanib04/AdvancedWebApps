@@ -1,4 +1,9 @@
+import { getStoredSessionUser } from "../utils/sessionUser";
+
 function LeftSidebar() {
+  const currentUser = getStoredSessionUser();
+  const currentUserId = currentUser?._id ?? "";
+
   return (
     <aside>
       <div className="list-group">
@@ -15,7 +20,7 @@ function LeftSidebar() {
           🔖 Saved Posts
         </a>
         <a
-          href="/profile"
+          href={`/profile/${currentUserId}`}
           className="list-group-item list-group-item-action rounded-4 border-0 shadow-sm mb-2 py-3 fw-semibold"
         >
           👤 My Profile

@@ -4,6 +4,7 @@ import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import HomeFeed from "./components/HomeFeed";
 import PostDetailsPage from "./pages/PostDetailsPage";
+import UserProfilePage from "./pages/UserProfilePage";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const accessToken = localStorage.getItem("accessToken");
@@ -37,6 +38,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PostDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile/:id"
+          element={
+            <ProtectedRoute>
+              <UserProfilePage />
             </ProtectedRoute>
           }
         />
