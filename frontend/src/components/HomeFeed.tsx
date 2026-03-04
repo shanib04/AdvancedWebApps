@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import usePosts from "../hooks/usePosts";
 import type { Post } from "../types/models";
 import { feedCache } from "../utils/feedCache";
@@ -17,6 +18,7 @@ import Navbar from "./Navbar";
 import RightAIWidget from "./RightAIWidget";
 import "../styles/feed-modern.css";
 import { normalizePhotoUrl } from "../utils/photoUtils";
+import apiClient from "../services/api-client";
 
 type InitialDraftPayload = {
   text: string;
@@ -26,6 +28,8 @@ type InitialDraftPayload = {
 };
 
 function HomeFeed() {
+  const [searchParams] = useSearchParams();
+  const isSavedMode = searchParams.get("saved") === "true";
   const [page, setPage] = useState(feedCache.page);
 
   useEffect(() => {
@@ -38,10 +42,20 @@ function HomeFeed() {
     null,
   );
   const [showGoToTop, setShowGoToTop] = useState(false);
-  const { posts, setPosts, error, isLoading, hasMore } = usePosts(page);
   const { toasts, removeToast, showFailed, showSuccess } = useAppToast();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const queuedSearchPageRef = useRef(false);
+
+  // Custom posts state for saved mode
+  const [savedPosts, setSavedPosts] = useState<Post[]>([]);
+  const [savedError, setSavedError] = useState("");
+  const [savedIsLoading, setSavedIsLoading] = useState(false);
+
+  // Use different posts based on mode
+  const { posts, setPosts, error, isLoading, hasMore } = usePosts(page);
+  const currentPosts = isSavedMode ? savedPosts : posts;
+  const currentError = isSavedMode ? savedError : error;
+  const currentIsLoading = isSavedMode ? savedIsLoading : isLoading;
 
   const initialUser = useMemo(() => getStoredSessionUser(), []);
 
@@ -75,13 +89,45 @@ function HomeFeed() {
   const currentUserId = currentUser?._id ?? "";
   const currentUserPhoto = normalizePhotoUrl(currentUser?.photoUrl);
 
+  // Fetch saved posts when in saved mode
+  useEffect(() => {
+    if (!isSavedMode || !currentUserId) return;
+
+    const fetchSavedPosts = async () => {
+      setSavedIsLoading(true);
+      setSavedError("");
+
+      try {
+        const response = await apiClient.get<Post[]>(
+          `/post/user/${currentUserId}/saved`,
+        );
+        setSavedPosts(response.data || []);
+      } catch (err: unknown) {
+        console.error("Failed to load saved posts:", err);
+        setSavedError("Failed to load saved posts.");
+        setSavedPosts([]);
+      } finally {
+        setSavedIsLoading(false);
+      }
+    };
+
+    fetchSavedPosts();
+  }, [isSavedMode, currentUserId]);
+
+  // Update page title based on mode
+  useEffect(() => {
+    document.title = isSavedMode
+      ? "Saved Posts - Advanced Web Apps"
+      : "Home - Advanced Web Apps";
+  }, [isSavedMode]);
+
   const filteredPosts = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
     if (!normalized) {
-      return posts;
+      return currentPosts;
     }
 
-    return posts.filter((post) => {
+    return currentPosts.filter((post) => {
       const contentText = post.content ?? "";
       const contentMatch = contentText.toLowerCase().includes(normalized);
       const userName =
@@ -91,7 +137,7 @@ function HomeFeed() {
       const userMatch = userName.toLowerCase().includes(normalized);
       return contentMatch || userMatch;
     });
-  }, [posts, searchTerm]);
+  }, [currentPosts, searchTerm]);
 
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
   const isSearchActive = normalizedSearchTerm.length > 0;
@@ -251,9 +297,9 @@ function HomeFeed() {
             </div>
 
             <HomePostsList
-              error={error}
-              isLoading={isLoading}
-              posts={posts}
+              error={currentError}
+              isLoading={currentIsLoading}
+              posts={currentPosts}
               filteredPosts={filteredPosts}
               currentUserId={currentUserId}
               onPostUpdated={handlePostUpdated}
