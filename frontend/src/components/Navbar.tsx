@@ -7,6 +7,7 @@ import {
   type SessionUser,
 } from "../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
+import { useSessionUserListener } from "../hooks/useSessionUserListener";
 
 interface NavbarProps {
   searchValue: string;
@@ -26,6 +27,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
   const initialUser = useMemo(() => getStoredSessionUser(), []);
 
   const [userData, setUserData] = useState<SessionUser | null>(initialUser);
+  const sessionUser = useSessionUserListener();
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -57,26 +59,19 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
       }
     };
 
-    // Listen for custom event for same-tab updates
-    const handleSessionUserUpdate = (event: CustomEvent<SessionUser>) => {
-      setUserData(event.detail);
-    };
-
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener(
-      "sessionUserUpdated",
-      handleSessionUserUpdate as EventListener,
-    );
 
     return () => {
       abortController.abort();
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener(
-        "sessionUserUpdated",
-        handleSessionUserUpdate as EventListener,
-      );
     };
   }, [initialUser]);
+
+  useEffect(() => {
+    if (sessionUser) {
+      setUserData(sessionUser);
+    }
+  }, [sessionUser]);
 
   const userPhotoUrl = normalizePhotoUrl(userData?.photoUrl);
   const displayName =

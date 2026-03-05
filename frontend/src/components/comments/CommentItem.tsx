@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../services/api-client";
 import type { Comment, CommentTreeItem } from "../../types/models";
-import { getStoredSessionUser } from "../../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
+import { useSessionUserListener } from "../../hooks/useSessionUserListener";
 
 interface CommentItemProps {
   comment: CommentTreeItem;
@@ -44,30 +44,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
     }
   }, [showReplyBox]);
 
-  const [currentUser, setCurrentUser] = useState(getStoredSessionUser());
+  const currentUser = useSessionUserListener();
 
   const currentUserPhoto = currentUser
     ? normalizePhotoUrl(currentUser.photoUrl)
     : defaultUserPhotoUrl;
-
-  useEffect(() => {
-    // Listen for session user updates
-    const handleSessionUserUpdate = (event: CustomEvent) => {
-      setCurrentUser(event.detail);
-    };
-
-    window.addEventListener(
-      "sessionUserUpdated",
-      handleSessionUserUpdate as EventListener,
-    );
-
-    return () => {
-      window.removeEventListener(
-        "sessionUserUpdated",
-        handleSessionUserUpdate as EventListener,
-      );
-    };
-  }, []);
 
   // Safely extract the user object from our string | User type union
   const userObj = typeof comment.user === "object" ? comment.user : null;
