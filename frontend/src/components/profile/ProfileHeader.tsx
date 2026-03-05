@@ -25,6 +25,15 @@ const ProfileHeader = ({
   const [editingUsername, setEditingUsername] = useState(user.username);
   const [editingPhotoUrl, setEditingPhotoUrl] = useState(user.photoUrl || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  useEffect(() => {
+    setEditingUsername(user.username);
+    setEditingPhotoUrl(user.photoUrl || "");
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [user]);
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -121,6 +130,8 @@ const ProfileHeader = ({
         alt={user.username}
         className="rounded-circle border shadow"
         style={{ width: "120px", height: "120px", objectFit: "cover" }}
+        referrerPolicy="no-referrer"
+        crossOrigin="anonymous"
         onError={(event) => {
           const element = event.currentTarget;
           if (element.src !== defaultUserPhotoUrl) {
@@ -187,6 +198,8 @@ const ProfileHeader = ({
                         objectFit: "cover",
                         borderRadius: "50%",
                       }}
+                      referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
                     />
 
                     {/* controls */}

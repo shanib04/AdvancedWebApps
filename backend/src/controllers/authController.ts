@@ -236,7 +236,10 @@ export const googleSignin = async (req: Request, res: Response) => {
         refreshToken: [],
       });
     } else {
-      user.photoUrl = resolveUserPhotoUrl(req, picture || user.photoUrl);
+      // Only update photoUrl on first Google login - don't override edited
+      if (!user.photoUrl) {
+        user.photoUrl = resolveUserPhotoUrl(req, picture);
+      }
       if (!user.username) {
         user.username = await getUniqueUsername(preferredUsername);
       }
