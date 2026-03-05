@@ -1,5 +1,5 @@
 import webLogo from "../assets/web-logo.png";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { clearFeedCache } from "../utils/feedCache";
 import {
   getStoredSessionUser,
@@ -26,7 +26,6 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
 
   const initialUser = useMemo(() => getStoredSessionUser(), []);
 
-  const [userData, setUserData] = useState<SessionUser | null>(initialUser);
   const sessionUser = useSessionUserListener();
 
   useEffect(() => {
@@ -34,14 +33,9 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
 
     const syncUser = async () => {
       try {
-        const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
-        if (!abortController.signal.aborted) {
-          setUserData(mergedUser);
-        }
+        await syncStoredUserFromWhoAmI(initialUser);
       } catch {
-        if (!abortController.signal.aborted) {
-          setUserData(initialUser);
-        }
+        // Ignore errors - sessionUser will remain as initial value
       }
     };
 
@@ -52,7 +46,9 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
       if (event.key === "user" && event.newValue) {
         try {
           const updatedUser = JSON.parse(event.newValue) as SessionUser;
-          setUserData(updatedUser);
+          window.dispatchEvent(
+            new CustomEvent("sessionUserUpdated", { detail: updatedUser }),
+          );
         } catch {
           // Ignore invalid JSON
         }
@@ -67,18 +63,12 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
     };
   }, [initialUser]);
 
-  useEffect(() => {
-    if (sessionUser) {
-      setUserData(sessionUser);
-    }
-  }, [sessionUser]);
-
-  const userPhotoUrl = normalizePhotoUrl(userData?.photoUrl);
+  const userPhotoUrl = normalizePhotoUrl(sessionUser?.photoUrl);
   const displayName =
-    userData?.displayName ||
-    userData?.username ||
-    userData?.name ||
-    userData?.email ||
+    sessionUser?.displayName ||
+    sessionUser?.username ||
+    sessionUser?.name ||
+    sessionUser?.email ||
     "User";
 
   return (
