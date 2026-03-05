@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import RegisterForm from "./components/RegisterForm";
 import LoginForm from "./components/LoginForm";
 import HomeFeed from "./components/HomeFeed";
+import PostDetailsPage from "./pages/PostDetailsPage";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const accessToken = localStorage.getItem("accessToken");
@@ -28,6 +29,14 @@ function App() {
           element={
             <ProtectedRoute>
               <HomeFeed />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post/:postId"
+          element={
+            <ProtectedRoute>
+              <PostDetailsPage />
             </ProtectedRoute>
           }
         />

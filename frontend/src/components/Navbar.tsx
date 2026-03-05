@@ -1,39 +1,27 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import webLogo from "../assets/web-logo.png";
+import { useEffect, useMemo, useState } from "react";
+import { clearFeedCache } from "../utils/feedCache";
 import {
   getStoredSessionUser,
   syncStoredUserFromWhoAmI,
   type SessionUser,
 } from "../utils/sessionUser";
+import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
 
 interface NavbarProps {
   searchValue: string;
   onSearchChange: (value: string) => void;
-  onLogout: () => void;
+  hideSearch?: boolean;
 }
 
-function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
-  const apiBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
-  const defaultPhotoUrl = `${apiBaseUrl}/public/images/default-user.svg`;
-
-  const normalizePhotoUrl = useCallback(
-    (value?: string) => {
-      if (!value) {
-        return defaultPhotoUrl;
-      }
-
-      if (/^https?:\/\//i.test(value)) {
-        return value;
-      }
-
-      if (value.startsWith("/")) {
-        return `${apiBaseUrl}${value}`;
-      }
-
-      return value;
-    },
-    [apiBaseUrl, defaultPhotoUrl],
-  );
+function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    clearFeedCache();
+    window.location.href = "/login";
+  };
 
   const initialUser = useMemo(() => getStoredSessionUser(), []);
 
@@ -44,10 +32,7 @@ function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
 
     const syncUser = async () => {
       try {
-        const mergedUser = await syncStoredUserFromWhoAmI(
-          initialUser,
-          normalizePhotoUrl,
-        );
+        const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
         if (!abortController.signal.aborted) {
           setUserData(mergedUser);
         }
@@ -63,7 +48,7 @@ function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
     return () => {
       abortController.abort();
     };
-  }, [initialUser, normalizePhotoUrl]);
+  }, [initialUser]);
 
   const userPhotoUrl = normalizePhotoUrl(userData?.photoUrl);
   const displayName =
@@ -81,7 +66,7 @@ function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
           href="/home"
         >
           <img
-            src="src/assets/web-logo.png"
+            src={webLogo}
             alt="VibeIS Logo"
             height={40}
             className="rounded"
@@ -89,25 +74,27 @@ function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
           />
         </a>
 
-        <div
-          className="mx-auto w-100 px-3 d-none d-md-block search-glow rounded-pill"
-          style={{ maxWidth: "520px" }}
-        >
-          <div className="input-group input-group-sm">
-            <span className="input-group-text bg-transparent border-0 pe-0">
-              <span className="material-symbols-outlined text-primary">
-                search
+        {!hideSearch && (
+          <div
+            className="mx-auto w-100 px-3 d-none d-md-block search-glow rounded-pill"
+            style={{ maxWidth: "520px" }}
+          >
+            <div className="input-group input-group-sm">
+              <span className="input-group-text bg-transparent border-0 pe-0">
+                <span className="material-symbols-outlined text-primary">
+                  search
+                </span>
               </span>
-            </span>
-            <input
-              type="text"
-              className="form-control bg-transparent border-0 shadow-none rounded-pill"
-              placeholder="Search posts or people"
-              value={searchValue}
-              onChange={(event) => onSearchChange(event.target.value)}
-            />
+              <input
+                type="text"
+                className="form-control bg-transparent border-0 shadow-none rounded-pill"
+                placeholder="Search posts or people"
+                value={searchValue}
+                onChange={(event) => onSearchChange(event.target.value)}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="d-flex align-items-center gap-2">
           <div className="d-flex align-items-center gap-2">
@@ -121,8 +108,8 @@ function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
               crossOrigin="anonymous"
               onError={(event) => {
                 const element = event.currentTarget;
-                if (element.src !== defaultPhotoUrl) {
-                  element.src = defaultPhotoUrl;
+                if (element.src !== defaultUserPhotoUrl) {
+                  element.src = defaultUserPhotoUrl;
                 }
               }}
               style={{
@@ -137,7 +124,7 @@ function Navbar({ searchValue, onSearchChange, onLogout }: NavbarProps) {
           <button
             type="button"
             className="btn btn-sm rounded-pill px-3 d-flex align-items-center gap-1 logout-btn"
-            onClick={onLogout}
+            onClick={handleLogout}
           >
             <span
               className="material-symbols-outlined"

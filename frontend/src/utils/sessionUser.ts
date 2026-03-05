@@ -1,4 +1,6 @@
+import axios from "axios";
 import apiClient from "../services/api-client";
+import { normalizePhotoUrl } from "./photoUtils";
 
 export type SessionUser = {
   _id?: string;
@@ -25,48 +27,49 @@ export const getStoredSessionUser = (): SessionUser | null => {
   }
 };
 
-export const normalizeSessionUser = (
-  user: SessionUser,
-  normalizePhotoUrl?: (value?: string) => string,
-): SessionUser => {
+export const normalizeSessionUser = (user: SessionUser): SessionUser => {
   const rawPhoto = user.photoUrl || user.imageUrl;
 
   return {
     ...user,
-    photoUrl: normalizePhotoUrl ? normalizePhotoUrl(rawPhoto) : rawPhoto,
+    photoUrl: normalizePhotoUrl(rawPhoto),
   };
 };
 
-export const setStoredSessionUser = (
-  user: SessionUser,
-  normalizePhotoUrl?: (value?: string) => string,
-) => {
-  const normalized = normalizeSessionUser(user, normalizePhotoUrl);
+export const setStoredSessionUser = (user: SessionUser) => {
+  const normalized = normalizeSessionUser(user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalized));
   return normalized;
 };
 
 export const syncStoredUserFromWhoAmI = async (
   fallbackUser: SessionUser | null,
-  normalizePhotoUrl?: (value?: string) => string,
 ) => {
   const accessToken = localStorage.getItem("accessToken");
   if (!accessToken) {
     return fallbackUser;
   }
 
-  const response = await apiClient.get("/user/whoami");
-  const serverUser = (response.data ?? {}) as SessionUser;
+  try {
+    const response = await apiClient.get("/user/whoami");
+    const serverUser = (response.data ?? {}) as SessionUser;
 
-  const mergedUser = normalizeSessionUser(
-    {
+    const mergedUser = normalizeSessionUser({
       ...(fallbackUser ?? {}),
       ...serverUser,
       photoUrl: serverUser?.photoUrl || fallbackUser?.photoUrl,
-    },
-    normalizePhotoUrl,
-  );
+    });
 
-  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mergedUser));
-  return mergedUser;
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mergedUser));
+    return mergedUser;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      if (error.response.status === 401 || error.response.status === 404) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem(USER_STORAGE_KEY);
+        window.location.href = "/login";
+      }
+    }
+    throw error;
+  }
 };

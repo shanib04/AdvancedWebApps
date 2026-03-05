@@ -23,7 +23,7 @@
   height: 44px;
   border-radius: 50%;
   border: 1px solid rgba(79, 124, 255, 0.25);
-  object-fit: contain;
+  object-fit: cover;
   background-color: #ffffff;
 }
 

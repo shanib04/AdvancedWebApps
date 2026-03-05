@@ -1,6 +1,6 @@
 function LeftSidebar() {
   return (
-    <aside className="position-sticky" style={{ top: "90px" }}>
+    <aside>
       <div className="list-group">
         <a
           href="/home"
