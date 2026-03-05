@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import type { User } from "../../types/models";
 import apiClient from "../../services/api-client";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
@@ -28,6 +28,22 @@ const ProfileHeader = ({
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const previewUrl = useMemo(() => {
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
+    }
+    return editingPhotoUrl || defaultUserPhotoUrl;
+  }, [selectedFile, editingPhotoUrl]);
+
+  // clean up object URL when file changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (selectedFile && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl, selectedFile]);
+
   const handleSaveProfile = async () => {
     if (!editingUsername.trim()) return;
 
@@ -56,7 +72,6 @@ const ProfileHeader = ({
       const updatedUser = updateResponse.data;
       onUserUpdate(updatedUser);
 
-      // If this is the current user's own profile, update the session user
       if (isOwnProfile) {
         const currentSessionUser = getStoredSessionUser();
         if (currentSessionUser) {
@@ -131,7 +146,10 @@ const ProfileHeader = ({
           tabIndex={-1}
           style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
         >
-          <div className="modal-dialog modal-dialog-centered">
+          <div
+            className="modal-dialog modal-dialog-centered"
+            style={{ maxWidth: "350px" }}
+          >
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Edit Profile</h5>
@@ -142,7 +160,7 @@ const ProfileHeader = ({
                 ></button>
               </div>
               <div className="modal-body">
-                <div className="mb-3">
+                <div className="mb-3 text-center">
                   <label htmlFor="username" className="form-label">
                     Username
                   </label>
@@ -152,100 +170,61 @@ const ProfileHeader = ({
                     id="username"
                     value={editingUsername}
                     onChange={(e) => setEditingUsername(e.target.value)}
+                    style={{ maxWidth: "300px", margin: "0 auto" }}
                   />
                 </div>
-                <div className="mb-3">
+                <div className="mb-3 text-center">
                   <label className="form-label">Profile Picture</label>
-                  <div className="d-flex gap-2 align-items-center mb-2">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Image URL"
-                      value={editingPhotoUrl}
-                      onChange={(e) => {
-                        setEditingPhotoUrl(e.target.value);
-                        setSelectedFile(null); // Clear file if URL entered
-                        if (fileInputRef.current) {
-                          fileInputRef.current.value = "";
-                        }
+                  <div className="d-flex align-items-start gap-4 justify-content-center">
+                    {/* preview area */}
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="border"
+                      style={{
+                        width: "125px",
+                        height: "125px",
+                        objectFit: "cover",
+                        borderRadius: "50%",
                       }}
-                      disabled={!!selectedFile}
                     />
-                    {editingPhotoUrl && !selectedFile && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => setEditingPhotoUrl("")}
-                      >
-                        Clear
-                      </button>
-                    )}
-                    <span className="text-muted">or</span>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      accept="image/*"
-                      className="d-none"
-                      onChange={handleFileSelect}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={!!selectedFile}
-                    >
-                      Upload File
-                    </button>
-                  </div>
-                  {selectedFile && (
-                    <div className="mt-2 d-flex align-items-center gap-2">
-                      <img
-                        src={URL.createObjectURL(selectedFile)}
-                        alt="Preview"
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "cover",
-                          borderRadius: "50%",
-                        }}
-                      />
-                      <div>
-                        <small className="text-muted d-block">
-                          Selected: {selectedFile.name}
-                        </small>
+
+                    {/* controls */}
+                    <div>
+                      <div className="d-flex flex-column gap-3 mb-2 mt-3 align-items-center">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          className="d-none"
+                          onChange={handleFileSelect}
+                        />
                         <button
                           type="button"
-                          className="btn btn-link btn-sm p-0 text-danger"
+                          className="btn btn-outline-secondary"
+                          style={{ width: "150px" }}
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={!!selectedFile}
+                        >
+                          Upload File
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger"
+                          style={{ width: "150px" }}
                           onClick={() => {
+                            setEditingPhotoUrl("");
                             setSelectedFile(null);
                             if (fileInputRef.current) {
                               fileInputRef.current.value = "";
                             }
                           }}
                         >
-                          Remove
+                          Clear
                         </button>
                       </div>
                     </div>
-                  )}
-                  {editingPhotoUrl && !selectedFile && (
-                    <div className="mt-2">
-                      <img
-                        src={editingPhotoUrl}
-                        alt="Preview"
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "cover",
-                          borderRadius: "50%",
-                        }}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = "none";
-                        }}
-                      />
-                    </div>
-                  )}
+                  </div>
                 </div>
               </div>
               <div className="modal-footer">
