@@ -1,12 +1,12 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import apiClient from "../../services/api-client";
 import type { Comment, CommentTreeItem } from "../../types/models";
-import { getStoredSessionUser } from "../../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import CommentItem from "./CommentItem";
 import Swal from "sweetalert2";
 import useAppToast from "../../hooks/useAppToast";
+import { useSessionUserListener } from "../../hooks/useSessionUserListener";
 
 interface CommentsSectionProps {
   postId: string;
@@ -29,7 +29,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const mainInputRef = useRef<HTMLInputElement>(null);
 
-  const currentUser = getStoredSessionUser();
+  const currentUser = useSessionUserListener();
 
   const currentUserPhoto = currentUser
     ? normalizePhotoUrl(currentUser.photoUrl)

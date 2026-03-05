@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../services/api-client";
 import type { Comment, CommentTreeItem } from "../../types/models";
-import { getStoredSessionUser } from "../../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
+import { useSessionUserListener } from "../../hooks/useSessionUserListener";
 
 interface CommentItemProps {
   comment: CommentTreeItem;
@@ -44,7 +44,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     }
   }, [showReplyBox]);
 
-  const currentUser = getStoredSessionUser();
+  const currentUser = useSessionUserListener();
 
   const currentUserPhoto = currentUser
     ? normalizePhotoUrl(currentUser.photoUrl)

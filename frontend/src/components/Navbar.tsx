@@ -1,5 +1,5 @@
 import webLogo from "../assets/web-logo.png";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { clearFeedCache } from "../utils/feedCache";
 import {
   getStoredSessionUser,
@@ -7,6 +7,7 @@ import {
   type SessionUser,
 } from "../utils/sessionUser";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
+import { useSessionUserListener } from "../hooks/useSessionUserListener";
 
 interface NavbarProps {
   searchValue: string;
@@ -25,37 +26,49 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
 
   const initialUser = useMemo(() => getStoredSessionUser(), []);
 
-  const [userData, setUserData] = useState<SessionUser | null>(initialUser);
+  const sessionUser = useSessionUserListener();
 
   useEffect(() => {
     const abortController = new AbortController();
 
     const syncUser = async () => {
       try {
-        const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
-        if (!abortController.signal.aborted) {
-          setUserData(mergedUser);
-        }
+        await syncStoredUserFromWhoAmI(initialUser);
       } catch {
-        if (!abortController.signal.aborted) {
-          setUserData(initialUser);
-        }
+        // Ignore errors - sessionUser will remain as initial value
       }
     };
 
     syncUser();
 
+    // Listen for storage changes to update user data when profile is updated
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === "user" && event.newValue) {
+        try {
+          const updatedUser = JSON.parse(event.newValue) as SessionUser;
+          window.dispatchEvent(
+            new CustomEvent("sessionUserUpdated", { detail: updatedUser }),
+          );
+        } catch {
+          // Ignore invalid JSON
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
     return () => {
       abortController.abort();
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, [initialUser]);
 
-  const userPhotoUrl = normalizePhotoUrl(userData?.photoUrl);
+  const userPhotoUrl = normalizePhotoUrl(sessionUser?.photoUrl);
   const displayName =
-    userData?.displayName ||
-    userData?.username ||
-    userData?.name ||
-    userData?.email ||
+    sessionUser?.displayName ||
+    sessionUser?.username ||
+    sessionUser?.name ||
+    sessionUser?.email ||
     "User";
 
   return (
