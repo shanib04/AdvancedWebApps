@@ -9,6 +9,8 @@ import ProfileTabs from "../components/profile/ProfileTabs";
 import ProfilePostGrid from "../components/profile/ProfilePostGrid";
 import { getStoredSessionUser } from "../utils/sessionUser";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import useAppToast from "../hooks/useAppToast";
+import AppToast from "../components/AppToast";
 
 const UserProfilePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,8 @@ const UserProfilePage = () => {
   );
   const [posts, setPosts] = useState<Post[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
+
+  const { showSuccess, toasts, removeToast } = useAppToast();
 
   const currentUser = getStoredSessionUser();
   const currentUserId = currentUser?._id ?? "";
@@ -92,6 +96,7 @@ const UserProfilePage = () => {
 
   return (
     <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+      <AppToast toasts={toasts} onClose={removeToast} />
       <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
       <div className="container py-4">
         <div className="row g-4">
@@ -106,6 +111,7 @@ const UserProfilePage = () => {
               user={user}
               isOwnProfile={isOwnProfile}
               onUserUpdate={setUser}
+              onActionSuccess={showSuccess}
             />
             <ProfileTabs
               activeTab={activeTab}

@@ -13,12 +13,14 @@ interface ProfileHeaderProps {
   user: User;
   isOwnProfile: boolean;
   onUserUpdate: (user: User) => void;
+  onActionSuccess: (message: string) => void;
 }
 
 const ProfileHeader = ({
   user,
   isOwnProfile,
   onUserUpdate,
+  onActionSuccess,
 }: ProfileHeaderProps) => {
   const { showFailed } = useAppToast();
   const [showEditModal, setShowEditModal] = useState(false);
@@ -92,6 +94,7 @@ const ProfileHeader = ({
         }
       }
 
+      onActionSuccess("Profile updated successfully.");
       setShowEditModal(false);
       resetForm();
     } catch (err: unknown) {
