@@ -1,0 +1,7 @@
+# Frontend Production Environment Configuration
+
+# API Configuration - Must point to production domain
+VITE_API_URL=https://node32.cs.colman.ac.il
+
+# OAuth
+VITE_GOOGLE_CLIENT_ID=your_google_client_id

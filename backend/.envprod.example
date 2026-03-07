@@ -1,0 +1,25 @@
+# Backend Production Environment Configuration
+
+NODE_ENV=production
+
+# Server & HTTPS
+PORT=3000
+HTTPS_PORT=443
+HTTPS_KEY_PATH=path_to_your_ssl_key
+HTTPS_CERT_PATH=path_to_your_ssl_certificate
+
+# Database
+MONGO_URI=your_production_mongodb_uri
+
+# JWT
+JWT_SECRET=your_production_jwt_secret_key
+JWT_EXPIRES_IN=3600
+JWT_REFRESH_EXPIRES_IN=86400
+
+# Frontend URL - production domain
+CLIENT_URL=https://node32.cs.colman.ac.il
+
+# External APIs
+GOOGLE_CLIENT_ID=your_google_client_id
+GEMINI_API_KEY=your_gemini_api_key
+UNSPLASH_ACCESS_KEY=your_unsplash_api_key
