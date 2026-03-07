@@ -16,8 +16,8 @@ if (NODE_ENV !== "production") {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 } else {
-  const defaultKeyPath = path.join(__dirname, "../../client-key.pem");
-  const defaultCertPath = path.join(__dirname, "../../client-cert.pem");
+  const defaultKeyPath = path.join(__dirname, "../../../certs/client-key.pem");
+  const defaultCertPath = path.join(__dirname, "../../../certs/client-cert.pem");
 
   const keyPath = process.env.HTTPS_KEY_PATH || defaultKeyPath;
   const certPath = process.env.HTTPS_CERT_PATH || defaultCertPath;

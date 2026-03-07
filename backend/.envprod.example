@@ -5,8 +5,8 @@ NODE_ENV=production
 # Server & HTTPS
 PORT=3000
 HTTPS_PORT=443
-HTTPS_KEY_PATH=./client-key.pem
-HTTPS_CERT_PATH=./client-cert.pem
+HTTPS_KEY_PATH=path_to_your_ssl_key
+HTTPS_CERT_PATH=path_to_your_ssl_certificate
 
 # Database
 MONGO_URI=your_production_mongodb_uri
