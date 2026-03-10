@@ -12,6 +12,14 @@ import {
   syncStoredUserFromWhoAmI,
 } from "../utils/sessionUser";
 import AppToast from "./AppToast";
+import AuthPhotoGallery from "./AuthPhotoGallery";
+import photo1 from "../assets/authPhotos/photo1.png";
+import photo2 from "../assets/authPhotos/photo2.png";
+import photo3 from "../assets/authPhotos/photo3.png";
+import photo4 from "../assets/authPhotos/photo4.png";
+import photo5 from "../assets/authPhotos/photo5.png";
+import photo6 from "../assets/authPhotos/photo6.png";
+import photo7 from "../assets/authPhotos/photo7.png";
 
 const loginSchema = z.object({
   email: z.email("Please enter a valid email address."),
@@ -20,48 +28,14 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const galleryColumns = [
-  [
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCOHMHdiOHIXi4SZ-FO8dvhZlV81ZI7mzQIS4WS6oa3RJUQT1IENbneJYICKpQ7sUGOGNWqPsMTdLRT_qQh5Sqwstacq6vcniB4rdoPsJi5XPPpiQOMqvMH_VeiNT4Zxs6TQ2u-e8zHjUW6qQQTZeoqYIfyqigzK7naRf-rMQLMBIntaGchpXfW6sytzwfJOIv07rx-caiKZrBY3f6kPmMMJCT_7p15120mwVcMl8j-nmUuazesILFqR2DoXNdd1On2-f2xSfNDHo0j",
-      flex: 1.45,
-    },
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCqMLcz1w6e3vCqZblYSw0Phfd7ZpSA8D4VgwlaAUHYtpjZkQjO_wS_kEQI_Bz5gVrzeH1ARzV8GGkXwytN6htxGwpdGDkWTN54_ONFJ0Vzd5xUPc4YEDeTK1U25BfhvRZxLrwFTgCLnmtLhFIABGgz5171brXf6bZlSRtqOpa4U6f6sCm0DXmh23pbPjC3u6jE5KLNhEUKtLqKS_7bKcy1qUBe3LLlx7qhWm6F3dppOV0l4h6ftlYzGghRUECFgTNWezyxT3hZmfiT",
-      flex: 0.95,
-    },
-  ],
-  [
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuA8RKczcMCvjDTUhNBfJr7_YfzprkyMQV5E_ecsLcmDyxKaUU7OrxYmMdKXMws09tyQE6NHsTqXwMIptwlJzXRz5aivlt_76lE3VmNJdAQUXSmFB2Dqku2kkXlUx6HPf1Vaspn0UsIz8UnSD6WCPvjbGtU0knk_tZ_9ONb7CQL1Froa_KHvDqnroL0nyaPFrb3eETNGVOU1qk9KQ9HwpfVnSfAHxQDobSQt8fewDdO5kyVwSQo0VHTCE61qVfq2k05G4Tv_DAx3_w7E",
-      flex: 1.35,
-    },
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuB_FkCtbm_rYpH0X1_mFoLr7S22FwBvmCAPRhssZtuk-a2T9Tlm43myW56kukkyHo3tbmJwSnvnuHvmYQVFqYOR7hWakRhQ3r8mgqTj5qSiDwUw2EQ7qSQ9DRsDBD99eV0sznMV_SR0aTeshVwuvzViiDMmgjuyuylrhR2XjHH_h_-WDapPQv_VUF8wguujZk1246HxMahw65jJavymouqfHPA0s6TgOdBpxGdxIGZr167cVeEtSGCkyuxIVhxpXY2WwsRglrdwqR5M",
-      flex: 1,
-    },
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDR0I1vAlEMwSgfx7BiHv6a_x6ZRha6b4cYIM_trjCFigXv0PJLtVI04AFWp7d-7Ueif0MBBktaWsO06QWHSL3SeDvRl06rfBDCr19w5QgcS2kWmGl25YMroSna8jtOCjQuLq9QoiZ8lfyNuqsfGe43iWt9hf3lyYSR8RFPHrAwB82k08se-X_1WK4M7tYNIbJE2SQyN7i7smEzLuvFp8c53F0qetIbNikhd6lJ2-xDXfKJsg7NicG_cLe6_P8B-36dzzSW3sD_XRfx",
-      flex: 1.6,
-    },
-  ],
-  [
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBGDURaWjMzUXSwQiw_Iw_dKlMb58D8PIZalDWJGkagkRl-tJar0gSww6uLzA3rx658NUvlXgcpz8vPBIED15Md5wd3KYJ6WTEzeOuqEuxNuBwQnUXblwuUiOrAqK5z3wOVgMbn0nihr3JFN3WHXU44Sw6cUnTBlq2mk7nuu6w0FH2gmY9Gtd4sWY-05bgLzTXsk4-16liQOwo3uUDhPNJKiItCcodp76AypV-UyBIQIv59Wjp5aFUe0amXzI5UtwtH9FOksBaa3Exk",
-      flex: 0.9,
-    },
-    {
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCKdj9853J9pcCCudEom82lu4lQnA2nIT7wMyxeDotFAX9jbz-Uhub-WT0_q3kV2znORVJAvyG4zlo_Xz5KNCRVBS1UXP7Vz00hOgYjmlJdAvJ8AnGHBXV755Ziy2owZfeaMDUJFhix7BKc4rQ1Wge_z9yMpufij9aUsgEfwwwKAyba7exa5gVM3vTWsJLqO6Fo4OsHdTumFCGBJ5BxkHsidQg3cjtMAyv12owBAiwh2PFjcfA7kK-q_ecE16N279OZ3DbdBMS3BTGo",
-      flex: 1.1,
-    },
-  ],
+const authGalleryImages = [
+  photo1,
+  photo2,
+  photo3,
+  photo4,
+  photo5,
+  photo6,
+  photo7,
 ] as const;
 
 function LoginForm() {
@@ -148,53 +122,11 @@ function LoginForm() {
     >
       <AppToast toasts={toasts} onClose={removeToast} />
       <div className="row g-0 min-vh-100">
-        <section
-          className="login-gallery-panel col-lg-7 d-none d-lg-flex position-relative align-items-center justify-content-center px-4 px-xl-5 py-3 overflow-hidden"
-          style={{
-            background: "linear-gradient(180deg, #f4f6fb 0%, #eef2f7 100%)",
-          }}
-        >
-          <div className="login-gallery-fade position-absolute top-0 end-0 h-100" />
-          <div
-            className="login-gallery-canvas position-relative w-100"
-            style={{
-              maxWidth: "720px",
-              transform: "rotate(-4deg) scale(0.98)",
-            }}
-          >
-            <div className="row g-3 h-100">
-              {galleryColumns.map((column, columnIndex) => (
-                <div
-                  key={columnIndex}
-                  className="col-4 d-flex flex-column gap-3 h-100"
-                  style={{
-                    marginTop:
-                      columnIndex === 0
-                        ? "1.75rem"
-                        : columnIndex === 2
-                          ? "3rem"
-                          : 0,
-                  }}
-                >
-                  {column.map((tile) => (
-                    <div
-                      key={tile.image}
-                      className="w-100 rounded-4 shadow-sm flex-grow-1"
-                      style={{
-                        flex: tile.flex,
-                        minHeight: 0,
-                        backgroundImage: `url(${tile.image})`,
-                        backgroundPosition: "center",
-                        backgroundSize: "cover",
-                        boxShadow: "0 18px 36px rgba(15, 23, 42, 0.12)",
-                      }}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <AuthPhotoGallery
+          images={authGalleryImages}
+          counts={[2, 3, 2]}
+          canvasTransform="rotate(-4deg) scale(0.98)"
+        />
 
         <section className="login-form-panel col-12 col-lg-5 d-flex align-items-center justify-content-center px-4 px-sm-5 py-4 py-lg-3 overflow-hidden">
           <div className="login-form-shell w-100" style={{ maxWidth: "420px" }}>
