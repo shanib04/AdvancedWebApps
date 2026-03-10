@@ -68,11 +68,11 @@ const ProfileHeader = ({
         const uploadResponse = await apiClient.post("/upload", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        photoUrl =
-          uploadResponse.data?.imageUrl ||
-          uploadResponse.data?.photoUrl ||
-          uploadResponse.data?.url ||
-          editingPhotoUrl;
+        const uploadedPhotoUrl = uploadResponse.data?.imageUrl;
+        if (!uploadedPhotoUrl || typeof uploadedPhotoUrl !== "string") {
+          throw new Error("Image upload did not return a valid URL.");
+        }
+        photoUrl = uploadedPhotoUrl;
       }
 
       const updateResponse = await apiClient.patch(`/user/${user._id}`, {

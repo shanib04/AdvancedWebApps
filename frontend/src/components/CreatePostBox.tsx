@@ -126,10 +126,7 @@ function CreatePostBox({
           },
         });
 
-        uploadedImageUrl =
-          uploadResponse.data?.imageUrl ??
-          uploadResponse.data?.photoUrl ??
-          uploadResponse.data?.url;
+        uploadedImageUrl = uploadResponse.data?.imageUrl;
       }
 
       const createResponse = await apiClient.post("/post", {

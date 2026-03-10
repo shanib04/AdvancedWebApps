@@ -121,10 +121,7 @@ function HomeDraftStudio({
         },
       });
 
-      const uploadedImageUrl =
-        uploadResponse.data?.imageUrl ??
-        uploadResponse.data?.photoUrl ??
-        uploadResponse.data?.url;
+      const uploadedImageUrl = uploadResponse.data?.imageUrl;
 
       if (!uploadedImageUrl) {
         onActionFailed(
