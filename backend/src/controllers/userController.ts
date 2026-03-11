@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import User from "../models/userModel";
+import Post from "../models/postModel";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { AuthRequest } from "../middleware/authMiddleware";
@@ -55,7 +56,16 @@ export const getUserById = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    // Count posts for this user
+    const postsCount = await Post.countDocuments({ user: id });
+
+    const userWithPostCount = {
+      ...user.toObject(),
+      postsCount,
+    };
+
+    res.json(userWithPostCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
@@ -67,7 +77,16 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    // Count posts for the current user
+    const postsCount = await Post.countDocuments({ user: req.user?._id });
+
+    const userWithPostCount = {
+      ...user.toObject(),
+      postsCount,
+    };
+
+    res.json(userWithPostCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
@@ -143,7 +162,16 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    // Count posts for this user
+    const postsCount = await Post.countDocuments({ user: id });
+
+    const userWithPostCount = {
+      ...user.toObject(),
+      postsCount,
+    };
+
+    res.json(userWithPostCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }

@@ -142,49 +142,126 @@ const ProfileHeader = ({
   };
 
   return (
-    <div className="text-center mb-4">
-      <img
-        src={normalizePhotoUrl(user.photoUrl)}
-        alt={user.username}
-        className="rounded-circle border shadow"
-        style={{ width: "120px", height: "120px", objectFit: "cover" }}
-        referrerPolicy="no-referrer"
-        crossOrigin="anonymous"
-        onError={(event) => {
-          const element = event.currentTarget;
-          if (element.src !== defaultUserPhotoUrl) {
-            element.src = defaultUserPhotoUrl;
-          }
-        }}
-      />
-      <h3 className="fw-bold mt-3">{user.username}</h3>
-      {isOwnProfile && (
-        <div className="mt-3 d-flex gap-2 justify-content-center">
-          <button
-            type="button"
-            className="btn btn-outline-primary rounded-pill"
-            onClick={() => setShowEditModal(true)}
-          >
-            Edit Profile
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline-secondary rounded-pill"
-            onClick={() => setShowDetailsModal(true)}
-          >
-            View Details
-          </button>
+    <>
+      <div className="mb-4 d-flex justify-content-center">
+        <div
+          className="card border shadow-sm rounded-4"
+          style={{
+            backgroundColor: "#ffffff",
+            borderColor: "#f0f0f0",
+            maxWidth: "1024px",
+            width: "100%",
+          }}
+        >
+          <div className="card-body p-5 p-lg-6" style={{ padding: "3rem" }}>
+            <div
+              className="d-flex align-items-center justify-content-between"
+              style={{ gap: "4rem" }}
+            >
+              <div
+                className="d-flex align-items-center"
+                style={{ gap: "4rem", flex: "1" }}
+              >
+                <div className="flex-shrink-0">
+                  <img
+                    src={normalizePhotoUrl(user.photoUrl)}
+                    alt={user.username}
+                    className="rounded-circle border shadow-lg"
+                    style={{
+                      width: "160px",
+                      height: "160px",
+                      objectFit: "cover",
+                      borderWidth: "4px",
+                      borderColor: "#ffffff",
+                      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                    }}
+                    referrerPolicy="no-referrer"
+                    crossOrigin="anonymous"
+                    onError={(event) => {
+                      const element = event.currentTarget;
+                      if (element.src !== defaultUserPhotoUrl) {
+                        element.src = defaultUserPhotoUrl;
+                      }
+                    }}
+                  />
+                </div>
+
+                <div
+                  className="d-flex flex-column"
+                  style={{ gap: "0.75rem", flex: "1" }}
+                >
+                  <h2
+                    className="fw-bold mb-0"
+                    style={{ fontSize: "2rem", letterSpacing: "-0.5px" }}
+                  >
+                    {user.displayName || user.username}
+                  </h2>
+
+                  <div
+                    className="d-flex"
+                    style={{
+                      color: "#6c757d",
+                      fontSize: "0.95rem",
+                      gap: "1.5rem",
+                    }}
+                  >
+                    <div>
+                      <span className="fw-bold text-dark">
+                        {user.postsCount || 0}
+                      </span>{" "}
+                      Posts
+                    </div>
+                  </div>
+
+                  <BioSection
+                    user={user}
+                    isOwnProfile={isOwnProfile}
+                    onUserUpdate={onUserUpdate}
+                    onActionSuccess={onActionSuccess}
+                  />
+                </div>
+              </div>
+
+              {isOwnProfile && (
+                <div
+                  className="d-flex flex-column flex-shrink-0"
+                  style={{ gap: "0.75rem" }}
+                >
+                  <button
+                    type="button"
+                    className="btn btn-primary rounded-pill d-flex align-items-center justify-content-center"
+                    onClick={() => setShowEditModal(true)}
+                    style={{ minWidth: "140px", gap: "0.5rem" }}
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "18px" }}
+                    >
+                      edit
+                    </span>
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
+                    onClick={() => setShowDetailsModal(true)}
+                    style={{ minWidth: "140px", gap: "0.5rem" }}
+                  >
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "18px" }}
+                    >
+                      info
+                    </span>
+                    Details
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
 
-      <BioSection
-        user={user}
-        isOwnProfile={isOwnProfile}
-        onUserUpdate={onUserUpdate}
-        onActionSuccess={onActionSuccess}
-      />
-
-      {/* Edit Profile Modal */}
       {showEditModal && (
         <div
           className="modal show d-block"
@@ -193,121 +270,168 @@ const ProfileHeader = ({
         >
           <div
             className="modal-dialog modal-dialog-centered"
-            style={{ maxWidth: "350px" }}
+            style={{ maxWidth: "500px" }}
           >
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Profile</h5>
+            <div
+              className="modal-content border-0 shadow-lg rounded-3"
+              style={{ backgroundColor: "#ffffff" }}
+            >
+              <div className="modal-header border-bottom border-light-subtle py-4 px-5">
+                <h5
+                  className="modal-title fw-bold"
+                  style={{ fontSize: "1.25rem" }}
+                >
+                  Edit Profile
+                </h5>
                 <button
                   type="button"
                   className="btn-close"
                   onClick={handleModalClose}
+                  disabled={saving}
                 ></button>
               </div>
-              <div className="modal-body">
-                <div className="mb-3 text-center">
-                  <label htmlFor="username" className="form-label">
+              <div className="modal-body px-5 py-4">
+                <div className="mb-4">
+                  <label htmlFor="username" className="form-label fw-semibold">
                     Username
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control rounded-2"
                     id="username"
                     value={editingUsername}
                     onChange={(e) =>
                       setEditingUsername(e.target.value.slice(0, 30))
                     }
-                    style={{ maxWidth: "300px", margin: "0 auto" }}
+                    disabled={saving}
                   />
-                  <small className="text-muted">
-                    {editingUsername.length}/30
+                  <small className="text-muted d-block mt-2">
+                    {editingUsername.length}/30 characters
                   </small>
                 </div>
-                <div className="mb-3 text-center">
-                  <label htmlFor="displayName" className="form-label">
-                    Display Name (optional)
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="displayName"
+                    className="form-label fw-semibold"
+                  >
+                    Display Name
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control rounded-2"
                     id="displayName"
                     placeholder="Leave blank to use username"
                     value={editingDisplayName}
                     onChange={(e) => setEditingDisplayName(e.target.value)}
-                    style={{ maxWidth: "300px", margin: "0 auto" }}
+                    disabled={saving}
                   />
+                  <small className="text-muted d-block mt-2">
+                    How your name appears on your profile
+                  </small>
                 </div>
-                <div className="mb-3 text-center">
-                  <label className="form-label">Profile Picture</label>
-                  <div className="d-flex align-items-start gap-4 justify-content-center">
-                    {/* preview area */}
+
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    Profile Picture
+                  </label>
+                  <div className="d-flex align-items-center gap-4">
                     <img
                       src={previewUrl}
                       alt="Preview"
-                      className="border"
+                      className="rounded-circle border shadow-sm flex-shrink-0"
                       style={{
-                        width: "125px",
-                        height: "125px",
+                        width: "100px",
+                        height: "100px",
                         objectFit: "cover",
-                        borderRadius: "50%",
+                        borderWidth: "3px",
+                        borderColor: "#e9ecef",
                       }}
                       referrerPolicy="no-referrer"
                       crossOrigin="anonymous"
                     />
 
-                    {/* controls */}
-                    <div>
-                      <div className="d-flex flex-column gap-3 mb-2 mt-3 align-items-center">
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          accept="image/*"
-                          className="d-none"
-                          onChange={handleFileSelect}
-                        />
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary"
-                          style={{ width: "150px" }}
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={!!selectedFile}
+                    <div className="d-flex flex-column gap-2 flex-grow-1">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        className="d-none"
+                        onChange={handleFileSelect}
+                        disabled={saving}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={saving || !!selectedFile}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "18px" }}
                         >
-                          Upload File
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-outline-danger"
-                          style={{ width: "150px" }}
-                          onClick={() => {
-                            setEditingPhotoUrl("");
-                            setSelectedFile(null);
-                            if (fileInputRef.current) {
-                              fileInputRef.current.value = "";
-                            }
-                          }}
+                          photo_camera
+                        </span>
+                        Upload Photo
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2"
+                        onClick={() => {
+                          setEditingPhotoUrl("");
+                          setSelectedFile(null);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        }}
+                        disabled={saving}
+                      >
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ fontSize: "18px" }}
                         >
-                          Clear
-                        </button>
-                      </div>
+                          close
+                        </span>
+                        Clear Photo
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer border-top border-light-subtle py-4 px-5 d-flex justify-content-end gap-3">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-outline-secondary rounded-pill px-4"
                   onClick={handleModalClose}
+                  disabled={saving}
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
                   onClick={handleSaveProfile}
                   disabled={saving || !editingUsername.trim()}
                 >
-                  {saving ? "Saving..." : "Save Changes"}
+                  {saving ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        style={{ width: "16px", height: "16px" }}
+                      />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ fontSize: "18px" }}
+                      >
+                        check
+                      </span>
+                      Save Changes
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -319,7 +443,7 @@ const ProfileHeader = ({
         isOpen={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
       />
-    </div>
+    </>
   );
 };
 

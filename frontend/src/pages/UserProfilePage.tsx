@@ -117,6 +117,7 @@ const UserProfilePage = () => {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               isOwnProfile={isOwnProfile}
+              userName={user.displayName || user.username}
             />
             <ProfilePostGrid posts={posts} loading={postsLoading} />
           </div>
