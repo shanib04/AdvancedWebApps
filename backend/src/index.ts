@@ -14,12 +14,26 @@ import { specs } from "./config/swagger";
 
 const app = express();
 
+// Validate CORS origin in production
+const NODE_ENV = process.env.NODE_ENV || "development";
+const CLIENT_URL = process.env.CLIENT_URL;
+
+if (NODE_ENV === "production" && !CLIENT_URL) {
+  console.error("CLIENT_URL environment variable must be set in production");
+  process.exit(1);
+}
+
+const corsOrigin =
+  NODE_ENV === "production"
+    ? CLIENT_URL
+    : process.env.CLIENT_URL || "http://localhost:5173";
+
 connectDB();
 
 // Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: corsOrigin,
     credentials: true,
   }),
 );
