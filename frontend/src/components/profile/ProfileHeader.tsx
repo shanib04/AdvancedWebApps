@@ -4,6 +4,8 @@ import apiClient from "../../services/api-client";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
+import UserDetailsModal from "./UserDetailsModal";
+import BioSection from "./BioSection";
 import {
   getStoredSessionUser,
   setStoredSessionUser,
@@ -24,12 +26,19 @@ const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const { showFailed } = useAppToast();
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [editingUsername, setEditingUsername] = useState(user.username);
+  const [editingDisplayName, setEditingDisplayName] = useState(
+    user.displayName || "",
+  );
+  const [editingBio, setEditingBio] = useState(user.bio || "");
   const [editingPhotoUrl, setEditingPhotoUrl] = useState(user.photoUrl || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     setEditingUsername(user.username);
+    setEditingDisplayName(user.displayName || "");
+    setEditingBio(user.bio || "");
     setEditingPhotoUrl(user.photoUrl || "");
     setSelectedFile(null);
     if (fileInputRef.current) {
@@ -77,6 +86,8 @@ const ProfileHeader = ({
 
       const updateResponse = await apiClient.patch(`/user/${user._id}`, {
         username: editingUsername.trim(),
+        displayName: editingDisplayName.trim() || undefined,
+        bio: editingBio.trim() || undefined,
         photoUrl: photoUrl,
       });
 
@@ -90,6 +101,8 @@ const ProfileHeader = ({
             ...currentSessionUser,
             username: updatedUser.username,
             photoUrl: updatedUser.photoUrl,
+            displayName: updatedUser.displayName,
+            bio: updatedUser.bio,
           });
         }
       }
@@ -114,6 +127,8 @@ const ProfileHeader = ({
 
   const resetForm = () => {
     setEditingUsername(user.username);
+    setEditingDisplayName(user.displayName || "");
+    setEditingBio(user.bio || "");
     setEditingPhotoUrl(user.photoUrl || "");
     setSelectedFile(null);
     if (fileInputRef.current) {
@@ -144,14 +159,30 @@ const ProfileHeader = ({
       />
       <h3 className="fw-bold mt-3">{user.username}</h3>
       {isOwnProfile && (
-        <button
-          type="button"
-          className="btn btn-outline-primary rounded-pill mt-3"
-          onClick={() => setShowEditModal(true)}
-        >
-          Edit Profile
-        </button>
+        <div className="mt-3 d-flex gap-2 justify-content-center">
+          <button
+            type="button"
+            className="btn btn-outline-primary rounded-pill"
+            onClick={() => setShowEditModal(true)}
+          >
+            Edit Profile
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-secondary rounded-pill"
+            onClick={() => setShowDetailsModal(true)}
+          >
+            View Details
+          </button>
+        </div>
       )}
+
+      <BioSection
+        user={user}
+        isOwnProfile={isOwnProfile}
+        onUserUpdate={onUserUpdate}
+        onActionSuccess={onActionSuccess}
+      />
 
       {/* Edit Profile Modal */}
       {showEditModal && (
@@ -183,7 +214,26 @@ const ProfileHeader = ({
                     className="form-control"
                     id="username"
                     value={editingUsername}
-                    onChange={(e) => setEditingUsername(e.target.value)}
+                    onChange={(e) =>
+                      setEditingUsername(e.target.value.slice(0, 30))
+                    }
+                    style={{ maxWidth: "300px", margin: "0 auto" }}
+                  />
+                  <small className="text-muted">
+                    {editingUsername.length}/30
+                  </small>
+                </div>
+                <div className="mb-3 text-center">
+                  <label htmlFor="displayName" className="form-label">
+                    Display Name (optional)
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="displayName"
+                    placeholder="Leave blank to use username"
+                    value={editingDisplayName}
+                    onChange={(e) => setEditingDisplayName(e.target.value)}
                     style={{ maxWidth: "300px", margin: "0 auto" }}
                   />
                 </div>
@@ -264,6 +314,11 @@ const ProfileHeader = ({
           </div>
         </div>
       )}
+      <UserDetailsModal
+        user={user}
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+      />
     </div>
   );
 };

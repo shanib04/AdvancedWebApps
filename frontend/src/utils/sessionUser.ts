@@ -6,6 +6,7 @@ export type SessionUser = {
   _id?: string;
   photoUrl?: string;
   displayName?: string;
+  bio?: string;
   username?: string;
   name?: string;
   email?: string;
