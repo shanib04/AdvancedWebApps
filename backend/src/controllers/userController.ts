@@ -88,18 +88,23 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const { username, email, password, photoUrl } = req.body as {
-      username?: string;
-      email?: string;
-      password?: string;
-      photoUrl?: string;
-    };
+    const { username, email, password, photoUrl, displayName, bio } =
+      req.body as {
+        username?: string;
+        email?: string;
+        password?: string;
+        photoUrl?: string;
+        displayName?: string;
+        bio?: string;
+      };
 
     const updates: {
       username?: string;
       email?: string;
       password?: string;
       photoUrl?: string;
+      displayName?: string;
+      bio?: string;
     } = {};
 
     if (typeof username === "string" && username.trim()) {
@@ -116,6 +121,14 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
     if (typeof photoUrl === "string") {
       updates.photoUrl = photoUrl.trim();
+    }
+
+    if (typeof displayName === "string") {
+      updates.displayName = displayName.trim() || "";
+    }
+
+    if (typeof bio === "string") {
+      updates.bio = bio.trim() || "";
     }
 
     if (Object.keys(updates).length === 0) {
