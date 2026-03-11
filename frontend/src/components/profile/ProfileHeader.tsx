@@ -154,6 +154,14 @@ const ProfileHeader = ({
         user={user}
         isOpen={showDetailsModal}
         onClose={() => setShowDetailsModal(false)}
+        onEditOpen={
+          isOwnProfile
+            ? () => {
+                setShowDetailsModal(false);
+                setShowEditModal(true);
+              }
+            : undefined
+        }
       />
     </>
   );

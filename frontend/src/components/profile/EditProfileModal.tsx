@@ -8,6 +8,7 @@ import {
   getStoredSessionUser,
   setStoredSessionUser,
 } from "../../utils/sessionUser";
+import { Trash2 } from "lucide-react";
 
 interface EditProfileModalProps {
   user: User;
@@ -34,6 +35,8 @@ const EditProfileModal = ({
   const [editingPhotoUrl, setEditingPhotoUrl] = useState(user.photoUrl || "");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -73,8 +76,24 @@ const EditProfileModal = ({
   };
 
   const handleClose = () => {
+    setShowDeleteConfirmModal(false);
     onClose();
     resetForm();
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await apiClient.delete(`/user/${user._id}`);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    } catch (err: unknown) {
+      showFailed(getUserFriendlyApiError(err, "Failed to delete account"));
+      setDeleting(false);
+      setShowDeleteConfirmModal(false);
+    }
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,44 +284,102 @@ const EditProfileModal = ({
               </div>
             </div>
           </div>
-          <div className="modal-footer border-top border-light-subtle py-4 px-5 d-flex justify-content-end gap-3">
+          <div className="modal-footer border-top border-light-subtle py-4 px-5 d-flex justify-content-between align-items-center gap-3">
             <button
               type="button"
-              className="btn btn-outline-secondary rounded-pill px-4"
-              onClick={handleClose}
-              disabled={saving}
+              className="btn btn-sm rounded-pill d-flex align-items-center justify-content-center"
+              style={{
+                width: "40px",
+                height: "40px",
+                border: "1px solid #e35d6a",
+                color: "#c4374a",
+                backgroundColor: "transparent",
+              }}
+              onClick={() => setShowDeleteConfirmModal(true)}
+              disabled={saving || deleting}
+              aria-label="Delete account"
+              title="Delete account"
             >
-              Cancel
+              <Trash2 size={17} />
             </button>
-            <button
-              type="button"
-              className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
-              onClick={handleSave}
-              disabled={saving || !editingUsername.trim()}
-            >
-              {saving ? (
-                <>
-                  <span
-                    className="spinner-border spinner-border-sm"
-                    style={{ width: "16px", height: "16px" }}
-                  />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "18px" }}
-                  >
-                    check
-                  </span>
-                  Save Changes
-                </>
-              )}
-            </button>
+            <div className="d-flex align-items-center gap-3">
+              <button
+                type="button"
+                className="btn btn-outline-secondary rounded-pill px-4"
+                onClick={handleClose}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary rounded-pill px-4 d-flex align-items-center gap-2"
+                onClick={handleSave}
+                disabled={saving || !editingUsername.trim()}
+              >
+                {saving ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm"
+                      style={{ width: "16px", height: "16px" }}
+                    />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "18px" }}
+                    >
+                      check
+                    </span>
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {showDeleteConfirmModal && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.35)", zIndex: 1060 }}
+          onClick={() => !deleting && setShowDeleteConfirmModal(false)}
+        >
+          <div
+            className="bg-white shadow-lg border border-light-subtle p-4"
+            style={{ width: "min(420px, 92vw)", borderRadius: "1.75rem" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h6 className="fw-bold mb-2">
+              Are you sure you want to delete your account?
+            </h6>
+            <p className="text-muted mb-4" style={{ fontSize: "0.92rem" }}>
+              This action is permanent and cannot be undone.
+            </p>
+            <div className="d-flex justify-content-end gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-secondary rounded-pill px-3"
+                onClick={() => setShowDeleteConfirmModal(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger rounded-pill px-3"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete Account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

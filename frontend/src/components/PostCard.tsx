@@ -147,7 +147,8 @@ function PostCard({
 
   const isOwner = senderId === currentUserId;
 
-  const senderName = userObj?.username || "Unknown User";
+  const senderName =
+    userObj?.displayName || userObj?.username || "Unknown User";
 
   const senderPhoto = userObj
     ? normalizePhotoUrl(userObj.photoUrl)

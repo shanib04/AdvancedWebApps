@@ -4,9 +4,15 @@ interface UserDetailsModalProps {
   user: User;
   isOpen: boolean;
   onClose: () => void;
+  onEditOpen?: () => void;
 }
 
-const UserDetailsModal = ({ user, isOpen, onClose }: UserDetailsModalProps) => {
+const UserDetailsModal = ({
+  user,
+  isOpen,
+  onClose,
+  onEditOpen,
+}: UserDetailsModalProps) => {
   if (!isOpen) return null;
 
   const formatDate = (dateString?: string) => {
@@ -146,10 +152,25 @@ const UserDetailsModal = ({ user, isOpen, onClose }: UserDetailsModalProps) => {
               </div>
             )}
           </div>
-          <div className="modal-footer border-top border-light-subtle py-4 px-5">
+          <div className="modal-footer border-top border-light-subtle py-4 px-5 d-flex gap-3">
+            {onEditOpen && (
+              <button
+                type="button"
+                className="btn btn-primary rounded-pill px-4 flex-grow-1 d-flex align-items-center justify-content-center gap-2"
+                onClick={onEditOpen}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "18px" }}
+                >
+                  edit
+                </span>
+                Edit Profile
+              </button>
+            )}
             <button
               type="button"
-              className="btn btn-primary rounded-pill px-4 w-100"
+              className="btn btn-outline-secondary rounded-pill px-4 flex-grow-1"
               onClick={onClose}
             >
               Close

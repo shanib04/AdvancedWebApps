@@ -18,7 +18,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     });
     const populatedPost = await Post.findById(post._id).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     res.status(201).json(populatedPost);
   } catch (error: unknown) {
@@ -38,7 +38,7 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
     const skip = (pageNumber - 1) * pageSize;
 
     const posts = await Post.find(user ? { user } : {})
-      .populate("user", "username photoUrl")
+      .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize);
@@ -66,7 +66,10 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
-    const post = await Post.findById(id).populate("user", "username photoUrl");
+    const post = await Post.findById(id).populate(
+      "user",
+      "username displayName photoUrl",
+    );
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -102,7 +105,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
     await post.save();
     const populatedPost = await Post.findById(post._id).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     res.json(populatedPost);
   } catch (error: unknown) {
@@ -160,7 +163,7 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
 
     const updatedPost = await Post.findByIdAndUpdate(id, updateOperator, {
       new: true,
-    }).populate("user", "username photoUrl");
+    }).populate("user", "username displayName photoUrl");
 
     if (!updatedPost) {
       return res.status(404).json({ error: "Post not found" });
@@ -205,7 +208,7 @@ export const toggleSave = async (req: AuthRequest, res: Response) => {
 
     const updatedPost = await Post.findByIdAndUpdate(id, updateOperator, {
       new: true,
-    }).populate("user", "username photoUrl");
+    }).populate("user", "username displayName photoUrl");
 
     if (!updatedPost) {
       return res.status(404).json({ error: "Post not found" });
@@ -230,7 +233,7 @@ export const getLikedPosts = async (req: AuthRequest, res: Response) => {
     }
 
     const posts = await Post.find({ likes: userId })
-      .populate("user", "username photoUrl")
+      .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 });
 
     res.json(posts);
@@ -248,7 +251,7 @@ export const getSavedPosts = async (req: AuthRequest, res: Response) => {
     }
 
     const posts = await Post.find({ savedBy: userId })
-      .populate("user", "username photoUrl")
+      .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 });
 
     res.json(posts);
