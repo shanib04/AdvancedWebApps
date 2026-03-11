@@ -85,27 +85,6 @@ const UserDetailsModal = ({ user, isOpen, onClose }: UserDetailsModalProps) => {
               </div>
             )}
 
-            {user.bio && (
-              <div className="mb-4">
-                <label className="form-label fw-semibold text-secondary small">
-                  <span
-                    className="material-symbols-outlined"
-                    style={{
-                      fontSize: "16px",
-                      verticalAlign: "middle",
-                      marginRight: "6px",
-                    }}
-                  >
-                    description
-                  </span>
-                  Bio
-                </label>
-                <p className="mb-0 text-body" style={{ lineHeight: "1.6" }}>
-                  {user.bio}
-                </p>
-              </div>
-            )}
-
             {user.email && (
               <div className="mb-4">
                 <label className="form-label fw-semibold text-secondary small">
