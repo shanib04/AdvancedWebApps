@@ -14,11 +14,16 @@ import {
   syncStoredUserFromWhoAmI,
 } from "../utils/sessionUser";
 
+const USERNAME_MAX_LENGTH = 15;
+
 const registerSchema = z.object({
   username: z
     .string()
     .min(3, "Username must be at least 3 characters.")
-    .max(30, "Username must be at most 30 characters."),
+    .max(
+      USERNAME_MAX_LENGTH,
+      `Username must be at most ${USERNAME_MAX_LENGTH} characters.`,
+    ),
   email: z.email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
   profilePicture: z.instanceof(FileList).optional(),
@@ -194,6 +199,7 @@ function RegisterForm() {
                       id="username"
                       type="text"
                       className="form-control"
+                      maxLength={USERNAME_MAX_LENGTH}
                       {...register("username")}
                     />
                     <p

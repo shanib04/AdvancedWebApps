@@ -10,6 +10,9 @@ import {
 } from "../../utils/sessionUser";
 import { Trash2 } from "lucide-react";
 
+const USERNAME_MAX_LENGTH = 15;
+const DISPLAY_NAME_MAX_LENGTH = 20;
+
 interface EditProfileModalProps {
   user: User;
   isOwnProfile: boolean;
@@ -126,7 +129,7 @@ const EditProfileModal = ({
 
       const updateResponse = await apiClient.patch(`/user/${user._id}`, {
         username: editingUsername.trim(),
-        displayName: editingDisplayName.trim() || undefined,
+        displayName: editingDisplayName.trim(),
         photoUrl: photoUrl,
       });
 
@@ -193,12 +196,15 @@ const EditProfileModal = ({
                 id="username"
                 value={editingUsername}
                 onChange={(e) =>
-                  setEditingUsername(e.target.value.slice(0, 30))
+                  setEditingUsername(
+                    e.target.value.slice(0, USERNAME_MAX_LENGTH),
+                  )
                 }
+                maxLength={USERNAME_MAX_LENGTH}
                 disabled={saving}
               />
               <small className="text-muted d-block mt-2">
-                {editingUsername.length}/30 characters
+                {editingUsername.length}/{USERNAME_MAX_LENGTH} characters
               </small>
             </div>
 
@@ -212,11 +218,19 @@ const EditProfileModal = ({
                 id="displayName"
                 placeholder="Leave blank to use username"
                 value={editingDisplayName}
-                onChange={(e) => setEditingDisplayName(e.target.value)}
+                onChange={(e) =>
+                  setEditingDisplayName(
+                    e.target.value.slice(0, DISPLAY_NAME_MAX_LENGTH),
+                  )
+                }
+                maxLength={DISPLAY_NAME_MAX_LENGTH}
                 disabled={saving}
               />
               <small className="text-muted d-block mt-2">
                 How your name appears on your profile
+              </small>
+              <small className="text-muted d-block mt-1">
+                {editingDisplayName.length}/{DISPLAY_NAME_MAX_LENGTH} characters
               </small>
             </div>
 

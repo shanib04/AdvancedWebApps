@@ -29,8 +29,6 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
   const sessionUser = useSessionUserListener();
 
   useEffect(() => {
-    const abortController = new AbortController();
-
     const syncUser = async () => {
       try {
         await syncStoredUserFromWhoAmI(initialUser);
@@ -58,7 +56,6 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      abortController.abort();
       window.removeEventListener("storage", handleStorageChange);
     };
   }, [initialUser]);

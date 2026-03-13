@@ -163,7 +163,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               >
                 reply
               </span>
-              Replying to <strong className="ms-1">@{parentAuthorName}</strong>
+              Replying to <strong className="ms-1">{parentAuthorName}</strong>
             </div>
           )}
 
@@ -313,7 +313,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               onEditComment={onEditComment}
               onDeleteComment={onDeleteComment}
               depth={depth + 1}
-              parentAuthorName={username}
+              parentAuthorName={authorName}
             />
           ))}
         </div>
