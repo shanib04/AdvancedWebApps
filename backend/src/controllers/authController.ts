@@ -4,15 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import { getErrorMessage } from "../utils/getErrorMessage";
-
-type JwtDecodedPayload = {
-  userId: string;
-};
-
-export interface Tokens {
-  accessToken: string;
-  refreshToken: string;
-}
+import { HandlerResponse, JwtDecodedPayload, Tokens } from "../types/models";
 
 const getDefaultPhotoUrl = (req: Request) =>
   `${req.protocol}://${req.get("host")}/public/images/default-user.svg`;
@@ -97,7 +89,10 @@ const generateToken = (userId: string): Tokens => {
   return { accessToken, refreshToken };
 };
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { username, email, password, photoUrl } = req.body;
     if (!username || !email || !password) {
@@ -150,7 +145,7 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { username, email, password } = req.body;
     if ((!username && !email) || !password) {
@@ -197,7 +192,10 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const googleSignin = async (req: Request, res: Response) => {
+export const googleSignin = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { credential } = req.body;
 
@@ -263,7 +261,7 @@ export const googleSignin = async (req: Request, res: Response) => {
   }
 };
 
-export const refresh = async (req: Request, res: Response) => {
+export const refresh = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -301,7 +299,7 @@ export const refresh = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {

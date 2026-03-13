@@ -4,8 +4,12 @@ import Comment from "../models/commentModel";
 import { validateObjectId } from "./validateId";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { HandlerResponse } from "../types/models";
 
-export const createPost = async (req: AuthRequest, res: Response) => {
+export const createPost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { content, imageUrl } = req.body;
     if (!content) {
@@ -26,7 +30,10 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllPosts = async (req: AuthRequest, res: Response) => {
+export const getAllPosts = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { user, page } = req.query as { user?: string; page?: string };
     if (user && !validateObjectId(user)) {
@@ -57,7 +64,10 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getPostById = async (req: AuthRequest, res: Response) => {
+export const getPostById = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!id) {
@@ -79,7 +89,10 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updatePost = async (req: AuthRequest, res: Response) => {
+export const updatePost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const { content, imageUrl } = req.body;
@@ -113,7 +126,10 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deletePost = async (req: AuthRequest, res: Response) => {
+export const deletePost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!validateObjectId(id)) {
@@ -134,7 +150,10 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const toggleLike = async (req: AuthRequest, res: Response) => {
+export const toggleLike = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -179,7 +198,10 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const toggleSave = async (req: AuthRequest, res: Response) => {
+export const toggleSave = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -224,7 +246,10 @@ export const toggleSave = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getLikedPosts = async (req: AuthRequest, res: Response) => {
+export const getLikedPosts = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { userId } = req.params;
 
@@ -242,7 +267,10 @@ export const getLikedPosts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getSavedPosts = async (req: AuthRequest, res: Response) => {
+export const getSavedPosts = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { userId } = req.params;
 

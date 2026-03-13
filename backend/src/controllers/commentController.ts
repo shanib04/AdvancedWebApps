@@ -4,8 +4,12 @@ import Post from "../models/postModel";
 import { validateObjectId } from "./validateId";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { HandlerResponse } from "../types/models";
 
-export const createComment = async (req: AuthRequest, res: Response) => {
+export const createComment = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const postId = req.body?.post ?? req.body?.postId;
     const { content, parentId } = req.body;
@@ -45,7 +49,10 @@ export const createComment = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllComments = async (req: AuthRequest, res: Response) => {
+export const getAllComments = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { user, post } = req.query as { user?: string; post?: string };
     if (user && !validateObjectId(user)) {
@@ -69,7 +76,10 @@ export const getAllComments = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getCommentById = async (req: AuthRequest, res: Response) => {
+export const getCommentById = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!id) {
@@ -91,7 +101,10 @@ export const getCommentById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getCommentsByPost = async (req: AuthRequest, res: Response) => {
+export const getCommentsByPost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const postId = (req.query.postId ?? req.query.post) as string | undefined;
     if (!postId) {
@@ -116,7 +129,10 @@ export const getCommentsByPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updateComment = async (req: AuthRequest, res: Response) => {
+export const updateComment = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const { content } = req.body;
@@ -144,7 +160,10 @@ export const updateComment = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deleteComment = async (req: AuthRequest, res: Response) => {
+export const deleteComment = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!validateObjectId(id)) {
