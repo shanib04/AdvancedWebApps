@@ -64,6 +64,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     setIsEditing(false);
   };
   const username = userObj?.username || "Anonymous";
+  const authorName = userObj?.displayName || username;
   const photoUrl = userObj?.photoUrl
     ? normalizePhotoUrl(userObj.photoUrl)
     : defaultUserPhotoUrl;
@@ -128,7 +129,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
         >
           <img
             src={photoUrl}
-            alt={username}
+            alt={authorName}
             className="rounded-circle mt-1 border shadow-sm"
             style={{
               width: "36px",
@@ -153,7 +154,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 to={`/profile/${userObj?._id || "new"}`}
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                {username}
+                {authorName}
               </Link>
             </span>
             {isAuthor && (
@@ -286,7 +287,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                   ref={replyInputRef}
                   type="text"
                   className="form-control form-control-sm rounded-pill bg-white shadow-sm border border-secondary-subtle px-3 pt-1 pb-1"
-                  placeholder={`Reply to ${username}...`}
+                  placeholder={`Reply to ${authorName}...`}
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   disabled={submitting}

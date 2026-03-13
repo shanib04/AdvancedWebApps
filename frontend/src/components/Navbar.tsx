@@ -70,6 +70,8 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
     sessionUser?.name ||
     sessionUser?.email ||
     "User";
+  const profileUserId = sessionUser?._id || initialUser?._id;
+  const profileHref = profileUserId ? `/profile/${profileUserId}` : "/home";
 
   return (
     <nav className="navbar navbar-expand-lg glass-navbar sticky-top mb-4">
@@ -110,7 +112,11 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
         )}
 
         <div className="d-flex align-items-center gap-2">
-          <div className="d-flex align-items-center gap-2">
+          <a
+            className="d-flex align-items-center gap-2 text-decoration-none"
+            href={profileHref}
+            aria-label="Go to profile"
+          >
             <img
               src={userPhotoUrl}
               alt="Profile"
@@ -133,7 +139,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
             <span className="fw-bold text-dark d-none d-md-inline">
               {displayName}
             </span>
-          </div>
+          </a>
           <button
             type="button"
             className="btn btn-sm rounded-pill px-3 d-flex align-items-center gap-1 logout-btn"

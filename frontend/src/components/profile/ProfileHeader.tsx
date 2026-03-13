@@ -33,14 +33,14 @@ const ProfileHeader = ({
             width: "100%",
           }}
         >
-          <div className="card-body p-5 p-lg-6" style={{ padding: "3rem" }}>
+          <div className="card-body p-4 p-lg-5">
             <div
-              className="d-flex align-items-center justify-content-between"
-              style={{ gap: "4rem" }}
+              className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between"
+              style={{ gap: "1.5rem" }}
             >
               <div
-                className="d-flex align-items-center"
-                style={{ gap: "4rem", flex: "1" }}
+                className="d-flex flex-column flex-md-row align-items-start align-items-md-center flex-grow-1"
+                style={{ gap: "1.5rem" }}
               >
                 <div className="flex-shrink-0">
                   <img
@@ -67,22 +67,29 @@ const ProfileHeader = ({
                 </div>
 
                 <div
-                  className="d-flex flex-column"
-                  style={{ gap: "0.75rem", flex: "1" }}
+                  className="d-flex flex-column ms-md-3 ms-lg-4"
+                  style={{ gap: "0.75rem", flex: "1", minWidth: 0 }}
                 >
                   <h2
-                    className="fw-bold mb-0"
+                    className="fw-bold mb-0 text-break"
                     style={{ fontSize: "2rem", letterSpacing: "-0.5px" }}
                   >
                     {user.displayName || user.username}
                   </h2>
 
+                  <p
+                    className="mb-0 text-muted text-break"
+                    style={{ fontSize: "0.95rem" }}
+                  >
+                    @{user.username}
+                  </p>
+
                   <div
-                    className="d-flex"
+                    className="d-flex flex-wrap"
                     style={{
                       color: "#6c757d",
                       fontSize: "0.95rem",
-                      gap: "1.5rem",
+                      gap: "1rem",
                     }}
                   >
                     <div>
@@ -104,14 +111,14 @@ const ProfileHeader = ({
 
               {isOwnProfile && (
                 <div
-                  className="d-flex flex-column flex-shrink-0"
+                  className="d-flex flex-row flex-sm-column flex-wrap flex-shrink-0"
                   style={{ gap: "0.75rem" }}
                 >
                   <button
                     type="button"
                     className="btn btn-primary rounded-pill d-flex align-items-center justify-content-center"
                     onClick={() => setShowEditModal(true)}
-                    style={{ minWidth: "140px", gap: "0.5rem" }}
+                    style={{ minWidth: "120px", gap: "0.5rem" }}
                   >
                     <span
                       className="material-symbols-outlined"
@@ -125,7 +132,7 @@ const ProfileHeader = ({
                     type="button"
                     className="btn btn-outline-secondary rounded-pill d-flex align-items-center justify-content-center"
                     onClick={() => setShowDetailsModal(true)}
-                    style={{ minWidth: "140px", gap: "0.5rem" }}
+                    style={{ minWidth: "120px", gap: "0.5rem" }}
                   >
                     <span
                       className="material-symbols-outlined"

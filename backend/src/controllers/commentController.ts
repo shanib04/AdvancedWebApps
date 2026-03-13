@@ -36,7 +36,7 @@ export const createComment = async (req: AuthRequest, res: Response) => {
 
     const populatedComment = await comment.populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
 
     res.status(201).json(populatedComment);
@@ -61,7 +61,7 @@ export const getAllComments = async (req: AuthRequest, res: Response) => {
 
     const comments = await Comment.find(filter).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     res.json(comments);
   } catch (error: unknown) {
@@ -80,7 +80,7 @@ export const getCommentById = async (req: AuthRequest, res: Response) => {
     }
     const comment = await Comment.findById(id).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     if (!comment) {
       return res.status(404).json({ error: "Comment not found" });
@@ -108,7 +108,7 @@ export const getCommentsByPost = async (req: AuthRequest, res: Response) => {
     }
     const comments = await Comment.find({ post: postId }).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     res.json(comments);
   } catch (error: unknown) {

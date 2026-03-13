@@ -30,6 +30,10 @@ const UserProfilePage = () => {
   const isOwnProfile = currentUserId === id;
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [id]);
+
+  useEffect(() => {
     if (!id) return;
 
     const fetchUser = async () => {
