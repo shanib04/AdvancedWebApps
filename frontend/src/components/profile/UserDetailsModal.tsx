@@ -1,4 +1,5 @@
 import type { User } from "../../types/models";
+import { formatDateTimeLocal } from "../../utils/dateUtils";
 
 interface UserDetailsModalProps {
   user: User;
@@ -14,21 +15,6 @@ const UserDetailsModal = ({
   onEditOpen,
 }: UserDetailsModalProps) => {
   if (!isOpen) return null;
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "Not available";
-    try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return dateString;
-    }
-  };
 
   return (
     <div
@@ -126,7 +112,9 @@ const UserDetailsModal = ({
                   Account Created
                 </label>
                 <p className="mb-0 text-secondary small">
-                  {formatDate(user.createdAt)}
+                  {formatDateTimeLocal(user.createdAt, {
+                    fallback: "Not available",
+                  })}
                 </p>
               </div>
             )}
@@ -147,7 +135,9 @@ const UserDetailsModal = ({
                   Last Updated
                 </label>
                 <p className="mb-0 text-secondary small">
-                  {formatDate(user.updatedAt)}
+                  {formatDateTimeLocal(user.updatedAt, {
+                    fallback: "Not available",
+                  })}
                 </p>
               </div>
             )}

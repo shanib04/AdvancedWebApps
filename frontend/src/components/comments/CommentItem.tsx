@@ -6,6 +6,7 @@ import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
 import { useSessionUserListener } from "../../hooks/useSessionUserListener";
+import { formatDateTimeLocal } from "../../utils/dateUtils";
 
 interface CommentItemProps {
   comment: CommentTreeItem;
@@ -92,22 +93,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
-    try {
-      return new Intl.DateTimeFormat("en-IL", {
-        timeZone: "Asia/Jerusalem",
-        hour: "2-digit",
-        minute: "2-digit",
-        day: "2-digit",
-        month: "short",
-        hour12: false,
-      }).format(new Date(dateString));
-    } catch {
-      return new Date(dateString).toLocaleDateString();
-    }
-  };
-
   // Calculate total nested replies to know when to show the "View X replies" button
   const getTotalSubRepliesCount = (node: CommentTreeItem): number => {
     if (!node.replies || node.replies.length === 0) return 0;
@@ -163,7 +148,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               </span>
             )}
             <span className="text-muted ms-auto" style={{ fontSize: "0.8rem" }}>
-              {formatDate(comment.createdAt)}
+              {formatDateTimeLocal(comment.createdAt)}
             </span>
           </div>
 
