@@ -4,15 +4,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import { getErrorMessage } from "../utils/getErrorMessage";
-
-type JwtDecodedPayload = {
-  userId: string;
-};
-
-export interface Tokens {
-  accessToken: string;
-  refreshToken: string;
-}
+import { HandlerResponse, JwtDecodedPayload, Tokens } from "../types/models";
 
 const getDefaultPhotoUrl = (req: Request) =>
   `${req.protocol}://${req.get("host")}/public/images/default-user.svg`;
@@ -97,7 +89,10 @@ const generateToken = (userId: string): Tokens => {
   return { accessToken, refreshToken };
 };
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { username, email, password, photoUrl } = req.body;
     if (!username || !email || !password) {
@@ -134,7 +129,7 @@ export const register = async (req: Request, res: Response) => {
 
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
-    await user.save();
+    await user.save({ timestamps: false });
 
     res.status(201).json({
       ...tokens,
@@ -150,7 +145,7 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { username, email, password } = req.body;
     if ((!username && !email) || !password) {
@@ -181,7 +176,7 @@ export const login = async (req: Request, res: Response) => {
 
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
-    await user.save();
+    await user.save({ timestamps: false });
 
     res.json({
       ...tokens,
@@ -197,7 +192,10 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const googleSignin = async (req: Request, res: Response) => {
+export const googleSignin = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { credential } = req.body;
 
@@ -225,6 +223,7 @@ export const googleSignin = async (req: Request, res: Response) => {
     const preferredUsername = name || email.split("@")[0];
 
     let user = await User.findOne({ email });
+    let profileFieldsUpdated = false;
     if (!user) {
       const generatedPassword = await bcrypt.hash(`google-${Date.now()}`, 10);
       const uniqueUsername = await getUniqueUsername(preferredUsername);
@@ -239,15 +238,21 @@ export const googleSignin = async (req: Request, res: Response) => {
       // Only update photoUrl on first Google login - don't override edited
       if (!user.photoUrl) {
         user.photoUrl = resolveUserPhotoUrl(req, picture);
+        profileFieldsUpdated = true;
       }
       if (!user.username) {
         user.username = await getUniqueUsername(preferredUsername);
+        profileFieldsUpdated = true;
       }
     }
 
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
-    await user.save();
+    if (profileFieldsUpdated) {
+      await user.save();
+    } else {
+      await user.save({ timestamps: false });
+    }
 
     return res.status(200).json({
       ...tokens,
@@ -263,7 +268,7 @@ export const googleSignin = async (req: Request, res: Response) => {
   }
 };
 
-export const refresh = async (req: Request, res: Response) => {
+export const refresh = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -286,14 +291,14 @@ export const refresh = async (req: Request, res: Response) => {
 
     if (!user.refreshToken.includes(refreshToken)) {
       user.refreshToken = [];
-      await user.save();
+      await user.save({ timestamps: false });
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
     user.refreshToken = user.refreshToken.filter((rt) => rt !== refreshToken);
-    await user.save();
+    await user.save({ timestamps: false });
 
     res.json(tokens);
   } catch (error: unknown) {
@@ -301,7 +306,7 @@ export const refresh = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = async (req: Request, res: Response) => {
+export const logout = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { refreshToken } = req.body;
     if (!refreshToken) {
@@ -323,7 +328,7 @@ export const logout = async (req: Request, res: Response) => {
     }
 
     user.refreshToken = user.refreshToken.filter((rt) => rt !== refreshToken);
-    await user.save();
+    await user.save({ timestamps: false });
 
     res.json({ message: "Logged out successfully" });
   } catch (error: unknown) {

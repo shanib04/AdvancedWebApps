@@ -103,6 +103,40 @@ function HomeFeed() {
   const currentUserId = currentUser?._id ?? "";
   const currentUserPhoto = normalizePhotoUrl(currentUser?.photoUrl);
 
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const patchAuthoredPosts = (items: Post[]) =>
+      items.map((post) => {
+        if (typeof post.user !== "object" || post.user === null) {
+          return post;
+        }
+
+        if (post.user._id !== currentUserId) {
+          return post;
+        }
+
+        return {
+          ...post,
+          user: {
+            ...post.user,
+            username: currentUser?.username || post.user.username,
+            displayName: currentUser?.displayName,
+            photoUrl: currentUser?.photoUrl || post.user.photoUrl,
+          },
+        };
+      });
+
+    setPosts((prevPosts) => patchAuthoredPosts(prevPosts));
+    setSavedPosts((prevPosts) => patchAuthoredPosts(prevPosts));
+  }, [
+    currentUserId,
+    currentUser?.username,
+    currentUser?.displayName,
+    currentUser?.photoUrl,
+    setPosts,
+  ]);
+
   // Fetch saved posts when in saved mode
   useEffect(() => {
     if (!isSavedMode || !currentUserId) return;

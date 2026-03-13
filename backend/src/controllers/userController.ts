@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
 import User from "../models/userModel";
+import Post from "../models/postModel";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { HandlerResponse, UserUpdateFields } from "../types/models";
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { username, email, password } = req.body;
     if (!username || !email || !password) {
@@ -33,7 +38,10 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const users = await User.find().select("-password");
     res.json(users);
@@ -42,45 +50,72 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!id) {
       return res.status(422).json({ error: "User ID is required" });
     }
-    if (!mongoose.Types.ObjectId.isValid(id as string)) {
+    if (!mongoose.Types.ObjectId.isValid(String(id))) {
       return res.status(422).json({ error: "Invalid User ID format" });
     }
     const user = await User.findById(id).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    // Count posts for this user
+    const postsCount = await Post.countDocuments({ user: id });
+
+    const userWithPostCount = {
+      ...user.toObject(),
+      postsCount,
+    };
+
+    res.json(userWithPostCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
-export const getCurrentUser = async (req: AuthRequest, res: Response) => {
+export const getCurrentUser = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const user = await User.findById(req.user?._id).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    // Count posts for the current user
+    const postsCount = await Post.countDocuments({ user: req.user?._id });
+
+    const userWithPostCount = {
+      ...user.toObject(),
+      postsCount,
+    };
+
+    res.json(userWithPostCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
-export const updateUser = async (req: AuthRequest, res: Response) => {
+export const updateUser = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!id) {
       return res.status(422).json({ error: "User ID is required" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(id as string)) {
+    if (!mongoose.Types.ObjectId.isValid(String(id))) {
       return res.status(422).json({ error: "Invalid User ID format" });
     }
 
@@ -88,19 +123,10 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const { username, email, password, photoUrl } = req.body as {
-      username?: string;
-      email?: string;
-      password?: string;
-      photoUrl?: string;
-    };
+    const { username, email, password, photoUrl, displayName, bio } =
+      req.body as UserUpdateFields;
 
-    const updates: {
-      username?: string;
-      email?: string;
-      password?: string;
-      photoUrl?: string;
-    } = {};
+    const updates: UserUpdateFields = {};
 
     if (typeof username === "string" && username.trim()) {
       updates.username = username.trim();
@@ -118,6 +144,14 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       updates.photoUrl = photoUrl.trim();
     }
 
+    if (typeof displayName === "string") {
+      updates.displayName = displayName.trim() || "";
+    }
+
+    if (typeof bio === "string") {
+      updates.bio = bio.trim() || "";
+    }
+
     if (Object.keys(updates).length === 0) {
       return res.status(422).json({ error: "No valid fields to update" });
     }
@@ -130,19 +164,31 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+
+    // Count posts for this user
+    const postsCount = await Post.countDocuments({ user: id });
+
+    const userWithPostCount = {
+      ...user.toObject(),
+      postsCount,
+    };
+
+    res.json(userWithPostCount);
   } catch (error: unknown) {
     res.status(500).json({ error: getErrorMessage(error) });
   }
 };
 
-export const deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!id) {
       return res.status(422).json({ error: "User ID is required" });
     }
-    if (!mongoose.Types.ObjectId.isValid(id as string)) {
+    if (!mongoose.Types.ObjectId.isValid(String(id))) {
       return res.status(422).json({ error: "Invalid User ID format" });
     }
     const user = await User.findByIdAndDelete(id);

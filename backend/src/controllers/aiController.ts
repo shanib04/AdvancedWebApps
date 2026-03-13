@@ -5,17 +5,11 @@ import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
 import { getErrorMessage } from "../utils/getErrorMessage";
-
-type InitialDraftResponse = {
-  text: string;
-  keyword: string;
-  images: string[];
-};
-
-type ParsedInitialDraft = {
-  text: string;
-  keywords: string[];
-};
+import {
+  HandlerResponse,
+  InitialDraftResponse,
+  ParsedInitialDraft,
+} from "../types/models";
 
 const getGeminiApiKey = () => normalizeEnvValue(getEnvValue("GEMINI_API_KEY"));
 
@@ -193,7 +187,10 @@ const fetchUnsplashImagesSafe = async (
   }
 };
 
-export const generateInitialDraft = async (req: Request, res: Response) => {
+export const generateInitialDraft = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { prompt, includeImages } = req.body as {
       prompt?: string;
@@ -255,7 +252,10 @@ export const generateInitialDraft = async (req: Request, res: Response) => {
   }
 };
 
-export const refineText = async (req: Request, res: Response) => {
+export const refineText = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { currentText, instruction } = req.body as {
       currentText?: string;
@@ -286,7 +286,10 @@ export const refineText = async (req: Request, res: Response) => {
   }
 };
 
-export const getMoreImages = async (req: Request, res: Response) => {
+export const getMoreImages = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   try {
     const { keyword } = req.body as { keyword?: string };
 

@@ -4,8 +4,12 @@ import Comment from "../models/commentModel";
 import { validateObjectId } from "./validateId";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import { HandlerResponse } from "../types/models";
 
-export const createPost = async (req: AuthRequest, res: Response) => {
+export const createPost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { content, imageUrl } = req.body;
     if (!content) {
@@ -18,7 +22,7 @@ export const createPost = async (req: AuthRequest, res: Response) => {
     });
     const populatedPost = await Post.findById(post._id).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     res.status(201).json(populatedPost);
   } catch (error: unknown) {
@@ -26,7 +30,10 @@ export const createPost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getAllPosts = async (req: AuthRequest, res: Response) => {
+export const getAllPosts = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { user, page } = req.query as { user?: string; page?: string };
     if (user && !validateObjectId(user)) {
@@ -38,7 +45,7 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
     const skip = (pageNumber - 1) * pageSize;
 
     const posts = await Post.find(user ? { user } : {})
-      .populate("user", "username photoUrl")
+      .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize);
@@ -57,7 +64,10 @@ export const getAllPosts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getPostById = async (req: AuthRequest, res: Response) => {
+export const getPostById = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!id) {
@@ -66,7 +76,10 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
-    const post = await Post.findById(id).populate("user", "username photoUrl");
+    const post = await Post.findById(id).populate(
+      "user",
+      "username displayName photoUrl",
+    );
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -76,7 +89,10 @@ export const getPostById = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const updatePost = async (req: AuthRequest, res: Response) => {
+export const updatePost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const { content, imageUrl } = req.body;
@@ -102,7 +118,7 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
     await post.save();
     const populatedPost = await Post.findById(post._id).populate(
       "user",
-      "username photoUrl",
+      "username displayName photoUrl",
     );
     res.json(populatedPost);
   } catch (error: unknown) {
@@ -110,7 +126,10 @@ export const updatePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const deletePost = async (req: AuthRequest, res: Response) => {
+export const deletePost = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     if (!validateObjectId(id)) {
@@ -131,7 +150,10 @@ export const deletePost = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const toggleLike = async (req: AuthRequest, res: Response) => {
+export const toggleLike = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -160,7 +182,7 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
 
     const updatedPost = await Post.findByIdAndUpdate(id, updateOperator, {
       new: true,
-    }).populate("user", "username photoUrl");
+    }).populate("user", "username displayName photoUrl");
 
     if (!updatedPost) {
       return res.status(404).json({ error: "Post not found" });
@@ -176,7 +198,10 @@ export const toggleLike = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const toggleSave = async (req: AuthRequest, res: Response) => {
+export const toggleSave = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
@@ -205,7 +230,7 @@ export const toggleSave = async (req: AuthRequest, res: Response) => {
 
     const updatedPost = await Post.findByIdAndUpdate(id, updateOperator, {
       new: true,
-    }).populate("user", "username photoUrl");
+    }).populate("user", "username displayName photoUrl");
 
     if (!updatedPost) {
       return res.status(404).json({ error: "Post not found" });
@@ -221,7 +246,10 @@ export const toggleSave = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getLikedPosts = async (req: AuthRequest, res: Response) => {
+export const getLikedPosts = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { userId } = req.params;
 
@@ -230,7 +258,7 @@ export const getLikedPosts = async (req: AuthRequest, res: Response) => {
     }
 
     const posts = await Post.find({ likes: userId })
-      .populate("user", "username photoUrl")
+      .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 });
 
     res.json(posts);
@@ -239,7 +267,10 @@ export const getLikedPosts = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getSavedPosts = async (req: AuthRequest, res: Response) => {
+export const getSavedPosts = async (
+  req: AuthRequest,
+  res: Response,
+): HandlerResponse => {
   try {
     const { userId } = req.params;
 
@@ -248,7 +279,7 @@ export const getSavedPosts = async (req: AuthRequest, res: Response) => {
     }
 
     const posts = await Post.find({ savedBy: userId })
-      .populate("user", "username photoUrl")
+      .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 });
 
     res.json(posts);
