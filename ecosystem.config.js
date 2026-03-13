@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "REST SERVER",
+      name: "REST-SERVER",
       script: "./dist/src/server.js",
       cwd: "./backend",
       env: {
@@ -12,7 +12,7 @@ module.exports = {
       },
     },
     {
-      name: "FRONTEND SERVER",
+      name: "FRONTEND-SERVER",
       script: "npm",
       args: "run preview",
       cwd: "./frontend",
