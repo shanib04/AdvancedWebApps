@@ -179,13 +179,14 @@ export const login = async (req: Request, res: Response): HandlerResponse => {
     });
 
     if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res
+        .status(404)
+        .json({ error: "User with this email/username not found" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid username or password" });
     }
-
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
     await user.save({ timestamps: false });

@@ -26,7 +26,12 @@ import photo7 from "../assets/authPhotos/photo7.png";
 const loginSchema = z.object({
   identifier: z
     .string()
-    .min(1, "Please enter a valid username or email address."),
+    .min(1, "Please enter a valid username or email address.")
+    .refine((val) => {
+      const isEmail = z.email().safeParse(val).success;
+      const isUsername = /^[a-zA-Z0-9\-_]+$/.test(val);
+      return isEmail || isUsername;
+    }, "Invalid email or username format."),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
@@ -149,7 +154,7 @@ function LoginForm() {
                   src={webLogo}
                   alt="VibeIS icon"
                   style={{
-                    width: "12rem",
+                    width: "16rem",
                     objectFit: "contain",
                   }}
                 />
@@ -162,8 +167,6 @@ function LoginForm() {
                 style={{
                   color: "#111827",
                   fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
-                  lineHeight: 1.02,
-                  letterSpacing: "-0.04em",
                 }}
               >
                 Join the community

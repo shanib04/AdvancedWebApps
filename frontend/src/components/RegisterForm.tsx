@@ -227,7 +227,7 @@ function RegisterForm() {
                   src={webLogo}
                   alt="VibeIS icon"
                   style={{
-                    width: "12rem",
+                    width: "14rem",
                     objectFit: "contain",
                   }}
                 />
@@ -240,8 +240,6 @@ function RegisterForm() {
                 style={{
                   color: "#111827",
                   fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
-                  lineHeight: 1.02,
-                  letterSpacing: "-0.04em",
                 }}
               >
                 Create your account
@@ -357,7 +355,7 @@ function RegisterForm() {
                   id="username"
                   type="text"
                   maxLength={USERNAME_MAX_LENGTH}
-                  placeholder="e.g. janedoe"
+                  placeholder="Username"
                   aria-invalid={Boolean(errors.username)}
                   className={`register-input form-control rounded-4 shadow-none ${errors.username ? "border-danger" : "border-secondary-subtle"}`}
                   style={{ fontSize: "0.95rem" }}
@@ -392,7 +390,7 @@ function RegisterForm() {
                   id="displayName"
                   type="text"
                   maxLength={DISPLAY_NAME_MAX_LENGTH}
-                  placeholder="e.g. Jane Doe"
+                  placeholder="Display name"
                   aria-invalid={Boolean(errors.displayName)}
                   className={`register-input form-control rounded-4 shadow-none ${errors.displayName ? "border-danger" : "border-secondary-subtle"}`}
                   style={{ fontSize: "0.95rem" }}
@@ -417,7 +415,7 @@ function RegisterForm() {
                 <input
                   id="email"
                   type="email"
-                  placeholder="jane@example.com"
+                  placeholder="Email address"
                   aria-invalid={Boolean(errors.email)}
                   className={`register-input form-control rounded-4 shadow-none ${errors.email ? "border-danger" : "border-secondary-subtle"}`}
                   style={{ fontSize: "0.95rem" }}
@@ -442,7 +440,7 @@ function RegisterForm() {
                 <input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   aria-invalid={Boolean(errors.password)}
                   className={`register-input form-control rounded-4 shadow-none ${errors.password ? "border-danger" : "border-secondary-subtle"}`}
                   style={{ fontSize: "0.95rem" }}
