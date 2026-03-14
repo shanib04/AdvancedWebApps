@@ -24,4 +24,87 @@ describe("Upload API", () => {
     expect(typeof response.body.imageUrl).toBe("string");
     expect(response.body.imageUrl).toContain("/public/images/");
   });
+
+  test("upload middleware should create directory when missing", () => {
+    jest.resetModules();
+
+    const existsSync = jest.fn(() => false);
+    const mkdirSync = jest.fn();
+    const multerMock = Object.assign(
+      jest.fn((options) => options),
+      {
+        diskStorage: jest.fn((config) => config),
+      },
+    );
+
+    jest.isolateModules(() => {
+      jest.doMock("fs", () => ({
+        __esModule: true,
+        default: { existsSync, mkdirSync },
+        existsSync,
+        mkdirSync,
+      }));
+      jest.doMock("multer", () => ({
+        __esModule: true,
+        default: multerMock,
+      }));
+
+      require("../middleware/upload");
+    });
+
+    expect(existsSync).toHaveBeenCalledTimes(1);
+    expect(mkdirSync).toHaveBeenCalledWith(expect.any(String), {
+      recursive: true,
+    });
+
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
+
+  test("upload middleware should reject unsupported files", () => {
+    jest.resetModules();
+
+    const multerMock = Object.assign(
+      jest.fn((options) => options),
+      {
+        diskStorage: jest.fn((config) => config),
+      },
+    );
+
+    let uploadOptions: {
+      fileFilter: (
+        req: unknown,
+        file: { originalname: string; mimetype: string },
+        cb: (error: Error | null, acceptFile?: boolean) => void,
+      ) => void;
+    };
+
+    jest.isolateModules(() => {
+      jest.doMock("multer", () => ({
+        __esModule: true,
+        default: multerMock,
+      }));
+
+      require("../middleware/upload");
+      uploadOptions = multerMock.mock.calls[0][0];
+    });
+
+    const callback = jest.fn();
+
+    uploadOptions.fileFilter(
+      {},
+      {
+        originalname: "avatar.exe",
+        mimetype: "application/octet-stream",
+      },
+      callback,
+    );
+
+    expect(callback).toHaveBeenCalledWith(
+      new Error("Only JPG, PNG, and WEBP image files are allowed"),
+    );
+
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+  });
 });

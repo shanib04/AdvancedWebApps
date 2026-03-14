@@ -1,359 +1,235 @@
-import type { Response } from "express";
+import request from "supertest";
+import app from "../index";
+import { Express } from "express";
+import { cleanupDatabase, registerTestUser, TestUser } from "./testUtils";
 
-// Ensure route file is executed for coverage.
-import "../routes/commentRoutes";
+let testApp: Express;
+let userA: TestUser;
+let userB: TestUser;
+let userC: TestUser;
+let postId: string;
 
-import Post from "../models/postModel";
-import Comment from "../models/commentModel";
-import {
-  createComment,
-  deleteComment,
-  getAllComments,
-  getCommentById,
-  getCommentsByPost,
-  updateComment,
-} from "../controllers/commentController";
+const authHeader = (user: TestUser) => ({
+  Authorization: `Bearer ${user.accessToken}`,
+});
 
-type MockRes = Response & {
-  status: jest.Mock;
-  json: jest.Mock;
-};
+beforeAll(async () => {
+  testApp = app;
+  await cleanupDatabase();
+  userA = await registerTestUser(testApp);
 
-const mockRes = (): MockRes => {
-  const res: Partial<MockRes> = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  return res as MockRes;
-};
-
-const expectStatusJson = (res: MockRes, status: number, json: any) => {
-  expect(res.status).toHaveBeenCalledWith(status);
-  expect(res.json).toHaveBeenCalledWith(json);
-};
-
-describe("commentController coverage", () => {
-  const validId = "507f1f77bcf86cd799439011";
-
-  afterEach(() => {
-    jest.restoreAllMocks();
+  const registerB = await request(testApp).post("/auth/register").send({
+    username: "comment_user_b",
+    email: "comment_user_b@example.com",
+    password: "password123",
   });
 
-  describe("createComment", () => {
-    test("validates input/auth and handles success/error", async () => {
-      const resMissing = mockRes();
-      await createComment({ body: {} } as any, resMissing);
-      expectStatusJson(resMissing, 422, {
-        error: "Post ID and content are required",
-      });
+  userB = {
+    _id: registerB.body.user._id,
+    username: "comment_user_b",
+    email: "comment_user_b@example.com",
+    accessToken: registerB.body.accessToken,
+    refreshToken: registerB.body.refreshToken,
+  };
 
-      const resMissingContent = mockRes();
-      await createComment(
-        { body: { postId: validId } } as any,
-        resMissingContent,
-      );
-      expectStatusJson(resMissingContent, 422, {
-        error: "Post ID and content are required",
-      });
-
-      const resInvalidPost = mockRes();
-      await createComment(
-        { body: { post: "bad", content: "x" } } as any,
-        resInvalidPost,
-      );
-      expectStatusJson(resInvalidPost, 422, {
-        error: "Invalid Post ID format",
-      });
-
-      const postFindByIdSpy = jest.spyOn(Post as any, "findById");
-
-      postFindByIdSpy.mockResolvedValueOnce(null);
-      const resNotFound = mockRes();
-      await createComment(
-        { body: { post: validId, content: "x" }, user: { _id: "u1" } } as any,
-        resNotFound,
-      );
-      expectStatusJson(resNotFound, 404, { error: "Post not found" });
-
-      postFindByIdSpy.mockResolvedValue({ _id: "p1" });
-
-      const commentCreateSpy = jest.spyOn(Comment as any, "create");
-
-      postFindByIdSpy.mockResolvedValueOnce({ _id: "p1" });
-      commentCreateSpy.mockResolvedValueOnce({ _id: "c1" });
-      const resOk = mockRes();
-      await createComment(
-        { body: { post: validId, content: "x" }, user: { _id: "u1" } } as any,
-        resOk,
-      );
-      expect(resOk.status).toHaveBeenCalledWith(201);
-      expect(resOk.json).toHaveBeenCalledWith({ _id: "c1" });
-
-      postFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
-      const resErr = mockRes();
-      await createComment(
-        { body: { post: validId, content: "x" }, user: { _id: "u1" } } as any,
-        resErr,
-      );
-      expectStatusJson(resErr, 500, { error: "boom" });
-    });
+  const registerC = await request(testApp).post("/auth/register").send({
+    username: "comment_user_c",
+    email: "comment_user_c@example.com",
+    password: "password123",
   });
 
-  describe("getAllComments", () => {
-    test("validates filters, queries correctly, and handles error", async () => {
-      const resBadUser = mockRes();
-      await getAllComments({ query: { user: "bad" } } as any, resBadUser);
-      expectStatusJson(resBadUser, 422, { error: "Invalid User ID format" });
+  userC = {
+    _id: registerC.body.user._id,
+    username: "comment_user_c",
+    email: "comment_user_c@example.com",
+    accessToken: registerC.body.accessToken,
+    refreshToken: registerC.body.refreshToken,
+  };
 
-      const resBadPost = mockRes();
-      await getAllComments(
-        { query: { user: validId, post: "bad" } } as any,
-        resBadPost,
-      );
-      expectStatusJson(resBadPost, 422, { error: "Invalid Post ID format" });
+  const postResp = await request(testApp)
+    .post("/post")
+    .set(authHeader(userA))
+    .send({ content: "post for comments" });
+  postId = postResp.body._id;
+}, 30000);
 
-      const commentFindSpy = jest.spyOn(Comment as any, "find");
+describe("Comment API", () => {
+  test("POST /comment should enforce auth and validate payload", async () => {
+    const noAuth = await request(testApp)
+      .post("/comment")
+      .send({ post: postId, content: "x" });
+    expect(noAuth.statusCode).toBe(401);
 
-      commentFindSpy.mockResolvedValueOnce([]);
-      const resNoFilters = mockRes();
-      await getAllComments({ query: {} } as any, resNoFilters);
-      expect(commentFindSpy).toHaveBeenLastCalledWith({});
-      expect(resNoFilters.json).toHaveBeenCalledWith([]);
+    const missingFields = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userA))
+      .send({ post: postId });
+    expect(missingFields.statusCode).toBe(422);
 
-      commentFindSpy.mockResolvedValueOnce([]);
-      const resUserAndPost = mockRes();
-      await getAllComments(
-        { query: { user: validId, post: validId } } as any,
-        resUserAndPost,
-      );
-      expect(commentFindSpy).toHaveBeenLastCalledWith({
-        user: validId,
-        post: validId,
+    const invalidParent = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userA))
+      .send({ post: postId, content: "x", parentId: "invalid-id" });
+    expect(invalidParent.statusCode).toBe(422);
+
+    const created = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userB))
+      .send({ post: postId, content: "first comment" });
+    expect(created.statusCode).toBe(201);
+    expect(created.body).toHaveProperty("_id");
+
+    const reply = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userA))
+      .send({
+        post: postId,
+        content: "reply",
+        parentId: created.body._id,
       });
-      expect(resUserAndPost.json).toHaveBeenCalledWith([]);
-
-      commentFindSpy.mockRejectedValueOnce(new Error("boom"));
-      const resErr = mockRes();
-      await getAllComments({ query: {} } as any, resErr);
-      expectStatusJson(resErr, 500, { error: "boom" });
-    });
+    expect(reply.statusCode).toBe(201);
   });
 
-  describe("getCommentById", () => {
-    test("validates id and handles not-found/success/error", async () => {
-      const resMissing = mockRes();
-      await getCommentById({ params: {} } as any, resMissing);
-      expectStatusJson(resMissing, 422, { error: "Comment ID is required" });
+  test("GET comment endpoints should return data and validate IDs", async () => {
+    const created = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userA))
+      .send({ post: postId, content: "read me" });
 
-      const resInvalid = mockRes();
-      await getCommentById({ params: { id: "bad" } } as any, resInvalid);
-      expectStatusJson(resInvalid, 422, { error: "Invalid Comment ID format" });
+    const all = await request(testApp).get("/comment").set(authHeader(userA));
+    expect(all.statusCode).toBe(200);
+    expect(Array.isArray(all.body)).toBe(true);
 
-      const commentFindByIdSpy = jest.spyOn(Comment as any, "findById");
+    const byFilter = await request(testApp)
+      .get(`/comment?user=${userA._id}&post=${postId}`)
+      .set(authHeader(userA));
+    expect(byFilter.statusCode).toBe(200);
 
-      commentFindByIdSpy.mockResolvedValueOnce(null);
-      const resNotFound = mockRes();
-      await getCommentById({ params: { id: validId } } as any, resNotFound);
-      expectStatusJson(resNotFound, 404, { error: "Comment not found" });
+    const badUserFilter = await request(testApp)
+      .get("/comment?user=invalid-id")
+      .set(authHeader(userA));
+    expect(badUserFilter.statusCode).toBe(422);
 
-      commentFindByIdSpy.mockResolvedValueOnce({ _id: "c1" });
-      const resOk = mockRes();
-      await getCommentById({ params: { id: validId } } as any, resOk);
-      expect(resOk.json).toHaveBeenCalledWith({ _id: "c1" });
+    const badPostFilter = await request(testApp)
+      .get(`/comment?user=${userA._id}&post=invalid-id`)
+      .set(authHeader(userA));
+    expect(badPostFilter.statusCode).toBe(422);
 
-      commentFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
-      const resErr = mockRes();
-      await getCommentById({ params: { id: validId } } as any, resErr);
-      expectStatusJson(resErr, 500, { error: "boom" });
-    });
+    const byId = await request(testApp)
+      .get(`/comment/${created.body._id}`)
+      .set(authHeader(userA));
+    expect(byId.statusCode).toBe(200);
+
+    const invalidById = await request(testApp)
+      .get("/comment/invalid-id")
+      .set(authHeader(userA));
+    expect(invalidById.statusCode).toBe(422);
+
+    const missingById = await request(testApp)
+      .get("/comment/507f1f77bcf86cd799439099")
+      .set(authHeader(userA));
+    expect(missingById.statusCode).toBe(404);
+
+    const missingPostQuery = await request(testApp)
+      .get("/comment/post")
+      .set(authHeader(userA));
+    expect(missingPostQuery.statusCode).toBe(422);
+
+    const invalidPostQuery = await request(testApp)
+      .get("/comment/post?postId=invalid-id")
+      .set(authHeader(userA));
+    expect(invalidPostQuery.statusCode).toBe(422);
+
+    const notFoundPost = await request(testApp)
+      .get("/comment/post?postId=507f1f77bcf86cd799439099")
+      .set(authHeader(userA));
+    expect(notFoundPost.statusCode).toBe(404);
+
+    const byPost = await request(testApp)
+      .get(`/comment/post?postId=${postId}`)
+      .set(authHeader(userA));
+    expect(byPost.statusCode).toBe(200);
+    expect(Array.isArray(byPost.body)).toBe(true);
   });
 
-  describe("getCommentsByPost", () => {
-    test("validates query, checks post exists, queries comments, handles error", async () => {
-      const resMissing = mockRes();
-      await getCommentsByPost({ query: {} } as any, resMissing);
-      expectStatusJson(resMissing, 422, {
-        error: "postId query parameter is required",
-      });
+  test("PUT /comment/:id should enforce ownership and update content", async () => {
+    const created = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userB))
+      .send({ post: postId, content: "editable comment" });
 
-      const resInvalid = mockRes();
-      await getCommentsByPost({ query: { postId: "bad" } } as any, resInvalid);
-      expectStatusJson(resInvalid, 422, { error: "Invalid postId format" });
+    const missingContent = await request(testApp)
+      .put(`/comment/${created.body._id}`)
+      .set(authHeader(userB))
+      .send({});
+    expect(missingContent.statusCode).toBe(422);
 
-      const postFindByIdSpy = jest.spyOn(Post as any, "findById");
-      const commentFindSpy = jest.spyOn(Comment as any, "find");
+    const invalidId = await request(testApp)
+      .put("/comment/invalid-id")
+      .set(authHeader(userB))
+      .send({ content: "x" });
+    expect(invalidId.statusCode).toBe(422);
 
-      postFindByIdSpy.mockResolvedValueOnce(null);
-      const resNotFound = mockRes();
-      await getCommentsByPost(
-        { query: { postId: validId } } as any,
-        resNotFound,
-      );
-      expectStatusJson(resNotFound, 404, { error: "Post not found" });
+    const notOwner = await request(testApp)
+      .put(`/comment/${created.body._id}`)
+      .set(authHeader(userA))
+      .send({ content: "cannot edit" });
+    expect(notOwner.statusCode).toBe(403);
 
-      postFindByIdSpy.mockResolvedValueOnce({ _id: "p1" });
-      commentFindSpy.mockResolvedValueOnce([{ _id: "c1" }]);
-      const resByPostId = mockRes();
-      await getCommentsByPost(
-        { query: { postId: validId } } as any,
-        resByPostId,
-      );
-      expect(commentFindSpy).toHaveBeenLastCalledWith({ post: validId });
-      expect(resByPostId.json).toHaveBeenCalledWith([{ _id: "c1" }]);
-
-      postFindByIdSpy.mockResolvedValueOnce({ _id: "p1" });
-      commentFindSpy.mockResolvedValueOnce([{ _id: "c1" }]);
-      const resByPost = mockRes();
-      await getCommentsByPost({ query: { post: validId } } as any, resByPost);
-      expect(commentFindSpy).toHaveBeenLastCalledWith({ post: validId });
-      expect(resByPost.json).toHaveBeenCalledWith([{ _id: "c1" }]);
-
-      postFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
-      const resErr = mockRes();
-      await getCommentsByPost({ query: { postId: validId } } as any, resErr);
-      expectStatusJson(resErr, 500, { error: "boom" });
-    });
+    const updated = await request(testApp)
+      .put(`/comment/${created.body._id}`)
+      .set(authHeader(userB))
+      .send({ content: "updated by owner" });
+    expect(updated.statusCode).toBe(200);
+    expect(updated.body).toHaveProperty("content", "updated by owner");
   });
 
-  describe("updateComment", () => {
-    test("validates inputs/id and handles auth/not-found", async () => {
-      const resMissing = mockRes();
-      await updateComment({ params: {}, body: {} } as any, resMissing);
-      expectStatusJson(resMissing, 422, {
-        error: "Comment ID and content are required",
+  test("DELETE /comment/:id should respect permissions and cascade replies", async () => {
+    const parent = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userB))
+      .send({ post: postId, content: "parent for delete" });
+
+    const child = await request(testApp)
+      .post("/comment")
+      .set(authHeader(userA))
+      .send({
+        post: postId,
+        content: "child for delete",
+        parentId: parent.body._id,
       });
 
-      const resMissingContent = mockRes();
-      await updateComment(
-        { params: { id: validId }, body: {} } as any,
-        resMissingContent,
-      );
-      expectStatusJson(resMissingContent, 422, {
-        error: "Comment ID and content are required",
-      });
+    const invalidId = await request(testApp)
+      .delete("/comment/invalid-id")
+      .set(authHeader(userA));
+    expect(invalidId.statusCode).toBe(422);
 
-      const resInvalidId = mockRes();
-      await updateComment(
-        { params: { id: "bad" }, body: { content: "x" } } as any,
-        resInvalidId,
-      );
-      expectStatusJson(resInvalidId, 422, {
-        error: "Invalid Comment ID format",
-      });
+    const notFound = await request(testApp)
+      .delete("/comment/507f1f77bcf86cd799439099")
+      .set(authHeader(userA));
+    expect(notFound.statusCode).toBe(404);
 
-      const commentFindByIdSpy = jest.spyOn(Comment as any, "findById");
-      commentFindByIdSpy.mockResolvedValueOnce(null);
+    const unauthorized = await request(testApp)
+      .delete(`/comment/${parent.body._id}`)
+      .set(authHeader(userC));
+    expect(unauthorized.statusCode).toBe(403);
 
-      const resNotFound = mockRes();
-      await updateComment(
-        {
-          params: { id: validId },
-          body: { content: "x" },
-          user: { _id: "u1" },
-        } as any,
-        resNotFound,
-      );
-      expectStatusJson(resNotFound, 404, { error: "Comment not found" });
+    const deletedByPostOwner = await request(testApp)
+      .delete(`/comment/${parent.body._id}`)
+      .set(authHeader(userA));
+    expect(deletedByPostOwner.statusCode).toBe(200);
+    expect(deletedByPostOwner.body).toEqual({
+      message: "Comment deleted successfully",
     });
 
-    test("enforces ownership and handles success/error", async () => {
-      const commentFindByIdSpy = jest.spyOn(Comment as any, "findById");
+    const parentAfter = await request(testApp)
+      .get(`/comment/${parent.body._id}`)
+      .set(authHeader(userA));
+    expect(parentAfter.statusCode).toBe(404);
 
-      commentFindByIdSpy.mockResolvedValueOnce({
-        user: { toString: () => "u1" },
-      });
-      const resNotOwner = mockRes();
-      await updateComment(
-        {
-          params: { id: validId },
-          body: { content: "x" },
-          user: { _id: "u2" },
-        } as any,
-        resNotOwner,
-      );
-      expectStatusJson(resNotOwner, 403, { error: "Unauthorized" });
-
-      const commentDoc: any = {
-        user: { toString: () => "u1" },
-        content: "old",
-        save: jest.fn().mockResolvedValue(undefined),
-      };
-      commentFindByIdSpy.mockResolvedValueOnce(commentDoc);
-      const resOk = mockRes();
-      await updateComment(
-        {
-          params: { id: validId },
-          body: { content: "new" },
-          user: { _id: "u1" },
-        } as any,
-        resOk,
-      );
-      expect(commentDoc.save).toHaveBeenCalled();
-      expect(resOk.json).toHaveBeenCalledWith(commentDoc);
-
-      commentFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
-      const resErr = mockRes();
-      await updateComment(
-        {
-          params: { id: validId },
-          body: { content: "x" },
-          user: { _id: "u1" },
-        } as any,
-        resErr,
-      );
-      expectStatusJson(resErr, 500, { error: "boom" });
-    });
-  });
-
-  describe("deleteComment", () => {
-    test("validates id and auth", async () => {
-      const resInvalid = mockRes();
-      await deleteComment({ params: { id: "bad" } } as any, resInvalid);
-      expectStatusJson(resInvalid, 422, { error: "Invalid Comment ID format" });
-    });
-
-    test("handles not-found/ownership/success/error", async () => {
-      const commentFindByIdSpy = jest.spyOn(Comment as any, "findById");
-
-      commentFindByIdSpy.mockResolvedValueOnce(null);
-      const resNotFound = mockRes();
-      await deleteComment(
-        { params: { id: validId }, user: { _id: "u1" } } as any,
-        resNotFound,
-      );
-      expectStatusJson(resNotFound, 404, { error: "Comment not found" });
-
-      commentFindByIdSpy.mockResolvedValueOnce({
-        user: { toString: () => "u1" },
-      });
-      const resNotOwner = mockRes();
-      await deleteComment(
-        { params: { id: validId }, user: { _id: "u2" } } as any,
-        resNotOwner,
-      );
-      expectStatusJson(resNotOwner, 403, { error: "Unauthorized" });
-
-      const delCommentDoc: any = {
-        user: { toString: () => "u1" },
-        deleteOne: jest.fn().mockResolvedValue(undefined),
-      };
-      commentFindByIdSpy.mockResolvedValueOnce(delCommentDoc);
-      const resOk = mockRes();
-      await deleteComment(
-        { params: { id: validId }, user: { _id: "u1" } } as any,
-        resOk,
-      );
-      expect(delCommentDoc.deleteOne).toHaveBeenCalled();
-      expect(resOk.json).toHaveBeenCalledWith({
-        message: "Comment deleted successfully",
-      });
-
-      commentFindByIdSpy.mockRejectedValueOnce(new Error("boom"));
-      const resErr = mockRes();
-      await deleteComment(
-        { params: { id: validId }, user: { _id: "u1" } } as any,
-        resErr,
-      );
-      expectStatusJson(resErr, 500, { error: "boom" });
-    });
+    const childAfter = await request(testApp)
+      .get(`/comment/${child.body._id}`)
+      .set(authHeader(userA));
+    expect(childAfter.statusCode).toBe(404);
   });
 });

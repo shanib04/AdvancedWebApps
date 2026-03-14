@@ -45,8 +45,7 @@ beforeEach(() => {
 
   mockGenerateContent.mockResolvedValue({
     response: {
-      text: () =>
-        '{"text":"Draft from AI","keywords":["react app","coding"]}',
+      text: () => '{"text":"Draft from AI","keywords":["react app","coding"]}',
     },
   });
 
@@ -59,7 +58,9 @@ beforeEach(() => {
     .mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => [{ urls: { regular: "https://images.example.com/two.jpg" } }],
+      json: async () => [
+        { urls: { regular: "https://images.example.com/two.jpg" } },
+      ],
     });
 });
 
@@ -98,11 +99,9 @@ describe("AI API", () => {
     expect(noImages.body).toHaveProperty("keyword");
     expect(Array.isArray(noImages.body.images)).toBe(true);
 
-    mockAxiosGet
-      .mockResolvedValueOnce({ data: [] })
-      .mockResolvedValueOnce({
-        data: [{ urls: { regular: "https://images.example.com/fallback.jpg" } }],
-      });
+    mockAxiosGet.mockResolvedValueOnce({ data: [] }).mockResolvedValueOnce({
+      data: [{ urls: { regular: "https://images.example.com/fallback.jpg" } }],
+    });
 
     const withImages = await request(testApp)
       .post("/api/ai/generateInitialDraft")
@@ -110,7 +109,7 @@ describe("AI API", () => {
       .send({ prompt: "Write about coding", includeImages: true });
 
     expect(withImages.statusCode).toBe(200);
-    expect(withImages.body.images.length).toBeGreaterThan(0);
+    expect(withImages.body.images.length).toBe(1);
     expect(mockAxiosGet).toHaveBeenCalled();
 
     mockGenerateContent.mockResolvedValueOnce({
@@ -120,7 +119,9 @@ describe("AI API", () => {
     });
     mockAxiosGet.mockResolvedValueOnce({
       data: {
-        results: [{ urls: { regular: "https://images.example.com/object.jpg" } }],
+        results: [
+          { urls: { regular: "https://images.example.com/object.jpg" } },
+        ],
       },
     });
 
@@ -213,6 +214,41 @@ describe("AI API", () => {
 
     expect(refined.statusCode).toBe(200);
     expect(refined.body).toEqual({ text: "Refined text" });
+  });
+
+  test("POST /api/ai/refineText should return 500 when all Gemini models fail", async () => {
+    mockGenerateContent.mockRejectedValue(new Error("all models failed"));
+
+    const response = await request(testApp)
+      .post("/api/ai/refineText")
+      .set(authHeader(testUser))
+      .send({
+        currentText: "Long sentence",
+        instruction: "Shorten it",
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toHaveProperty("error", "all models failed");
+  });
+
+  test("POST /api/ai/generateInitialDraft should continue when Unsplash safe fetch fails", async () => {
+    mockGenerateContent.mockResolvedValueOnce({
+      response: {
+        text: () =>
+          '{"text":"Draft from AI","keywords":["react app","coding"]}',
+      },
+    });
+    mockAxiosGet.mockRejectedValue(new Error("unsplash down"));
+
+    const response = await request(testApp)
+      .post("/api/ai/generateInitialDraft")
+      .set(authHeader(testUser))
+      .send({ prompt: "Write about coding", includeImages: true });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("keyword", "react app");
+    expect(response.body).toHaveProperty("images");
+    expect(response.body.images).toHaveLength(0);
   });
 
   test("POST /api/ai/getMoreImages should validate keyword and return/fail correctly", async () => {

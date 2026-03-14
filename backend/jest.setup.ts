@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 
+// Silence console output during tests for cleaner output
 global.console = {
   ...console,
   log: jest.fn(),
@@ -10,6 +11,13 @@ global.console = {
 };
 
 dotenv.config();
+
+if (process.env.MONGO_URI) {
+  process.env.MONGO_URI = process.env.MONGO_URI.replace(
+    /\/([^/?]+)(\?|$)/,
+    "/$1_test$2",
+  );
+}
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-key";
 process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "3600";

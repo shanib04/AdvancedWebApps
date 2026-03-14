@@ -34,7 +34,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockNext).toHaveBeenCalled();
@@ -47,7 +47,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -69,7 +69,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -87,7 +87,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -110,29 +110,10 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(jwt.verify).toHaveBeenCalledWith(validToken, process.env.JWT_SECRET);
-    expect(mockNext).toHaveBeenCalled();
-  });
-
-  test("should handle authorization header with extra spaces", () => {
-    const userId = "507f1f77bcf86cd799439011";
-    const validToken = "valid_token_123";
-
-    mockRequest.headers = {
-      authorization: `Bearer ${validToken}`,
-    };
-
-    (jwt.verify as jest.Mock).mockReturnValue({ userId });
-
-    authMiddleware(
-      mockRequest as AuthRequest,
-      mockResponse as Response,
-      mockNext
-    );
-
     expect(mockNext).toHaveBeenCalled();
   });
 
@@ -144,7 +125,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -161,7 +142,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -184,7 +165,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     // Should check for JWT_SECRET and return 500
@@ -210,7 +191,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect((mockRequest as AuthRequest).user).toBeDefined();
@@ -232,7 +213,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
@@ -253,7 +234,7 @@ describe("Auth Middleware", () => {
     authMiddleware(
       mockRequest as AuthRequest,
       mockResponse as Response,
-      mockNext
+      mockNext,
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(401);
