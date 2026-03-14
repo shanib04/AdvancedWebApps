@@ -5,16 +5,7 @@ import type { Post, User } from "../types/models";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
-
-const israelDateTimeFormatter = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Asia/Jerusalem",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-});
+import { formatDateTimeLocal } from "../utils/dateUtils";
 
 interface PostCardProps {
   post: Post;
@@ -147,7 +138,8 @@ function PostCard({
 
   const isOwner = senderId === currentUserId;
 
-  const senderName = userObj?.username || "Unknown User";
+  const senderName =
+    userObj?.displayName || userObj?.username || "Unknown User";
 
   const senderPhoto = userObj
     ? normalizePhotoUrl(userObj.photoUrl)
@@ -389,7 +381,7 @@ function PostCard({
               </h6>
               {post.createdAt && (
                 <small className="text-muted">
-                  {israelDateTimeFormatter.format(new Date(post.createdAt))}
+                  {formatDateTimeLocal(post.createdAt)}
                 </small>
               )}
             </div>

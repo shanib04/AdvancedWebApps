@@ -6,6 +6,7 @@ export type SessionUser = {
   _id?: string;
   photoUrl?: string;
   displayName?: string;
+  bio?: string;
   username?: string;
   name?: string;
   email?: string;
@@ -69,8 +70,7 @@ export const syncStoredUserFromWhoAmI = async (
       photoUrl: serverUser?.photoUrl || fallbackUser?.photoUrl,
     });
 
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(mergedUser));
-    return mergedUser;
+    return setStoredSessionUser(mergedUser);
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
       if (error.response.status === 401 || error.response.status === 404) {

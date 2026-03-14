@@ -12,16 +12,27 @@ import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import useAppToast from "../hooks/useAppToast";
 import AppToast from "../components/AppToast";
 
+type ProfileTab = "posts" | "liked" | "saved";
+
+type TabPostsState = Record<ProfileTab, Post[]>;
+type TabLoadingState = Record<ProfileTab, boolean>;
+
 const UserProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"posts" | "liked" | "saved">(
-    "posts",
-  );
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [postsLoading, setPostsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<ProfileTab>("posts");
+  const [postsByTab, setPostsByTab] = useState<TabPostsState>({
+    posts: [],
+    liked: [],
+    saved: [],
+  });
+  const [loadingByTab, setLoadingByTab] = useState<TabLoadingState>({
+    posts: false,
+    liked: false,
+    saved: false,
+  });
 
   const { showSuccess, toasts, removeToast } = useAppToast();
 
@@ -30,7 +41,19 @@ const UserProfilePage = () => {
   const isOwnProfile = currentUserId === id;
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [id]);
+
+  useEffect(() => {
     if (!id) return;
+
+    setLoading(true);
+    setError("");
+    setUser(null);
+
+    // Reset tab data when moving to a different profile
+    setPostsByTab({ posts: [], liked: [], saved: [] });
+    setLoadingByTab({ posts: false, liked: false, saved: false });
 
     const fetchUser = async () => {
       try {
@@ -50,24 +73,39 @@ const UserProfilePage = () => {
   useEffect(() => {
     if (!id) return;
 
+    let isCancelled = false;
+
     const fetchPosts = async () => {
-      setPostsLoading(true);
+      setLoadingByTab((prev) => ({ ...prev, [activeTab]: true }));
       try {
         let endpoint = `/post?user=${id}`;
         if (activeTab === "liked") endpoint = `/post/user/${id}/liked`;
         else if (activeTab === "saved") endpoint = `/post/user/${id}/saved`;
 
         const response = await apiClient.get<Post[]>(endpoint);
-        setPosts(response.data || []);
+        if (!isCancelled) {
+          setPostsByTab((prev) => ({
+            ...prev,
+            [activeTab]: response.data || [],
+          }));
+        }
       } catch (err: unknown) {
         console.error("Failed to load posts:", err);
-        setPosts([]);
+        if (!isCancelled) {
+          setPostsByTab((prev) => ({ ...prev, [activeTab]: [] }));
+        }
       } finally {
-        setPostsLoading(false);
+        if (!isCancelled) {
+          setLoadingByTab((prev) => ({ ...prev, [activeTab]: false }));
+        }
       }
     };
 
     fetchPosts();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [id, activeTab]);
 
   if (loading) {
@@ -117,8 +155,12 @@ const UserProfilePage = () => {
               activeTab={activeTab}
               onTabChange={setActiveTab}
               isOwnProfile={isOwnProfile}
+              userName={user.displayName || user.username}
             />
-            <ProfilePostGrid posts={posts} loading={postsLoading} />
+            <ProfilePostGrid
+              posts={postsByTab[activeTab]}
+              loading={loadingByTab[activeTab]}
+            />
           </div>
         </div>
       </div>

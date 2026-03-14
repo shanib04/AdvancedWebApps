@@ -2,15 +2,21 @@ interface ProfileTabsProps {
   activeTab: "posts" | "liked" | "saved";
   onTabChange: (tab: "posts" | "liked" | "saved") => void;
   isOwnProfile: boolean;
+  userName?: string;
 }
 
 const ProfileTabs = ({
   activeTab,
   onTabChange,
   isOwnProfile,
+  userName,
 }: ProfileTabsProps) => {
+  const postsLabel = isOwnProfile
+    ? "My Posts"
+    : `${userName || "User"}'s Posts`;
+
   const tabs = [
-    { key: "posts" as const, label: "My Posts" },
+    { key: "posts" as const, label: postsLabel },
     ...(isOwnProfile
       ? [
           { key: "liked" as const, label: "Liked Posts" },

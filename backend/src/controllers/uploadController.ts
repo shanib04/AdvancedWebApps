@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
+import { HandlerResponse } from "../types/models";
 
-export const uploadImage = async (req: Request, res: Response) => {
+export const uploadImage = async (
+  req: Request,
+  res: Response,
+): HandlerResponse => {
   if (!req.file) {
     return res.status(400).json({ error: "Image file is required" });
   }
