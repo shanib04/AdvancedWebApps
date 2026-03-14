@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import useAppToast from "../hooks/useAppToast";
 import apiClient from "../services/api-client";
+import axios from "axios";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import {
   setStoredSessionUser,
@@ -13,6 +14,7 @@ import {
 } from "../utils/sessionUser";
 import AppToast from "./AppToast";
 import AuthPhotoGallery from "./AuthPhotoGallery";
+import webLogo from "../assets/web-logo.png";
 import photo1 from "../assets/authPhotos/photo1.png";
 import photo2 from "../assets/authPhotos/photo2.png";
 import photo3 from "../assets/authPhotos/photo3.png";
@@ -22,7 +24,9 @@ import photo6 from "../assets/authPhotos/photo6.png";
 import photo7 from "../assets/authPhotos/photo7.png";
 
 const loginSchema = z.object({
-  email: z.email("Please enter a valid email address."),
+  identifier: z
+    .string()
+    .min(1, "Please enter a valid username or email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
@@ -54,7 +58,7 @@ function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await apiClient.post("/auth/login", {
-        email: data.email,
+        identifier: data.identifier,
         password: data.password,
       });
 
@@ -70,12 +74,18 @@ function LoginForm() {
       setStoredSessionUser(rawUser);
       navigate("/home");
     } catch (error: unknown) {
-      showFailed(
-        getUserFriendlyApiError(
-          error,
-          "Login failed. Please check your credentials.",
-        ),
-      );
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        showFailed(
+          error.response.data?.error || "Invalid username or password",
+        );
+      } else {
+        showFailed(
+          getUserFriendlyApiError(
+            error,
+            "Login failed. Please check your credentials.",
+          ),
+        );
+      }
     }
   };
 
@@ -128,43 +138,39 @@ function LoginForm() {
           canvasTransform="rotate(-4deg) scale(0.98)"
         />
 
-        <section className="login-form-panel col-12 col-lg-5 d-flex align-items-center justify-content-center px-4 px-sm-5 py-4 py-lg-3 overflow-hidden">
-          <div className="login-form-shell w-100" style={{ maxWidth: "420px" }}>
-            {/* <div className="login-brand-row d-flex align-items-center gap-3 mb-4 mb-lg-5">
+        <section className="login-form-panel col-12 col-lg-5 d-flex flex-column align-items-center px-4 px-sm-5 py-4 py-lg-5 overflow-auto">
+          <div
+            className="login-form-shell w-100 my-auto flex-shrink-0"
+            style={{ maxWidth: "380px" }}
+          >
+            <div className="login-brand-row d-flex align-items-center justify-content-center gap-3 mb-5 mb-lg-4">
               <div className="d-inline-flex align-items-center justify-content-center">
                 <img
-                  src={webIcon}
+                  src={webLogo}
                   alt="VibeIS icon"
                   style={{
-                    width: "2rem",
-                    height: "2rem",
+                    width: "12rem",
                     objectFit: "contain",
                   }}
                 />
               </div>
-              <span
-                className="fw-semibold"
-                style={{ color: "#6d4dff", letterSpacing: "-0.02em" }}
-              >
-                VibeIS
-              </span>
-            </div> */}
+            </div>
 
-            <div className="login-heading-block mb-4 pb-1">
+            <div className="login-heading-block text-center mb-4 pb-1">
               <h1
                 className="login-page-title fw-bold mb-2"
                 style={{
                   color: "#111827",
-                  fontSize: "clamp(2.2rem, 4vw, 3rem)",
+                  fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
                   lineHeight: 1.02,
                   letterSpacing: "-0.04em",
                 }}
               >
-                Join the VibeIS community
+                Join the community
               </h1>
               <p
                 className="login-page-subtitle mb-0"
-                style={{ color: "#667085", fontSize: "1.02rem" }}
+                style={{ color: "#667085", fontSize: "0.9rem" }}
               >
                 Enter your details to access your global community.
               </p>
@@ -177,20 +183,20 @@ function LoginForm() {
             >
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="identifier"
                   className="form-label fw-semibold mb-2"
-                  style={{ color: "#1f2937" }}
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
                 >
-                  Email address
+                  Username or email address
                 </label>
-                <div className="input-group input-group-lg">
+                <div className="input-group">
                   <span
-                    className={`input-group-text bg-white border-end-0 rounded-start-4 px-3 ${errors.email ? "border-danger" : "border-secondary-subtle"}`}
+                    className={`input-group-text bg-white border-end-0 rounded-start-4 px-3 ${errors.identifier ? "border-danger" : "border-secondary-subtle"}`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
+                      width="20"
+                      height="20"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -201,20 +207,20 @@ function LoginForm() {
                     </svg>
                   </span>
                   <input
-                    id="email"
-                    type="email"
-                    placeholder="name@company.com"
-                    aria-invalid={Boolean(errors.email)}
-                    className={`login-input form-control form-control-lg border-start-0 rounded-end-4 shadow-none ${errors.email ? "border-danger" : "border-secondary-subtle"}`}
-                    style={{ color: "#475467" }}
-                    {...register("email")}
+                    id="identifier"
+                    type="text"
+                    placeholder="Enter username or email"
+                    aria-invalid={Boolean(errors.identifier)}
+                    className={`login-input form-control border-start-0 rounded-end-4 shadow-none ${errors.identifier ? "border-danger" : "border-secondary-subtle"}`}
+                    style={{ color: "#475467", fontSize: "0.95rem" }}
+                    {...register("identifier")}
                   />
                 </div>
                 <p
-                  className="small text-danger mt-2 mb-0"
-                  style={{ minHeight: "1.25rem" }}
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1.25rem", fontSize: "0.85rem" }}
                 >
-                  {errors.email?.message || "\u00A0"}
+                  {errors.identifier?.message || "\u00A0"}
                 </p>
               </div>
 
@@ -222,18 +228,18 @@ function LoginForm() {
                 <label
                   htmlFor="password"
                   className="form-label fw-semibold mb-2"
-                  style={{ color: "#1f2937" }}
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
                 >
                   Password
                 </label>
-                <div className="input-group input-group-lg">
+                <div className="input-group">
                   <span
                     className={`input-group-text bg-white border-end-0 rounded-start-4 px-3 ${errors.password ? "border-danger" : "border-secondary-subtle"}`}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
+                      width="20"
+                      height="20"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -248,8 +254,8 @@ function LoginForm() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     aria-invalid={Boolean(errors.password)}
-                    className={`login-input form-control form-control-lg border-start-0 border-end-0 rounded-0 shadow-none ${errors.password ? "border-danger" : "border-secondary-subtle"}`}
-                    style={{ color: "#475467" }}
+                    className={`login-input form-control border-start-0 border-end-0 rounded-0 shadow-none ${errors.password ? "border-danger" : "border-secondary-subtle"}`}
+                    style={{ color: "#475467", fontSize: "0.95rem" }}
                     {...register("password")}
                   />
                   <button
@@ -262,8 +268,8 @@ function LoginForm() {
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="18"
-                      height="18"
+                      width="16"
+                      height="16"
                       fill="none"
                       viewBox="0 0 24 24"
                     >
@@ -275,8 +281,8 @@ function LoginForm() {
                   </button>
                 </div>
                 <p
-                  className="small text-danger mt-2 mb-0"
-                  style={{ minHeight: "1.25rem" }}
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1.25rem", fontSize: "0.85rem" }}
                 >
                   {errors.password?.message || "\u00A0"}
                 </p>
@@ -284,12 +290,12 @@ function LoginForm() {
 
               <button
                 type="submit"
-                className="login-submit-button btn w-100 rounded-4 fw-bold text-white border-0 py-3 mt-2 shadow"
+                className="login-submit-button btn w-100 rounded-4 fw-bold text-white border-0 py-2 mt-2 shadow"
                 style={{
                   background:
                     "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
                   boxShadow: "0 10px 24px rgba(37, 99, 235, 0.26)",
-                  fontSize: "1.08rem",
+                  fontSize: "1rem",
                 }}
                 disabled={isSubmitting}
               >
@@ -300,7 +306,11 @@ function LoginForm() {
                 <div className="flex-grow-1 border-top border-secondary-subtle" />
                 <span
                   className="small fw-semibold text-uppercase"
-                  style={{ color: "#98A2B3", letterSpacing: "0.14em" }}
+                  style={{
+                    color: "#98A2B3",
+                    letterSpacing: "0.14em",
+                    fontSize: "0.75rem",
+                  }}
                 >
                   Or continue with
                 </span>
@@ -317,14 +327,14 @@ function LoginForm() {
                     theme="outline"
                     size="large"
                     logo_alignment="left"
-                    width="388"
+                    width="340"
                   />
                 </div>
               </div>
 
               <p
                 className="login-signup-copy text-center mb-0 mt-3"
-                style={{ color: "#667085", fontSize: "0.98rem" }}
+                style={{ color: "#667085", fontSize: "0.875rem" }}
               >
                 Don&apos;t have an account?{" "}
                 <Link

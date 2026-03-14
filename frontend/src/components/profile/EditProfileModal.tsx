@@ -35,7 +35,9 @@ const EditProfileModal = ({
   const [editingDisplayName, setEditingDisplayName] = useState(
     user.displayName || "",
   );
-  const [editingPhotoUrl, setEditingPhotoUrl] = useState(user.photoUrl || "");
+  const [editingPhotoUrl, setEditingPhotoUrl] = useState(
+    user.photoUrl || defaultUserPhotoUrl,
+  );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -102,6 +104,14 @@ const EditProfileModal = ({
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        showFailed("Only PNG, JPG, JPEG, and WEBP formats are allowed.");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
       setSelectedFile(file);
       setEditingPhotoUrl(""); // Clear URL if file selected
     }
@@ -120,17 +130,15 @@ const EditProfileModal = ({
         const uploadResponse = await apiClient.post("/upload", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-        photoUrl =
-          uploadResponse.data?.imageUrl ||
-          uploadResponse.data?.photoUrl ||
-          uploadResponse.data?.url ||
-          editingPhotoUrl;
+        photoUrl = uploadResponse.data?.imageUrl || editingPhotoUrl;
       }
+
+      const finalPhotoUrl = photoUrl || defaultUserPhotoUrl;
 
       const updateResponse = await apiClient.patch(`/user/${user._id}`, {
         username: editingUsername.trim(),
         displayName: editingDisplayName.trim(),
-        photoUrl: photoUrl,
+        photoUrl: finalPhotoUrl,
       });
 
       const updatedUser = updateResponse.data;
@@ -195,11 +203,15 @@ const EditProfileModal = ({
                 className="form-control rounded-2"
                 id="username"
                 value={editingUsername}
-                onChange={(e) =>
+                onChange={(e) => {
+                  // Only allow alphanumeric characters, hyphens, and underscores, and convert to lowercase
+                  const formattedValue = e.target.value
+                    .replace(/[^a-zA-Z0-9\-_]/g, "")
+                    .toLowerCase();
                   setEditingUsername(
-                    e.target.value.slice(0, USERNAME_MAX_LENGTH),
-                  )
-                }
+                    formattedValue.slice(0, USERNAME_MAX_LENGTH),
+                  );
+                }}
                 maxLength={USERNAME_MAX_LENGTH}
                 disabled={saving}
               />
@@ -255,7 +267,7 @@ const EditProfileModal = ({
                   <input
                     type="file"
                     ref={fileInputRef}
-                    accept="image/*"
+                    accept=".png, .jpg, .jpeg, .webp, image/png, image/jpeg, image/webp"
                     className="d-none"
                     onChange={handleFileSelect}
                     disabled={saving}
@@ -278,7 +290,7 @@ const EditProfileModal = ({
                     type="button"
                     className="btn btn-outline-danger btn-sm rounded-pill d-flex align-items-center justify-content-center gap-2"
                     onClick={() => {
-                      setEditingPhotoUrl("");
+                      setEditingPhotoUrl(defaultUserPhotoUrl);
                       setSelectedFile(null);
                       if (fileInputRef.current) {
                         fileInputRef.current.value = "";

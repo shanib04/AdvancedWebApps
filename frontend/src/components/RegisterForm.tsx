@@ -13,6 +13,7 @@ import {
   syncStoredUserFromWhoAmI,
 } from "../utils/sessionUser";
 import AuthPhotoGallery from "./AuthPhotoGallery";
+import webLogo from "../assets/web-logo.png";
 import photo1 from "../assets/authPhotos/photo1.png";
 import photo2 from "../assets/authPhotos/photo2.png";
 import photo3 from "../assets/authPhotos/photo3.png";
@@ -22,6 +23,7 @@ import photo6 from "../assets/authPhotos/photo6.png";
 import photo7 from "../assets/authPhotos/photo7.png";
 
 const USERNAME_MAX_LENGTH = 15;
+const DISPLAY_NAME_MAX_LENGTH = 20;
 
 const registerSchema = z.object({
   username: z
@@ -30,10 +32,29 @@ const registerSchema = z.object({
     .max(
       USERNAME_MAX_LENGTH,
       `Username must be at most ${USERNAME_MAX_LENGTH} characters.`,
-    ),
+    )
+    .regex(
+      /^[a-zA-Z0-9\-_]+$/,
+      "Username can only contain letters, numbers, hyphens, and underscores.",
+    )
+    .transform((val) => val.toLowerCase()),
+  displayName: z
+    .string()
+    .max(
+      DISPLAY_NAME_MAX_LENGTH,
+      `Display name must be at most ${DISPLAY_NAME_MAX_LENGTH} characters.`,
+    )
+    .optional(),
   email: z.email("Please enter a valid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  profilePicture: z.instanceof(FileList).optional(),
+  profilePicture: z
+    .instanceof(FileList)
+    .optional()
+    .refine((files) => {
+      if (!files || files.length === 0) return true;
+      const file = files[0];
+      return ["image/png", "image/jpeg", "image/webp"].includes(file.type);
+    }, "Only PNG, JPG, JPEG, and WEBP formats are allowed."),
 });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -104,11 +125,13 @@ function RegisterForm() {
         username: string;
         email: string;
         password: string;
+        displayName?: string;
         photoUrl?: string;
       } = {
         username: data.username,
         email: data.email,
         password: data.password,
+        displayName: data.displayName || data.username,
       };
 
       if (photoUrl) {
@@ -193,17 +216,30 @@ function RegisterForm() {
           canvasTransform="rotate(-4deg) scale(0.96)"
         />
 
-        <section className="register-form-panel col-12 col-lg-5 d-flex align-items-start justify-content-center px-4 px-sm-5 py-3 py-lg-4">
+        <section className="register-form-panel col-12 col-lg-5 d-flex flex-column align-items-center px-4 px-sm-5 py-4 py-lg-5 overflow-auto">
           <div
-            className="register-screen-shell w-100"
-            style={{ maxWidth: "410px" }}
+            className="register-screen-shell w-100 my-auto flex-shrink-0"
+            style={{ maxWidth: "380px" }}
           >
-            <div className="register-heading-block mb-3">
+            <div className="login-brand-row d-flex align-items-center justify-content-center gap-3 mb-4 mb-lg-4">
+              <div className="d-inline-flex align-items-center justify-content-center">
+                <img
+                  src={webLogo}
+                  alt="VibeIS icon"
+                  style={{
+                    width: "12rem",
+                    objectFit: "contain",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="register-heading-block text-center mb-4">
               <h1
                 className="register-page-title fw-bold mb-2"
                 style={{
                   color: "#111827",
-                  fontSize: "clamp(1.9rem, 3vw, 2.45rem)",
+                  fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
                   lineHeight: 1.02,
                   letterSpacing: "-0.04em",
                 }}
@@ -211,26 +247,28 @@ function RegisterForm() {
                 Create your account
               </h1>
               <p
-                className="register-page-subtitle mb-3"
-                style={{ color: "#667085" }}
+                className="register-page-subtitle mb-0"
+                style={{ color: "#667085", fontSize: "0.9rem" }}
               >
                 Join the VibeIS community and share your vision.
               </p>
             </div>
 
             <form
-              className="register-form-content d-flex flex-column gap-2"
+              className="register-form-content d-flex flex-column gap-2 gap-lg-3"
               onSubmit={handleSubmit(onSubmit)}
               noValidate
             >
-              <div className="register-upload-panel d-flex flex-column align-items-start text-start">
+              <div className="register-upload-panel d-flex flex-column align-items-start text-start mb-2">
                 <label
                   htmlFor="profilePicture"
                   className="register-upload-title form-label fw-semibold mb-2"
-                  style={{ color: "#1f2937" }}
+                  style={{ color: "#1f2937", fontSize: "0.9rem" }}
                 >
                   Profile Image{" "}
-                  <span style={{ color: "#98A2B3" }}>(Optional)</span>
+                  <span style={{ color: "#98A2B3", fontWeight: "normal" }}>
+                    (Optional)
+                  </span>
                 </label>
                 <label
                   htmlFor="profilePicture"
@@ -252,7 +290,7 @@ function RegisterForm() {
                     <input
                       id="profilePicture"
                       type="file"
-                      accept="image/*"
+                      accept=".png, .jpg, .jpeg, .webp, image/png, image/jpeg, image/webp"
                       style={{ cursor: "pointer" }}
                       className="position-absolute top-0 start-0 w-100 h-100 opacity-0"
                       {...profilePictureRegistration}
@@ -311,21 +349,23 @@ function RegisterForm() {
                 <label
                   htmlFor="username"
                   className="form-label fw-semibold mb-2"
-                  style={{ color: "#1f2937" }}
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
                 >
-                  Display Name
+                  Username
                 </label>
                 <input
                   id="username"
                   type="text"
-                  placeholder="e.g. Jane Doe"
+                  maxLength={USERNAME_MAX_LENGTH}
+                  placeholder="e.g. janedoe"
                   aria-invalid={Boolean(errors.username)}
-                  className={`register-input form-control form-control-lg rounded-4 shadow-none ${errors.username ? "border-danger" : "border-secondary-subtle"}`}
+                  className={`register-input form-control rounded-4 shadow-none ${errors.username ? "border-danger" : "border-secondary-subtle"}`}
+                  style={{ fontSize: "0.95rem" }}
                   {...register("username")}
                 />
                 <p
-                  className="small text-danger mt-2 mb-0"
-                  style={{ minHeight: "1rem", fontSize: "0.78rem" }}
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1rem", fontSize: "0.85rem" }}
                 >
                   {errors.username?.message || "\u00A0"}
                 </p>
@@ -333,9 +373,44 @@ function RegisterForm() {
 
               <div>
                 <label
+                  htmlFor="displayName"
+                  className="form-label fw-semibold mb-2"
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
+                >
+                  Display Name{" "}
+                  <span
+                    style={{
+                      color: "#98A2B3",
+                      fontWeight: "normal",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    (Optional)
+                  </span>
+                </label>
+                <input
+                  id="displayName"
+                  type="text"
+                  maxLength={DISPLAY_NAME_MAX_LENGTH}
+                  placeholder="e.g. Jane Doe"
+                  aria-invalid={Boolean(errors.displayName)}
+                  className={`register-input form-control rounded-4 shadow-none ${errors.displayName ? "border-danger" : "border-secondary-subtle"}`}
+                  style={{ fontSize: "0.95rem" }}
+                  {...register("displayName")}
+                />
+                <p
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1rem", fontSize: "0.85rem" }}
+                >
+                  {errors.displayName?.message || "\u00A0"}
+                </p>
+              </div>
+
+              <div>
+                <label
                   htmlFor="email"
                   className="form-label fw-semibold mb-2"
-                  style={{ color: "#1f2937" }}
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
                 >
                   Email Address
                 </label>
@@ -344,12 +419,13 @@ function RegisterForm() {
                   type="email"
                   placeholder="jane@example.com"
                   aria-invalid={Boolean(errors.email)}
-                  className={`register-input form-control form-control-lg rounded-4 shadow-none ${errors.email ? "border-danger" : "border-secondary-subtle"}`}
+                  className={`register-input form-control rounded-4 shadow-none ${errors.email ? "border-danger" : "border-secondary-subtle"}`}
+                  style={{ fontSize: "0.95rem" }}
                   {...register("email")}
                 />
                 <p
-                  className="small text-danger mt-2 mb-0"
-                  style={{ minHeight: "1rem", fontSize: "0.78rem" }}
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1rem", fontSize: "0.85rem" }}
                 >
                   {errors.email?.message || "\u00A0"}
                 </p>
@@ -359,7 +435,7 @@ function RegisterForm() {
                 <label
                   htmlFor="password"
                   className="form-label fw-semibold mb-2"
-                  style={{ color: "#1f2937" }}
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
                 >
                   Password
                 </label>
@@ -368,12 +444,13 @@ function RegisterForm() {
                   type="password"
                   placeholder="Enter your password"
                   aria-invalid={Boolean(errors.password)}
-                  className={`register-input form-control form-control-lg rounded-4 shadow-none ${errors.password ? "border-danger" : "border-secondary-subtle"}`}
+                  className={`register-input form-control rounded-4 shadow-none ${errors.password ? "border-danger" : "border-secondary-subtle"}`}
+                  style={{ fontSize: "0.95rem" }}
                   {...register("password")}
                 />
                 <p
-                  className="small text-danger mt-2 mb-0"
-                  style={{ minHeight: "1rem", fontSize: "0.78rem" }}
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1rem", fontSize: "0.85rem" }}
                 >
                   {errors.password?.message || "\u00A0"}
                 </p>
@@ -381,7 +458,7 @@ function RegisterForm() {
 
               <button
                 type="submit"
-                className="register-submit-button btn w-100 rounded-4 fw-bold text-white border-0 py-3 mt-2 shadow"
+                className="register-submit-button btn w-100 rounded-4 fw-bold text-white border-0 py-2 mt-2 shadow"
                 style={{
                   background:
                     "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
@@ -397,7 +474,11 @@ function RegisterForm() {
                 <div className="flex-grow-1 border-top border-secondary-subtle" />
                 <span
                   className="small fw-semibold text-uppercase"
-                  style={{ color: "#98A2B3", letterSpacing: "0.14em" }}
+                  style={{
+                    color: "#98A2B3",
+                    letterSpacing: "0.14em",
+                    fontSize: "0.75rem",
+                  }}
                 >
                   Or continue with
                 </span>
@@ -414,14 +495,14 @@ function RegisterForm() {
                     theme="outline"
                     size="large"
                     logo_alignment="left"
-                    width="388"
+                    width="340"
                   />
                 </div>
               </div>
 
               <p
                 className="register-signin-copy text-center mb-0 mt-2"
-                style={{ color: "#667085", fontSize: "0.92rem" }}
+                style={{ color: "#667085", fontSize: "0.875rem" }}
               >
                 Already have an account?{" "}
                 <Link

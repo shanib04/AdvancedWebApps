@@ -30,12 +30,12 @@ export const getStoredSessionUser = (): SessionUser | null => {
 export const normalizeSessionUser = (user: SessionUser): SessionUser => {
   const legacyImageUrl = (user as SessionUser & { imageUrl?: string }).imageUrl;
   const rawPhoto = user.photoUrl || legacyImageUrl;
-  const { ...rest } = user as SessionUser & {
+  const { ...fullUser } = user as SessionUser & {
     imageUrl?: string;
   };
 
   return {
-    ...rest,
+    ...fullUser,
     photoUrl: normalizePhotoUrl(rawPhoto),
   };
 };
