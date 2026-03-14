@@ -81,7 +81,8 @@ function LoginForm() {
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         showFailed(
-          error.response.data?.error || "Invalid username or password",
+          error.response.data?.error ||
+            "Incorrect username, email, or password",
         );
       } else {
         showFailed(

@@ -33,7 +33,10 @@ export const getUserFriendlyApiError = (
     return backendError;
   }
 
-  if (status === 401 && backendError === "Invalid username or password") {
+  if (
+    status === 401 &&
+    backendError === "Incorrect username, email, or password"
+  ) {
     return backendError;
   }
 

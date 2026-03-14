@@ -185,7 +185,9 @@ export const login = async (req: Request, res: Response): HandlerResponse => {
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res
+        .status(401)
+        .json({ error: "Incorrect username, email, or password" });
     }
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
