@@ -1,4 +1,6 @@
-export const defaultUserPhotoUrl = "/public/images/default-user.svg";
+import defaultUserSvg from "../assets/default-user.svg";
+
+export const defaultUserPhotoUrl = defaultUserSvg;
 
 export const normalizePhotoUrl = (value?: string): string => {
   if (!value) return defaultUserPhotoUrl;

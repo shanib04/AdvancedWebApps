@@ -9,9 +9,35 @@ export const getUserFriendlyApiError = (
   }
 
   const status = error.response?.status;
+  const backendError = (error.response?.data as { error?: string })?.error;
 
   if (!status) {
     return "We could not reach the server. Please check your connection and try again.";
+  }
+
+  // Map specific backend errors directly if needed
+  if (status === 409 && backendError) {
+    if (backendError.includes("Username")) {
+      return "This username is already used. Please choose another one.";
+    }
+    if (backendError.includes("Email")) {
+      return "This email is already used. Please use a different one.";
+    }
+    return backendError;
+  }
+
+  if (
+    status === 404 &&
+    backendError === "User with this email/username not found"
+  ) {
+    return backendError;
+  }
+
+  if (
+    status === 401 &&
+    backendError === "Incorrect username, email, or password"
+  ) {
+    return backendError;
   }
 
   if (status === 400 || status === 422) {

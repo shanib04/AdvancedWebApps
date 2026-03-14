@@ -10,7 +10,6 @@ export type SessionUser = {
   username?: string;
   name?: string;
   email?: string;
-  imageUrl?: string;
 };
 
 const USER_STORAGE_KEY = "user";
@@ -29,10 +28,14 @@ export const getStoredSessionUser = (): SessionUser | null => {
 };
 
 export const normalizeSessionUser = (user: SessionUser): SessionUser => {
-  const rawPhoto = user.photoUrl || user.imageUrl;
+  const legacyImageUrl = (user as SessionUser & { imageUrl?: string }).imageUrl;
+  const rawPhoto = user.photoUrl || legacyImageUrl;
+  const { ...fullUser } = user as SessionUser & {
+    imageUrl?: string;
+  };
 
   return {
-    ...user,
+    ...fullUser,
     photoUrl: normalizePhotoUrl(rawPhoto),
   };
 };

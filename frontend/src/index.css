@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap");
+
 html,
 body,
 #root {
@@ -8,6 +10,508 @@ body {
   margin: 0;
   min-width: 320px;
   overflow-x: hidden;
+}
+
+.register-screen-shell {
+  max-width: 380px;
+}
+
+.register-form-panel {
+  overflow-y: auto;
+}
+
+@media (min-width: 992px) {
+  .register-scroll-page {
+    overflow: auto;
+  }
+
+  .register-form-panel {
+    max-height: 100vh;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .register-form-panel {
+    overflow: auto;
+    max-height: none;
+  }
+}
+
+.register-scroll-page {
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.login-input {
+  height: 3.75rem;
+  min-height: 3.75rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0.95rem;
+  padding-right: 0.95rem;
+  font-size: 1rem;
+  line-height: 3.75rem;
+}
+
+.login-input::placeholder {
+  color: #98a2b3;
+  font-size: 1rem;
+  line-height: 3.75rem;
+  opacity: 1;
+}
+
+.register-input {
+  height: 4rem !important;
+  min-height: 4rem;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  border-color: #d7dce5;
+  font-size: 1rem;
+  line-height: normal !important;
+  color: #475467;
+  background: rgba(255, 255, 255, 0.9);
+  display: block;
+}
+
+.register-input::placeholder {
+  color: #98a2b3;
+  font-size: 1rem;
+  line-height: normal;
+  opacity: 1;
+}
+
+.register-input[type="password"] {
+  letter-spacing: 0.02em;
+}
+
+.register-input:focus {
+  border-color: #9db9ff;
+  box-shadow: 0 0 0 0.18rem rgba(59, 130, 246, 0.13) !important;
+}
+
+.register-upload-panel {
+  padding-top: 0.15rem;
+  padding-bottom: 0.1rem;
+}
+
+.register-upload-trigger {
+  min-height: 6.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(208, 217, 230, 0.9);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(248, 250, 252, 0.98) 100%
+  );
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.register-upload-trigger:hover {
+  border-color: rgba(147, 197, 253, 0.95);
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.08);
+}
+
+.register-upload-circle {
+  width: 5rem;
+  height: 5rem;
+  flex-shrink: 0;
+  border: 2px dashed #d4deec;
+  background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f8fafc 100%);
+  box-shadow:
+    0 10px 20px rgba(148, 163, 184, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.register-upload-trigger:hover .register-upload-circle {
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 24px rgba(59, 130, 246, 0.11),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+
+.register-upload-trigger--filled {
+  border-color: rgba(191, 219, 254, 0.95);
+  background: linear-gradient(
+    180deg,
+    rgba(239, 246, 255, 0.78) 0%,
+    rgba(255, 255, 255, 0.98) 100%
+  );
+}
+
+.register-upload-circle--filled {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.register-upload-icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf4ff 100%);
+  box-shadow: 0 8px 18px rgba(125, 153, 191, 0.16);
+  transition: opacity 0.18s ease;
+}
+
+.register-upload-title {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.register-upload-copy {
+  min-width: 0;
+}
+
+.register-upload-copy-title {
+  color: #111827;
+  font-size: 0.98rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.register-upload-copy-subtitle {
+  margin-top: 0.25rem;
+  color: #667085;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.register-upload-error {
+  min-height: 1rem;
+  font-size: 0.78rem;
+}
+
+.register-upload-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.02) 0%,
+    rgba(15, 23, 42, 0.18) 100%
+  );
+}
+
+.google-login-shell > div,
+.google-login-shell iframe {
+  width: 100% !important;
+}
+
+.google-login-shell [role="button"],
+.google-login-shell div[style*="height: 40px"] {
+  border-radius: 1rem !important;
+}
+
+.login-gallery-fade {
+  width: 28%;
+  background: linear-gradient(
+    90deg,
+    rgba(243, 244, 248, 0) 0%,
+    rgba(243, 244, 248, 0.22) 28%,
+    rgba(243, 244, 248, 0.72) 74%,
+    rgba(243, 244, 248, 1) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.login-gallery-canvas {
+  height: calc(100vh - 2.5rem);
+  min-height: 0;
+}
+
+@media (min-width: 992px) {
+  .login-page {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .login-gallery-panel,
+  .login-form-panel {
+    height: 100vh;
+  }
+
+  .login-form-shell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: calc(100vh - 2rem);
+  }
+
+  .register-form-shell {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-height: none;
+    padding-block: 1.25rem;
+  }
+
+  .login-page-title {
+    font-size: clamp(2.1rem, 3.3vw, 3rem) !important;
+  }
+
+  .register-page-title {
+    font-size: clamp(1.75rem, 2.35vw, 2.2rem) !important;
+  }
+
+  .register-form-panel {
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .login-page {
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 992px) and (max-height: 940px) {
+  .login-form-shell {
+    max-height: calc(100vh - 1rem);
+  }
+
+  .register-form-shell {
+    max-height: none;
+    padding-block: 1rem;
+  }
+
+  .login-brand-row {
+    margin-bottom: 0.45rem !important;
+  }
+
+  .login-heading-block {
+    margin-bottom: 1rem !important;
+    padding-bottom: 0 !important;
+  }
+
+  .login-page-title {
+    font-size: clamp(1.95rem, 2.8vw, 2.5rem) !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .login-page-subtitle {
+    font-size: 0.96rem !important;
+  }
+
+  .register-heading-block {
+    margin-bottom: 0.85rem !important;
+  }
+
+  .register-page-title {
+    font-size: clamp(1.6rem, 2vw, 1.95rem) !important;
+    margin-bottom: 0.3rem !important;
+  }
+
+  .register-page-subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  .register-form-content {
+    gap: 0.5rem !important;
+  }
+
+  .register-input {
+    height: 3.2rem !important;
+    min-height: 3.2rem;
+    padding-left: 0.95rem !important;
+    padding-right: 0.95rem !important;
+    font-size: 1rem;
+    line-height: normal !important;
+  }
+
+  .register-input::placeholder {
+    font-size: 1rem;
+    line-height: normal;
+  }
+
+  .register-upload-circle {
+    width: 5.1rem;
+    height: 5.1rem;
+  }
+
+  .register-submit-button {
+    margin-top: 0.35rem !important;
+    padding-top: 0.68rem !important;
+    padding-bottom: 0.68rem !important;
+    font-size: 0.94rem !important;
+  }
+
+  .register-separator {
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+
+  .register-signin-copy {
+    margin-top: 0.3rem !important;
+    font-size: 0.88rem !important;
+  }
+
+  .register-upload-trigger .fw-bold {
+    font-size: 0.96rem;
+  }
+
+  .register-upload-trigger .small {
+    font-size: 0.84rem !important;
+  }
+
+  .login-form-content {
+    gap: 0.5rem !important;
+  }
+
+  .login-input {
+    height: 3.35rem;
+    min-height: 3.35rem;
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    line-height: 3.35rem;
+  }
+
+  .login-input::placeholder {
+    line-height: 3.35rem;
+  }
+
+  .login-submit-button {
+    margin-top: 0.5rem !important;
+    padding-top: 0.9rem !important;
+    padding-bottom: 0.9rem !important;
+  }
+
+  .login-separator {
+    margin-top: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    padding-top: 0 !important;
+  }
+
+  .login-signup-copy {
+    margin-top: 0.875rem !important;
+    font-size: 0.94rem !important;
+  }
+
+  .google-login-shell {
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
+  }
+
+  .login-gallery-canvas {
+    height: calc(100vh - 1.5rem);
+  }
+}
+
+@media (min-width: 992px) and (max-height: 820px) {
+  .register-page-title {
+    font-size: clamp(1.45rem, 1.8vw, 1.75rem) !important;
+  }
+
+  .register-page-subtitle {
+    font-size: 0.82rem !important;
+  }
+
+  .register-form-content {
+    gap: 0.35rem !important;
+  }
+
+  .register-input {
+    height: 3rem !important;
+    min-height: 3rem;
+    padding-left: 0.9rem !important;
+    padding-right: 0.9rem !important;
+    font-size: 0.96rem;
+    line-height: normal !important;
+  }
+
+  .register-input::placeholder {
+    font-size: 0.96rem;
+    line-height: normal;
+  }
+
+  .register-upload-circle {
+    width: 4.65rem;
+    height: 4.65rem;
+  }
+
+  .register-submit-button {
+    font-size: 0.9rem !important;
+    padding-top: 0.58rem !important;
+    padding-bottom: 0.58rem !important;
+  }
+
+  .register-separator {
+    margin-top: 0.2rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .register-signin-copy {
+    margin-top: 0.15rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .login-brand-row {
+    margin-bottom: 0.55rem !important;
+  }
+
+  .register-heading-block {
+    margin-bottom: 0.45rem !important;
+  }
+
+  .register-upload-trigger .fw-bold {
+    font-size: 0.88rem;
+  }
+
+  .register-upload-trigger .small {
+    font-size: 0.78rem !important;
+  }
+
+  .login-page-title {
+    font-size: clamp(1.75rem, 2.4vw, 2.15rem) !important;
+    line-height: 0.98 !important;
+  }
+
+  .login-page-subtitle {
+    font-size: 0.9rem !important;
+  }
+
+  .login-form-content {
+    gap: 0.35rem !important;
+  }
+
+  .login-input {
+    height: 3.1rem;
+    min-height: 3.1rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+    line-height: 3.1rem;
+  }
+
+  .login-input::placeholder {
+    line-height: 3.1rem;
+  }
+
+  .login-submit-button {
+    font-size: 1rem !important;
+    padding-top: 0.82rem !important;
+    padding-bottom: 0.82rem !important;
+  }
+
+  .login-separator {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .login-signup-copy {
+    margin-top: 0.65rem !important;
+  }
+}
+
+@media (min-width: 992px) and (max-height: 760px) {
+  .register-form-shell {
+    padding-block: 0.75rem;
+  }
 }
 
 .floating-heart {
@@ -41,6 +545,7 @@ body {
     transform: translate(-50%, 0) scale(0.8);
     opacity: 0.95;
   }
+
   100% {
     transform: translate(-50%, -34px) scale(1.15);
     opacity: 0;
@@ -56,6 +561,7 @@ body {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

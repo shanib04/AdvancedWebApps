@@ -55,9 +55,19 @@ const normalizeUsername = (value: string) => {
   return normalized || "User";
 };
 
+const resolveGoogleUsername = (value: string) => {
+  // Convert spaces to underscores and make lowercase, removing other whitespace
+  const resolved = value.trim().replace(/\s+/g, "_").toLowerCase();
+
+  // Also strip any non-allowed characters to be safe (matching frontend regex)
+  return resolved.replace(/[^a-z0-9\-_]/g, "") || "user";
+};
+
 // Cleans up the requested name and appends an incrementing number until it finds a username that is completely unique in the database.
-const getUniqueUsername = async (preferredValue: string) => {
-  const baseUsername = normalizeUsername(preferredValue);
+const getUniqueUsername = async (preferredValue: string, isGoogle = false) => {
+  const baseUsername = isGoogle
+    ? resolveGoogleUsername(preferredValue)
+    : normalizeUsername(preferredValue);
   let candidate = baseUsername;
   let suffix = 1;
 
@@ -94,7 +104,7 @@ export const register = async (
   res: Response,
 ): HandlerResponse => {
   try {
-    const { username, email, password, photoUrl } = req.body;
+    const { username, email, password, displayName, photoUrl } = req.body;
     if (!username || !email || !password) {
       return res
         .status(422)
@@ -123,6 +133,7 @@ export const register = async (
       username: normalizedUsername,
       email,
       password: hashedPassword,
+      displayName: displayName || normalizedUsername,
       photoUrl: resolvedPhotoUrl,
       refreshToken: [],
     });
@@ -137,6 +148,7 @@ export const register = async (
         _id: user._id,
         username: user.username,
         email: user.email,
+        displayName: user.displayName,
         photoUrl: resolveUserPhotoUrl(req, user.photoUrl),
       },
     });
@@ -147,33 +159,36 @@ export const register = async (
 
 export const login = async (req: Request, res: Response): HandlerResponse => {
   try {
-    const { username, email, password } = req.body;
-    if ((!username && !email) || !password) {
-      return res.status(422).json({ error: "email and password are required" });
+    const { username, email, identifier, password } = req.body;
+
+    const loginIdentifier = identifier || email || username;
+
+    if (!loginIdentifier || !password) {
+      return res
+        .status(422)
+        .json({ error: "Username or email and password are required" });
     }
 
-    const normalizedUsername = username
-      ? normalizeUsername(username)
-      : undefined;
+    const normalizedIdentifier = normalizeUsername(loginIdentifier);
 
-    const user = await User.findOne(
-      email
-        ? { email }
-        : {
-            username: new RegExp(
-              `^${escapeRegex(normalizedUsername || "")}$`,
-              "i",
-            ),
-          },
-    );
+    const user = await User.findOne({
+      $or: [
+        { email: loginIdentifier },
+        { username: new RegExp(`^${escapeRegex(normalizedIdentifier)}$`, "i") },
+      ],
+    });
+
     if (!user) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res
+        .status(404)
+        .json({ error: "User with this email/username not found" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res
+        .status(401)
+        .json({ error: "Incorrect username, email, or password" });
     }
-
     const tokens = generateToken(user._id.toString());
     user.refreshToken.push(tokens.refreshToken);
     await user.save({ timestamps: false });
@@ -226,9 +241,10 @@ export const googleSignin = async (
     let profileFieldsUpdated = false;
     if (!user) {
       const generatedPassword = await bcrypt.hash(`google-${Date.now()}`, 10);
-      const uniqueUsername = await getUniqueUsername(preferredUsername);
+      const uniqueUsername = await getUniqueUsername(preferredUsername, true);
       user = await User.create({
         username: uniqueUsername,
+        displayName: name || uniqueUsername,
         email,
         password: generatedPassword,
         photoUrl: resolveUserPhotoUrl(req, picture),
@@ -241,7 +257,11 @@ export const googleSignin = async (
         profileFieldsUpdated = true;
       }
       if (!user.username) {
-        user.username = await getUniqueUsername(preferredUsername);
+        user.username = await getUniqueUsername(preferredUsername, true);
+        profileFieldsUpdated = true;
+      }
+      if (!user.displayName && name) {
+        user.displayName = name;
         profileFieldsUpdated = true;
       }
     }
