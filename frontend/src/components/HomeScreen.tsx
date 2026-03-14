@@ -4,6 +4,7 @@ import useAppToast from "../hooks/useAppToast";
 import AppToast from "./AppToast";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import { defaultUserPhotoUrl } from "../utils/photoUtils";
 
 interface LoggedInUser {
   username?: string;
@@ -17,7 +18,7 @@ function HomeScreen() {
   const storedUser = localStorage.getItem("user");
   const user: LoggedInUser = storedUser ? JSON.parse(storedUser) : {};
   const username = user.username || "User";
-  const fallbackImage = "http://localhost:3000/public/images/default-user.svg";
+  const fallbackImage = defaultUserPhotoUrl;
   const profileImage = user.photoUrl || fallbackImage;
 
   useEffect(() => {

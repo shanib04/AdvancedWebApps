@@ -2,7 +2,6 @@
 
 import "dotenv/config";
 import https from "https";
-import http from "http";
 import fs from "fs";
 import path from "path";
 import app from "./index";
@@ -16,8 +15,8 @@ if (NODE_ENV !== "production") {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 } else {
-  const defaultKeyPath = path.join(__dirname, "../../../certs/client-key.pem");
-  const defaultCertPath = path.join(__dirname, "../../../certs/client-cert.pem");
+  const defaultKeyPath = path.join(__dirname, "../../../certs/vibeis.key");
+  const defaultCertPath = path.join(__dirname, "../../../certs/vibeis.crt");
 
   const keyPath = process.env.HTTPS_KEY_PATH || defaultKeyPath;
   const certPath = process.env.HTTPS_CERT_PATH || defaultCertPath;
