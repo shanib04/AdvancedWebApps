@@ -39,13 +39,9 @@ function PostCard({
   const [isFetchingEditImages, setIsFetchingEditImages] = useState(false);
   const [isEditInternetImageMode, setIsEditInternetImageMode] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const [isSaved, setIsSaved] = useState(
-    (post.savedBy ?? []).includes(currentUserId),
-  );
-  const [isLiked, setIsLiked] = useState(
-    (post.likes ?? []).includes(currentUserId),
-  );
-  const [likesCount, setLikesCount] = useState((post.likes ?? []).length);
+  const [isSaved, setIsSaved] = useState(Boolean(post.isSaved));
+  const [isLiked, setIsLiked] = useState(Boolean(post.isLiked));
+  const [likesCount, setLikesCount] = useState(post.likeCount ?? 0);
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
   const likeAnimationTimeoutRef = useRef<number | null>(null);
   const postCardRef = useRef<HTMLElement | null>(null);
@@ -57,12 +53,10 @@ function PostCard({
   );
 
   useEffect(() => {
-    const likes = post.likes ?? [];
-    const savedBy = post.savedBy ?? [];
-    setIsLiked(likes.includes(currentUserId));
-    setLikesCount(likes.length);
-    setIsSaved(savedBy.includes(currentUserId));
-  }, [post.likes, post.savedBy, currentUserId]);
+    setIsLiked(Boolean(post.isLiked));
+    setLikesCount(post.likeCount ?? 0);
+    setIsSaved(Boolean(post.isSaved));
+  }, [post.isLiked, post.likeCount, post.isSaved]);
 
   useEffect(() => {
     return () => {

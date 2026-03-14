@@ -14,18 +14,10 @@ const postSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
     },
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    savedBy: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
