@@ -261,11 +261,17 @@ export const toggleSave = async (
 
     if (existingSave) {
       await Save.deleteOne({ _id: existingSave._id });
-      updatedPost = await Post.findById(id).populate("user", "username displayName photoUrl");
+      updatedPost = await Post.findById(id).populate(
+        "user",
+        "username displayName photoUrl",
+      );
       actionMessage = "Post unsaved";
     } else {
       await Save.create({ userId, postId: id as string });
-      updatedPost = await Post.findById(id).populate("user", "username displayName photoUrl");
+      updatedPost = await Post.findById(id).populate(
+        "user",
+        "username displayName photoUrl",
+      );
       actionMessage = "Post saved";
     }
 
