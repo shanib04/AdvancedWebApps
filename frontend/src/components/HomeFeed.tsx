@@ -16,6 +16,7 @@ import HomePostsList from "./HomePostsList";
 import LeftSidebar from "./LeftSidebar";
 import Navbar from "./Navbar";
 import RightAIWidget from "./RightAIWidget";
+import UserFilterWidget from "./UserFilterWidget";
 import "../styles/feed-modern.css";
 import { normalizePhotoUrl } from "../utils/photoUtils";
 import apiClient from "../services/api-client";
@@ -30,6 +31,7 @@ type InitialDraftPayload = {
 function HomeFeed() {
   const [searchParams] = useSearchParams();
   const isSavedMode = searchParams.get("saved") === "true";
+  const isLikedMode = searchParams.get("liked") === "true";
   const [page, setPage] = useState(feedCache.page);
 
   useEffect(() => {
@@ -38,6 +40,9 @@ function HomeFeed() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDraftMode, setIsDraftMode] = useState(false);
+  const [selectedUserFilterIds, setSelectedUserFilterIds] = useState<string[]>(
+    [],
+  );
   const [draftPayload, setDraftPayload] = useState<InitialDraftPayload | null>(
     null,
   );
@@ -51,11 +56,28 @@ function HomeFeed() {
   const [savedError, setSavedError] = useState("");
   const [savedIsLoading, setSavedIsLoading] = useState(false);
 
+  // Custom posts state for liked mode
+  const [likedPosts, setLikedPosts] = useState<Post[]>([]);
+  const [likedError, setLikedError] = useState("");
+  const [likedIsLoading, setLikedIsLoading] = useState(false);
+
   // Use different posts based on mode
   const { posts, setPosts, error, isLoading, hasMore } = usePosts(page);
-  const currentPosts = isSavedMode ? savedPosts : posts;
-  const currentError = isSavedMode ? savedError : error;
-  const currentIsLoading = isSavedMode ? savedIsLoading : isLoading;
+  const currentPosts = isSavedMode
+    ? savedPosts
+    : isLikedMode
+      ? likedPosts
+      : posts;
+  const currentError = isSavedMode
+    ? savedError
+    : isLikedMode
+      ? likedError
+      : error;
+  const currentIsLoading = isSavedMode
+    ? savedIsLoading
+    : isLikedMode
+      ? likedIsLoading
+      : isLoading;
 
   const initialUser = useMemo(() => getStoredSessionUser(), []);
 
@@ -129,6 +151,7 @@ function HomeFeed() {
 
     setPosts((prevPosts) => patchAuthoredPosts(prevPosts));
     setSavedPosts((prevPosts) => patchAuthoredPosts(prevPosts));
+    setLikedPosts((prevPosts) => patchAuthoredPosts(prevPosts));
   }, [
     currentUserId,
     currentUser?.username,
@@ -162,20 +185,64 @@ function HomeFeed() {
     fetchSavedPosts();
   }, [isSavedMode, currentUserId]);
 
+  // Fetch liked posts when in liked mode
+  useEffect(() => {
+    if (!isLikedMode || !currentUserId) return;
+
+    const fetchLikedPosts = async () => {
+      setLikedIsLoading(true);
+      setLikedError("");
+
+      try {
+        const response = await apiClient.get<Post[]>(
+          `/post/user/${currentUserId}/liked`,
+        );
+        setLikedPosts(response.data || []);
+      } catch (err: unknown) {
+        console.error("Failed to load liked posts:", err);
+        setLikedError("Failed to load liked posts.");
+        setLikedPosts([]);
+      } finally {
+        setLikedIsLoading(false);
+      }
+    };
+
+    fetchLikedPosts();
+  }, [isLikedMode, currentUserId]);
+
   // Update page title based on mode
   useEffect(() => {
-    document.title = isSavedMode
-      ? "Saved Posts - Advanced Web Apps"
-      : "Home - Advanced Web Apps";
-  }, [isSavedMode]);
+    if (isSavedMode) {
+      document.title = "Saved Posts - Advanced Web Apps";
+    } else if (isLikedMode) {
+      document.title = "Liked Posts - Advanced Web Apps";
+    } else {
+      document.title = "Home - Advanced Web Apps";
+    }
+  }, [isSavedMode, isLikedMode]);
 
   const filteredPosts = useMemo(() => {
-    const normalized = searchTerm.trim().toLowerCase();
-    if (!normalized) {
-      return currentPosts;
+    let result = currentPosts;
+
+    if (selectedUserFilterIds.length > 0) {
+      result = result.filter((post) => {
+        if (
+          typeof post.user === "object" &&
+          post.user !== null &&
+          post.user._id
+        ) {
+          return selectedUserFilterIds.includes(post.user._id);
+        }
+        return false;
+      });
     }
 
-    return currentPosts.filter((post) => {
+    const normalized = searchTerm.trim().toLowerCase();
+    if (!normalized) {
+      return result;
+    }
+
+    return result.filter((post) => {
       const contentText = post.content ?? "";
       const contentMatch = contentText.toLowerCase().includes(normalized);
       const userName =
@@ -185,7 +252,7 @@ function HomeFeed() {
       const userMatch = userName.toLowerCase().includes(normalized);
       return contentMatch || userMatch;
     });
-  }, [currentPosts, searchTerm]);
+  }, [currentPosts, searchTerm, selectedUserFilterIds]);
 
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
   const isSearchActive = normalizedSearchTerm.length > 0;
@@ -298,8 +365,16 @@ function HomeFeed() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleToggleUserFilter = (userId: string) => {
+    setSelectedUserFilterIds((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
+    );
+  };
+
   return (
-    <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+    <main className="container-fluid min-vh-100 px-0 pb-4">
       <AppToast toasts={toasts} onClose={removeToast} />
       <Navbar searchValue={searchTerm} onSearchChange={setSearchTerm} />
 
@@ -309,40 +384,46 @@ function HomeFeed() {
             className="col-lg-3 d-none d-lg-block position-sticky"
             style={{ top: "85px", alignSelf: "start" }}
           >
-            <LeftSidebar activePage={isSavedMode ? "saved" : "home"} />
+            <LeftSidebar
+              activePage={
+                isSavedMode ? "saved" : isLikedMode ? "liked" : "home"
+              }
+            />
           </aside>
 
           <section className="col-12 col-lg-6">
-            <div className="card border-0 shadow-sm rounded-5 mb-4 create-post-card">
-              <div className="card-body p-4">
-                {!isDraftMode ? (
-                  <CreatePostBox
-                    currentUserPhoto={currentUserPhoto}
-                    onPostCreated={(post) => {
-                      setPosts((prev) => [post, ...prev]);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    onActionSuccess={showSuccess}
-                    onActionFailed={showFailed}
-                  />
-                ) : (
-                  <HomeDraftStudio
-                    initialDraft={
-                      draftPayload || {
-                        text: "",
-                        keyword: "",
-                        images: [],
-                        includeImagesRequested: true,
+            {!isSavedMode && !isLikedMode && (
+              <div className="card border-0 shadow-sm rounded-5 mb-4 create-post-card">
+                <div className="card-body p-4">
+                  {!isDraftMode ? (
+                    <CreatePostBox
+                      currentUserPhoto={currentUserPhoto}
+                      onPostCreated={(post) => {
+                        setPosts((prev) => [post, ...prev]);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      onActionSuccess={showSuccess}
+                      onActionFailed={showFailed}
+                    />
+                  ) : (
+                    <HomeDraftStudio
+                      initialDraft={
+                        draftPayload || {
+                          text: "",
+                          keyword: "",
+                          images: [],
+                          includeImagesRequested: true,
+                        }
                       }
-                    }
-                    onClose={resetDraftMode}
-                    onDraftPublished={handleDraftPublished}
-                    onActionSuccess={showSuccess}
-                    onActionFailed={showFailed}
-                  />
-                )}
+                      onClose={resetDraftMode}
+                      onDraftPublished={handleDraftPublished}
+                      onActionSuccess={showSuccess}
+                      onActionFailed={showFailed}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <HomePostsList
               error={currentError}
@@ -362,9 +443,21 @@ function HomeFeed() {
           </section>
 
           <aside className="col-lg-3 d-none d-lg-block">
-            <RightAIWidget
-              onInitialDraftGenerated={handleInitialDraftGenerated}
-            />
+            {!isSavedMode && !isLikedMode && (
+              <RightAIWidget
+                onInitialDraftGenerated={handleInitialDraftGenerated}
+              />
+            )}
+            {(isSavedMode || isLikedMode) && currentPosts.length > 0 && (
+              <div className="position-sticky" style={{ top: "85px" }}>
+                <UserFilterWidget
+                  posts={currentPosts}
+                  title={isSavedMode ? "Saved from users" : "Liked from users"}
+                  selectedUserIds={selectedUserFilterIds}
+                  onToggleUser={handleToggleUserFilter}
+                />
+              </div>
+            )}
           </aside>
         </div>
       </div>

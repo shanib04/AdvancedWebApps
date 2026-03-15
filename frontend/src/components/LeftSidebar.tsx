@@ -1,7 +1,7 @@
 import { getStoredSessionUser } from "../utils/sessionUser";
 
 interface LeftSidebarProps {
-  activePage?: "home" | "saved" | "profile";
+  activePage?: "home" | "saved" | "liked" | "profile";
 }
 
 function LeftSidebar({ activePage }: LeftSidebarProps) {
@@ -26,6 +26,14 @@ function LeftSidebar({ activePage }: LeftSidebarProps) {
           }`}
         >
           🔖 Saved Posts
+        </a>
+        <a
+          href="/home?liked=true"
+          className={`list-group-item list-group-item-action rounded-4 border-0 shadow-sm mb-2 py-3 fw-semibold ${
+            activePage === "liked" ? "active" : ""
+          }`}
+        >
+          ❤️ Liked Posts
         </a>
         <a
           href={`/profile/${currentUserId}`}
