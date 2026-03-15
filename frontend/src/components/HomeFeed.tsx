@@ -43,6 +43,7 @@ function HomeFeed() {
   const [selectedUserFilterIds, setSelectedUserFilterIds] = useState<string[]>(
     [],
   );
+  const [filterAnimationSeed, setFilterAnimationSeed] = useState(0);
   const [draftPayload, setDraftPayload] = useState<InitialDraftPayload | null>(
     null,
   );
@@ -371,6 +372,7 @@ function HomeFeed() {
         ? prev.filter((id) => id !== userId)
         : [...prev, userId],
     );
+    setFilterAnimationSeed((prev) => prev + 1);
   };
 
   return (
@@ -430,6 +432,7 @@ function HomeFeed() {
               isLoading={currentIsLoading}
               posts={currentPosts}
               filteredPosts={filteredPosts}
+              filterAnimationSeed={filterAnimationSeed}
               currentUserId={currentUserId}
               onPostUpdated={handlePostUpdated}
               onPostDeleted={handlePostDeleted}

@@ -180,11 +180,11 @@ function CreatePostBox({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
-      <div className="d-flex gap-3 mb-3">
+      <div className="d-flex gap-3 mb-2">
         <img
           src={currentUserPhoto}
           alt="Your avatar"
-          className="avatar-soft"
+          className="avatar-soft shadow-sm bg-white"
           referrerPolicy="no-referrer"
           crossOrigin="anonymous"
           onError={(event) => {
@@ -195,19 +195,17 @@ function CreatePostBox({
           }}
         />
         <div className="w-100">
-          <label htmlFor="text" className="form-label fw-semibold mb-1">
-            What's on your mind?
-          </label>
-          <textarea
-            id="text"
-            className="form-control rounded-4 border-0 shadow"
-            rows={4}
-            placeholder="Share something with your community..."
-            style={{ backgroundColor: "#f9fbff" }}
-            {...register("text")}
-          />
+          <div className="create-message-shell">
+            <textarea
+              id="text"
+              className="form-control create-message-input px-3 py-2 fs-5 rounded-4"
+              rows={selectedImagePreview || selectedCreateImage ? 2 : 3}
+              placeholder="Share something with your community..."
+              {...register("text")}
+            />
+          </div>
           <p
-            className="text-danger small mt-1 mb-0"
+            className="text-danger small mt-1 mb-0 ms-2"
             style={{ minHeight: "1.25rem" }}
           >
             {errors.text?.message || "\u00A0"}
@@ -227,20 +225,32 @@ function CreatePostBox({
         }}
       />
 
-      {selectedImagePreview && (
-        <div className="mb-3 position-relative d-inline-block">
+      {(selectedImagePreview ||
+        (selectedCreateImage && !isCreateInternetImageMode)) && (
+        <div className="mb-3 ms-2 position-relative d-inline-block">
           <img
-            src={selectedImagePreview}
+            src={selectedImagePreview || selectedCreateImage || ""}
             alt="Selected"
-            className="preview-thumb rounded-4"
+            className="preview-thumb rounded-4 shadow-sm"
+            style={{
+              width: "auto",
+              height: "auto",
+              maxHeight: "250px",
+              maxWidth: "100%",
+              objectFit: "contain",
+            }}
           />
           <button
             type="button"
-            className="btn btn-danger position-absolute top-0 start-100 translate-middle remove-image-btn"
+            className="btn btn-danger position-absolute top-0 start-100 translate-middle remove-image-btn shadow"
             onClick={() => {
-              setValue("image", undefined);
-              if (imageInputRef.current) {
-                imageInputRef.current.value = "";
+              if (selectedImagePreview) {
+                setValue("image", undefined);
+                if (imageInputRef.current) {
+                  imageInputRef.current.value = "";
+                }
+              } else {
+                setSelectedCreateImage(null);
               }
             }}
             aria-label="Remove selected image"
@@ -252,31 +262,185 @@ function CreatePostBox({
         </div>
       )}
 
-      <div className="d-flex justify-content-between align-items-center">
-        <span
-          title={
-            isCreateInternetImageMode
-              ? "Turn off 'Use image from internet' to import a photo from your files."
-              : "Import a photo from your files."
-          }
-        >
+      {isCreateInternetImageMode && (
+        <div className="mb-4 mt-2 px-2">
+          <div
+            className="p-3 rounded-4 border position-relative tab-opacity-fade shadow-sm"
+            style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+          >
+            <button
+              type="button"
+              className="btn-close position-absolute top-0 end-0 m-3"
+              aria-label="Close"
+              onClick={handleToggleCreateInternetImageMode}
+            />
+            <label className="form-label fw-semibold text-primary d-flex align-items-center gap-2 mb-3">
+              <span className="material-symbols-outlined">image_search</span>
+              Find or Link Image
+            </label>
+
+            <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
+              <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
+                <span className="material-symbols-outlined fs-5">search</span>
+              </span>
+              <input
+                type="text"
+                className="form-control border-0 shadow-none"
+                placeholder="e.g. nature, coding, coffee"
+                value={createImageSearchText}
+                onChange={(event) =>
+                  setCreateImageSearchText(event.target.value)
+                }
+              />
+              <button
+                type="button"
+                className="btn btn-primary px-4 fw-medium rounded-pill m-1"
+                disabled={isFetchingCreateImages}
+                onClick={handleFetchCreateImages}
+              >
+                {isFetchingCreateImages ? "Fetching..." : "Fetch Images"}
+              </button>
+            </div>
+
+            <div className="d-flex align-items-center mb-3">
+              <span className="text-muted small px-3 fw-medium">OR</span>
+            </div>
+
+            <div className="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white p-1">
+              <span className="input-group-text bg-transparent text-muted border-0 ps-3">
+                <span className="material-symbols-outlined fs-5">link</span>
+              </span>
+              <input
+                type="url"
+                className="form-control border-0 ps-1 shadow-none"
+                placeholder="Paste an image URL here..."
+                value={manualImageUrl}
+                onChange={(event) => setManualImageUrl(event.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary px-4 fw-medium text-white rounded-pill"
+                onClick={handleAddManualImageUrl}
+              >
+                Add URL
+              </button>
+            </div>
+
+            {createImages.length > 0 && (
+              <div className="row g-2 mb-2">
+                {createImages.map((imageUrl) => (
+                  <div className="col-4 col-sm-3" key={imageUrl}>
+                    <img
+                      src={imageUrl}
+                      alt="Internet option"
+                      className={`img-fluid w-100 rounded-3 ${
+                        selectedCreateImage === imageUrl
+                          ? "border border-4 border-primary shadow-sm"
+                          : "opacity-75"
+                      }`}
+                      style={{
+                        height: "90px",
+                        objectFit: "cover",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseOver={(event) => {
+                        if (selectedCreateImage !== imageUrl) {
+                          event.currentTarget.style.opacity = "1";
+                        }
+                      }}
+                      onMouseOut={(event) => {
+                        if (selectedCreateImage !== imageUrl) {
+                          event.currentTarget.style.opacity = "0.75";
+                        }
+                      }}
+                      onClick={() => setSelectedCreateImage(imageUrl)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {selectedCreateImage ? (
+              <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
+                  onClick={() => setSelectedCreateImage(null)}
+                >
+                  Clear Selection
+                </button>
+                <small className="text-muted">
+                  Image selected and ready for post.
+                </small>
+              </div>
+            ) : (
+              <small className="text-muted d-block mt-2">
+                Select an image above or paste a URL to attach it to your post.
+              </small>
+            )}
+          </div>
+        </div>
+      )}
+
+      <hr className="my-2 opacity-10 mx-2" style={{ borderColor: "#cbd5e1" }} />
+
+      <div className="d-flex justify-content-between align-items-center mt-2 px-2 pb-1">
+        <div className="d-flex gap-2">
           <button
             type="button"
-            className="btn btn-outline-primary rounded-pill d-flex align-items-center gap-2"
+            className={`btn btn-light rounded-circle d-flex align-items-center justify-content-center p-2 icon-action shadow-sm ${
+              selectedFile
+                ? "text-white bg-primary border-primary"
+                : "text-primary"
+            }`}
+            title={
+              isCreateInternetImageMode
+                ? "Turn off internet image mode to upload from your device"
+                : "Upload Photo"
+            }
             onClick={() => imageInputRef.current?.click()}
             disabled={isCreateInternetImageMode}
           >
-            <span className="material-symbols-outlined">
-              add_photo_alternate
-            </span>
-            {selectedImagePreview ? "Change Photo" : "Add Photo"}
+            <span className="material-symbols-outlined fs-5">image</span>
           </button>
-        </span>
+
+          <button
+            type="button"
+            className={`btn btn-light rounded-circle d-flex align-items-center justify-content-center p-2 icon-action position-relative shadow-sm ${
+              isCreateInternetImageMode ||
+              (!selectedFile && selectedCreateImage)
+                ? "text-white bg-primary border-primary"
+                : "text-primary"
+            }`}
+            title={
+              selectedFile
+                ? "Remove local file first"
+                : "Find on Web or Link URL"
+            }
+            onClick={handleToggleCreateInternetImageMode}
+            disabled={Boolean(selectedFile)}
+          >
+            <span className="material-symbols-outlined fs-5">language</span>
+            {selectedCreateImage &&
+              !selectedFile &&
+              !isCreateInternetImageMode && (
+                <span className="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle">
+                  <span className="visually-hidden">Image attached</span>
+                </span>
+              )}
+          </button>
+        </div>
 
         <button
           type="submit"
-          className="btn publish-btn text-white rounded-pill px-4"
-          disabled={isSubmitting}
+          className="btn publish-btn text-white rounded-pill px-4 py-2 fw-semibold shadow"
+          disabled={
+            isSubmitting ||
+            (!watch("text")?.trim() &&
+              !selectedImagePreview &&
+              !selectedCreateImage)
+          }
         >
           {isSubmitting ? (
             <span className="d-inline-flex align-items-center gap-2">
@@ -292,134 +456,6 @@ function CreatePostBox({
           )}
         </button>
       </div>
-
-      <div className="mt-3">
-        <div
-          className="form-check form-switch"
-          title={
-            selectedFile
-              ? "Remove the selected file to enable internet image toggle."
-              : "Toggle to search and select an internet image."
-          }
-        >
-          <input
-            className="form-check-input cursor-pointer"
-            type="checkbox"
-            role="switch"
-            id="create-internet-image-toggle"
-            checked={isCreateInternetImageMode}
-            disabled={Boolean(selectedFile)}
-            onChange={handleToggleCreateInternetImageMode}
-          />
-          <label
-            className="form-check-label"
-            htmlFor="create-internet-image-toggle"
-          >
-            Use image from internet
-          </label>
-        </div>
-
-        {selectedFile ? (
-          <small className="text-muted d-block mt-1">
-            Remove your selected local file to enable internet image search.
-          </small>
-        ) : isCreateInternetImageMode ? (
-          <small className="text-muted d-block mt-1">
-            Internet image mode is on. Local photo import is disabled until you
-            turn this off.
-          </small>
-        ) : null}
-      </div>
-
-      {isCreateInternetImageMode && (
-        <div className="mt-3 p-3 rounded-4 border bg-light-subtle">
-          <label className="form-label fw-semibold mb-2">
-            Fetch images from the internet
-          </label>
-
-          <div className="input-group mb-2">
-            <span className="input-group-text">Search</span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. nature, coding, coffee"
-              value={createImageSearchText}
-              onChange={(event) => setCreateImageSearchText(event.target.value)}
-            />
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              disabled={isFetchingCreateImages}
-              onClick={handleFetchCreateImages}
-            >
-              {isFetchingCreateImages ? "Fetching..." : "Fetch Images"}
-            </button>
-          </div>
-
-          <div className="input-group mb-3">
-            <span className="input-group-text bg-white text-muted border-end-0">
-              <span className="material-symbols-outlined fs-5">link</span>
-            </span>
-            <input
-              type="url"
-              className="form-control border-start-0 ps-0"
-              placeholder="Paste an image URL here..."
-              value={manualImageUrl}
-              onChange={(event) => setManualImageUrl(event.target.value)}
-            />
-            <button
-              type="button"
-              className="btn btn-outline-primary px-4"
-              onClick={handleAddManualImageUrl}
-            >
-              Add
-            </button>
-          </div>
-
-          {createImages.length > 0 && (
-            <div className="row g-2 mb-2">
-              {createImages.map((imageUrl) => (
-                <div className="col-6" key={imageUrl}>
-                  <img
-                    src={imageUrl}
-                    alt="Internet option"
-                    className={`img-fluid w-100 rounded-3 ${
-                      selectedCreateImage === imageUrl
-                        ? "border border-4 border-primary shadow"
-                        : "opacity-75"
-                    }`}
-                    style={{
-                      height: "120px",
-                      objectFit: "cover",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => setSelectedCreateImage(imageUrl)}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {selectedCreateImage ? (
-            <div className="d-flex align-items-center gap-2">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary"
-                onClick={() => setSelectedCreateImage(null)}
-              >
-                Clear Selected Internet Image
-              </button>
-              <small className="text-muted">
-                Selected internet image will be used if no file is uploaded.
-              </small>
-            </div>
-          ) : (
-            <small className="text-muted">
-              Pick an image above, or turn this off to keep file-only mode.
-            </small>
-          )}
-        </div>
-      )}
     </form>
   );
 }

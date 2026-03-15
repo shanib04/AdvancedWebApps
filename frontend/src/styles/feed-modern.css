@@ -82,6 +82,102 @@
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
+.create-message-shell {
+  position: relative;
+  margin-top: 0;
+  background: linear-gradient(180deg, #fbfdff 0%, #f3f8ff 100%);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 1.35rem;
+  box-shadow:
+    0 8px 20px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  padding: 0.2rem 0.25rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.create-message-input {
+  margin-top: 0;
+  background-color: transparent;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  resize: none;
+  overflow-y: auto;
+  max-height: 11rem;
+  line-height: 1.45;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79, 124, 255, 0.45) transparent;
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+}
+
+.app-scrollbar {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(79, 124, 255, 0.45) transparent;
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+}
+
+.ai-assistant-prompt {
+  resize: none;
+  max-height: 9.5rem;
+}
+
+.tab-opacity-fade-out {
+  animation: tabFadeOut 0.2s ease-in forwards;
+  pointer-events: none;
+}
+
+.create-message-input:focus {
+  background-color: transparent;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.create-message-shell:focus-within {
+  background: #ffffff;
+  border-color: rgba(79, 124, 255, 0.45);
+  box-shadow:
+    0 10px 22px rgba(79, 124, 255, 0.12),
+    0 0 0 0.13rem rgba(79, 124, 255, 0.14);
+}
+
+.create-message-input::-webkit-scrollbar,
+.app-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.create-message-input::-webkit-scrollbar-track,
+.app-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.create-message-input::-webkit-scrollbar-thumb,
+.app-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8fb0ff 0%, #6f96ff 100%);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.create-message-input::-webkit-scrollbar-thumb:hover,
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7fa4ff 0%, #5d88ff 100%);
+  background-clip: padding-box;
+}
+
+.create-message-input::-webkit-scrollbar-button,
+.app-scrollbar::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 .remove-image-btn {
   width: 1.75rem;
   height: 1.75rem;
@@ -161,5 +257,16 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes tabFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
   }
 }
