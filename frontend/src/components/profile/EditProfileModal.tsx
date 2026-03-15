@@ -313,7 +313,7 @@ const EditProfileModal = ({
           <div className="modal-footer border-top border-light-subtle py-4 px-5 d-flex justify-content-between align-items-center gap-3">
             <button
               type="button"
-              className="btn btn-sm rounded-pill d-flex align-items-center justify-content-center"
+              className="btn btn-sm rounded-pill d-flex align-items-center justify-content-center btn-delete-profile"
               style={{
                 width: "40px",
                 height: "40px",

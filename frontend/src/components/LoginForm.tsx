@@ -132,7 +132,6 @@ function LoginForm() {
     <main
       className="login-page container-fluid min-vh-100 px-0"
       style={{
-        backgroundColor: "#f3f4f8",
         fontFamily: '"Spline Sans", sans-serif',
       }}
     >
