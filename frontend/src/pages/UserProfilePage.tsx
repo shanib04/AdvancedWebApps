@@ -110,7 +110,7 @@ const UserProfilePage = () => {
 
   if (loading) {
     return (
-      <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+      <main className="container-fluid min-vh-100 px-0 pb-4">
         <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
         <div className="container mt-4 text-center">
           <div className="spinner-border text-primary" role="status">
@@ -123,7 +123,7 @@ const UserProfilePage = () => {
 
   if (error || !user) {
     return (
-      <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+      <main className="container-fluid min-vh-100 px-0 pb-4">
         <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
         <div className="container mt-4">
           <div className="alert alert-danger">{error || "User not found."}</div>
@@ -133,7 +133,7 @@ const UserProfilePage = () => {
   }
 
   return (
-    <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+    <main className="container-fluid min-vh-100 px-0 pb-4">
       <AppToast toasts={toasts} onClose={removeToast} />
       <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
       <div className="container py-4">
@@ -142,7 +142,7 @@ const UserProfilePage = () => {
             className="col-lg-3 d-none d-lg-block position-sticky"
             style={{ top: "85px", alignSelf: "start" }}
           >
-            <LeftSidebar activePage="profile" />
+            <LeftSidebar activePage={isOwnProfile ? "profile" : undefined} />
           </aside>
           <div className="col-12 col-lg-9">
             <ProfileHeader
@@ -157,10 +157,13 @@ const UserProfilePage = () => {
               isOwnProfile={isOwnProfile}
               userName={user.displayName || user.username}
             />
-            <ProfilePostGrid
-              posts={postsByTab[activeTab]}
-              loading={loadingByTab[activeTab]}
-            />
+            <div style={{ minHeight: "400px" }}>
+              <ProfilePostGrid
+                key={activeTab}
+                posts={postsByTab[activeTab]}
+                loading={loadingByTab[activeTab]}
+              />
+            </div>
           </div>
         </div>
       </div>

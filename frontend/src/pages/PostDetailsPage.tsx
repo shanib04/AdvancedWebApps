@@ -80,7 +80,7 @@ const PostDetailsPage = () => {
 
   if (loading) {
     return (
-      <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+      <main className="container-fluid min-vh-100 px-0 pb-4">
         <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
         <div className="container mt-4 text-center">
           <div className="spinner-border text-primary" role="status">
@@ -93,7 +93,7 @@ const PostDetailsPage = () => {
 
   if (error || !post) {
     return (
-      <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+      <main className="container-fluid min-vh-100 px-0 pb-4">
         <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
         <div className="container mt-4">
           <div className="alert alert-danger">
@@ -116,7 +116,7 @@ const PostDetailsPage = () => {
   const authorId = typeof post.user === "string" ? post.user : post.user?._id;
 
   return (
-    <main className="container-fluid feed-soft-bg min-vh-100 pb-4">
+    <main className="container-fluid min-vh-100 px-0 pb-4">
       <AppToast toasts={toasts} onClose={removeToast} />
       <Navbar searchValue="" onSearchChange={() => {}} hideSearch={true} />
       <div className="container py-4">

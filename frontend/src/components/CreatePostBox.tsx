@@ -32,6 +32,7 @@ function CreatePostBox({
   const [selectedCreateImage, setSelectedCreateImage] = useState<string | null>(
     null,
   );
+  const [manualImageUrl, setManualImageUrl] = useState("");
   const [isFetchingCreateImages, setIsFetchingCreateImages] = useState(false);
   const [isCreateInternetImageMode, setIsCreateInternetImageMode] =
     useState(false);
@@ -104,10 +105,34 @@ function CreatePostBox({
       if (!nextMode) {
         setSelectedCreateImage(null);
         setCreateImages([]);
+        setManualImageUrl("");
       }
 
       return nextMode;
     });
+  };
+
+  const handleAddManualImageUrl = () => {
+    const normalizedUrl = manualImageUrl.trim();
+    if (!normalizedUrl) {
+      onActionFailed("Please enter an image URL.");
+      return;
+    }
+
+    const isHttpUrl = /^https?:\/\//i.test(normalizedUrl);
+    if (!isHttpUrl) {
+      onActionFailed("Image URL must start with http:// or https://");
+      return;
+    }
+
+    setCreateImages((prevImages) =>
+      prevImages.includes(normalizedUrl)
+        ? prevImages
+        : [normalizedUrl, ...prevImages],
+    );
+    setSelectedCreateImage(normalizedUrl);
+    setManualImageUrl("");
+    onActionSuccess("Image added to draft.");
   };
 
   const onSubmit = async (data: CreatePostFormData) => {
@@ -244,7 +269,7 @@ function CreatePostBox({
             <span className="material-symbols-outlined">
               add_photo_alternate
             </span>
-            Add Photo
+            {selectedImagePreview ? "Change Photo" : "Add Photo"}
           </button>
         </span>
 
@@ -328,6 +353,26 @@ function CreatePostBox({
               onClick={handleFetchCreateImages}
             >
               {isFetchingCreateImages ? "Fetching..." : "Fetch Images"}
+            </button>
+          </div>
+
+          <div className="input-group mb-3">
+            <span className="input-group-text bg-white text-muted border-end-0">
+              <span className="material-symbols-outlined fs-5">link</span>
+            </span>
+            <input
+              type="url"
+              className="form-control border-start-0 ps-0"
+              placeholder="Paste an image URL here..."
+              value={manualImageUrl}
+              onChange={(event) => setManualImageUrl(event.target.value)}
+            />
+            <button
+              type="button"
+              className="btn btn-outline-primary px-4"
+              onClick={handleAddManualImageUrl}
+            >
+              Add
             </button>
           </div>
 

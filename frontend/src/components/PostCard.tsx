@@ -36,6 +36,7 @@ function PostCard({
   const [selectedEditInternetImage, setSelectedEditInternetImage] = useState<
     string | null
   >(null);
+  const [manualImageUrl, setManualImageUrl] = useState("");
   const [isFetchingEditImages, setIsFetchingEditImages] = useState(false);
   const [isEditInternetImageMode, setIsEditInternetImageMode] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -326,10 +327,34 @@ function PostCard({
       if (!nextMode) {
         setEditFetchedImages([]);
         setSelectedEditInternetImage(null);
+        setManualImageUrl("");
       }
 
       return nextMode;
     });
+  };
+
+  const handleAddManualImageUrl = () => {
+    const normalizedUrl = manualImageUrl.trim();
+    if (!normalizedUrl) {
+      onActionFailed("Please enter an image URL.");
+      return;
+    }
+
+    const isHttpUrl = /^https?:\/\//i.test(normalizedUrl);
+    if (!isHttpUrl) {
+      onActionFailed("Image URL must start with http:// or https://");
+      return;
+    }
+
+    setEditFetchedImages((prevImages) =>
+      prevImages.includes(normalizedUrl)
+        ? prevImages
+        : [normalizedUrl, ...prevImages],
+    );
+    setSelectedEditInternetImage(normalizedUrl);
+    setManualImageUrl("");
+    onActionSuccess("Image added to edit options.");
   };
 
   return (
@@ -442,7 +467,9 @@ function PostCard({
                   <span className="material-symbols-outlined">
                     add_photo_alternate
                   </span>
-                  Add Photo
+                  {post.imageUrl || editedImagePreview
+                    ? "Change Photo"
+                    : "Add Photo"}
                 </button>
               </span>
             </div>
@@ -507,6 +534,26 @@ function PostCard({
                     onClick={handleFetchEditImages}
                   >
                     {isFetchingEditImages ? "Fetching..." : "Fetch Images"}
+                  </button>
+                </div>
+
+                <div className="input-group mb-3">
+                  <span className="input-group-text bg-white text-muted border-end-0">
+                    <span className="material-symbols-outlined fs-5">link</span>
+                  </span>
+                  <input
+                    type="url"
+                    className="form-control border-start-0 ps-0"
+                    placeholder="Paste an image URL here..."
+                    value={manualImageUrl}
+                    onChange={(event) => setManualImageUrl(event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary px-4"
+                    onClick={handleAddManualImageUrl}
+                  >
+                    Add
                   </button>
                 </div>
 
