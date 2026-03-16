@@ -15,8 +15,9 @@ export interface Post {
   content: string;
   imageUrl?: string;
   user?: User | string;
-  likes?: string[];
-  savedBy?: string[];
+  likeCount?: number;
+  isLiked?: boolean;
+  isSaved?: boolean;
   comments?: number;
   createdAt?: string;
   updatedAt?: string;

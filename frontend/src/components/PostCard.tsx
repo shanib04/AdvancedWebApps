@@ -36,18 +36,18 @@ function PostCard({
   const [selectedEditInternetImage, setSelectedEditInternetImage] = useState<
     string | null
   >(null);
+  const [manualImageUrl, setManualImageUrl] = useState("");
   const [isFetchingEditImages, setIsFetchingEditImages] = useState(false);
   const [isEditInternetImageMode, setIsEditInternetImageMode] = useState(false);
+  const [isClosingEditInternetPanel, setIsClosingEditInternetPanel] =
+    useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const [isSaved, setIsSaved] = useState(
-    (post.savedBy ?? []).includes(currentUserId),
-  );
-  const [isLiked, setIsLiked] = useState(
-    (post.likes ?? []).includes(currentUserId),
-  );
-  const [likesCount, setLikesCount] = useState((post.likes ?? []).length);
+  const [isSaved, setIsSaved] = useState(Boolean(post.isSaved));
+  const [isLiked, setIsLiked] = useState(Boolean(post.isLiked));
+  const [likesCount, setLikesCount] = useState(post.likeCount ?? 0);
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
   const likeAnimationTimeoutRef = useRef<number | null>(null);
+  const closeEditPanelTimeoutRef = useRef<number | null>(null);
   const postCardRef = useRef<HTMLElement | null>(null);
   const editImageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -57,17 +57,18 @@ function PostCard({
   );
 
   useEffect(() => {
-    const likes = post.likes ?? [];
-    const savedBy = post.savedBy ?? [];
-    setIsLiked(likes.includes(currentUserId));
-    setLikesCount(likes.length);
-    setIsSaved(savedBy.includes(currentUserId));
-  }, [post.likes, post.savedBy, currentUserId]);
+    setIsLiked(Boolean(post.isLiked));
+    setLikesCount(post.likeCount ?? 0);
+    setIsSaved(Boolean(post.isSaved));
+  }, [post.isLiked, post.likeCount, post.isSaved]);
 
   useEffect(() => {
     return () => {
       if (likeAnimationTimeoutRef.current) {
         window.clearTimeout(likeAnimationTimeoutRef.current);
+      }
+      if (closeEditPanelTimeoutRef.current) {
+        window.clearTimeout(closeEditPanelTimeoutRef.current);
       }
     };
   }, []);
@@ -326,16 +327,48 @@ function PostCard({
   };
 
   const handleToggleEditInternetImageMode = () => {
-    setIsEditInternetImageMode((prevMode) => {
-      const nextMode = !prevMode;
+    if (isEditInternetImageMode) {
+      setIsClosingEditInternetPanel(true);
 
-      if (!nextMode) {
-        setEditFetchedImages([]);
-        setSelectedEditInternetImage(null);
+      if (closeEditPanelTimeoutRef.current) {
+        window.clearTimeout(closeEditPanelTimeoutRef.current);
       }
 
-      return nextMode;
-    });
+      closeEditPanelTimeoutRef.current = window.setTimeout(() => {
+        setIsEditInternetImageMode(false);
+        setIsClosingEditInternetPanel(false);
+        setEditFetchedImages([]);
+        setSelectedEditInternetImage(null);
+        setManualImageUrl("");
+      }, 200);
+      return;
+    }
+
+    setIsClosingEditInternetPanel(false);
+    setIsEditInternetImageMode(true);
+  };
+
+  const handleAddManualImageUrl = () => {
+    const normalizedUrl = manualImageUrl.trim();
+    if (!normalizedUrl) {
+      onActionFailed("Please enter an image URL.");
+      return;
+    }
+
+    const isHttpUrl = /^https?:\/\//i.test(normalizedUrl);
+    if (!isHttpUrl) {
+      onActionFailed("Image URL must start with http:// or https://");
+      return;
+    }
+
+    setEditFetchedImages((prevImages) =>
+      prevImages.includes(normalizedUrl)
+        ? prevImages
+        : [normalizedUrl, ...prevImages],
+    );
+    setSelectedEditInternetImage(normalizedUrl);
+    setManualImageUrl("");
+    onActionSuccess("Image added to edit options.");
   };
 
   return (
@@ -391,7 +424,7 @@ function PostCard({
         {isEditing ? (
           <div className="mb-3">
             <textarea
-              className="form-control mb-2"
+              className="form-control mb-2 app-scrollbar"
               rows={3}
               value={editedContent}
               onChange={(event) => setEditedContent(event.target.value)}
@@ -417,7 +450,7 @@ function PostCard({
                 />
                 <button
                   type="button"
-                  className="btn btn-danger btn-sm rounded-circle position-absolute top-0 start-100 translate-middle py-1"
+                  className="btn btn-danger position-absolute top-0 start-100 translate-middle remove-image-btn shadow"
                   onClick={() => {
                     setEditedImageFile(null);
                     if (editImageInputRef.current) {
@@ -426,140 +459,190 @@ function PostCard({
                   }}
                   aria-label="Remove selected image"
                 >
-                  ×
+                  <span className="material-symbols-outlined remove-image-icon">
+                    close
+                  </span>
                 </button>
               </div>
             )}
 
-            <div className="d-flex justify-content-between align-items-center">
-              <span
-                title={
-                  isEditInternetImageMode
-                    ? "Turn off 'Use image from internet' to import a local file."
-                    : "Import a photo from your files."
-                }
-              >
+            <div className="d-flex justify-content-between align-items-center mt-2 px-1 pb-1">
+              <div className="d-flex gap-2">
                 <button
                   type="button"
-                  className="btn btn-outline-primary rounded-pill d-flex align-items-center gap-2"
+                  className={`btn btn-light rounded-circle d-flex align-items-center justify-content-center p-2 icon-action shadow-sm ${
+                    editedImageFile
+                      ? "text-white bg-primary border-primary"
+                      : "text-primary"
+                  }`}
                   onClick={() => editImageInputRef.current?.click()}
                   disabled={isEditInternetImageMode}
                 >
-                  <span className="material-symbols-outlined">
-                    add_photo_alternate
-                  </span>
-                  Add Photo
+                  <span className="material-symbols-outlined fs-5">image</span>
                 </button>
-              </span>
+                <button
+                  type="button"
+                  className={`btn btn-light rounded-circle d-flex align-items-center justify-content-center p-2 icon-action position-relative shadow-sm ${
+                    isEditInternetImageMode ||
+                    (!editedImageFile && selectedEditInternetImage)
+                      ? "text-white bg-primary border-primary"
+                      : "text-primary"
+                  }`}
+                  title={
+                    editedImageFile
+                      ? "Remove local file first"
+                      : "Find on Web or Link URL"
+                  }
+                  onClick={handleToggleEditInternetImageMode}
+                  disabled={Boolean(editedImageFile)}
+                >
+                  <span className="material-symbols-outlined fs-5">
+                    language
+                  </span>
+                  {selectedEditInternetImage &&
+                    !editedImageFile &&
+                    !isEditInternetImageMode && (
+                      <span className="position-absolute top-0 start-100 translate-middle p-1 bg-success border border-light rounded-circle">
+                        <span className="visually-hidden">Image attached</span>
+                      </span>
+                    )}
+                </button>
+              </div>
             </div>
 
-            <div
-              className="form-check form-switch mt-3"
-              title={
-                editedImageFile
-                  ? "Remove the selected file to enable internet image toggle."
-                  : "Toggle to search and select an internet image."
-              }
-            >
-              <input
-                className="form-check-input"
-                type="checkbox"
-                role="switch"
-                id={`edit-internet-image-toggle-${post._id}`}
-                checked={isEditInternetImageMode}
-                disabled={Boolean(editedImageFile)}
-                onChange={handleToggleEditInternetImageMode}
-              />
-              <label
-                className="form-check-label"
-                htmlFor={`edit-internet-image-toggle-${post._id}`}
-              >
-                Use image from internet
-              </label>
-            </div>
-
-            {editedImageFile ? (
-              <small className="text-muted d-block mt-1">
-                Remove your selected local file to enable internet image search.
-              </small>
-            ) : isEditInternetImageMode ? (
-              <small className="text-muted d-block mt-1">
-                Internet image mode is on. Local file import is disabled until
-                you turn this off.
-              </small>
-            ) : null}
-
-            {isEditInternetImageMode && (
-              <div className="mt-3 p-3 rounded-4 border bg-light-subtle">
-                <label className="form-label fw-semibold mb-2">
-                  Fetch images from the internet
-                </label>
-
-                <div className="input-group mb-2">
-                  <span className="input-group-text">Search</span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. sunset, coding, travel"
-                    value={editImageSearchText}
-                    onChange={(event) =>
-                      setEditImageSearchText(event.target.value)
-                    }
-                  />
+            {(isEditInternetImageMode || isClosingEditInternetPanel) && (
+              <div className="mb-4 mt-2">
+                <div
+                  className={`p-3 rounded-4 border position-relative shadow-sm ${
+                    isClosingEditInternetPanel
+                      ? "tab-opacity-fade-out"
+                      : "tab-opacity-fade"
+                  }`}
+                  style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+                >
                   <button
                     type="button"
-                    className="btn btn-outline-primary"
-                    disabled={isFetchingEditImages}
-                    onClick={handleFetchEditImages}
-                  >
-                    {isFetchingEditImages ? "Fetching..." : "Fetch Images"}
-                  </button>
-                </div>
+                    className="btn-close position-absolute top-0 end-0 m-3"
+                    aria-label="Close"
+                    onClick={handleToggleEditInternetImageMode}
+                  />
+                  <label className="form-label fw-semibold text-primary d-flex align-items-center gap-2 mb-3">
+                    <span className="material-symbols-outlined">
+                      image_search
+                    </span>
+                    Find or Link Image
+                  </label>
 
-                {editFetchedImages.length > 0 && (
-                  <div className="row g-2 mb-2">
-                    {editFetchedImages.map((imageUrl) => (
-                      <div className="col-6" key={imageUrl}>
-                        <img
-                          src={imageUrl}
-                          alt="Edit option"
-                          className={`img-fluid w-100 rounded-3 ${
-                            selectedEditInternetImage === imageUrl
-                              ? "border border-4 border-primary shadow"
-                              : "opacity-75"
-                          }`}
-                          style={{
-                            height: "120px",
-                            objectFit: "cover",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setSelectedEditInternetImage(imageUrl)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {selectedEditInternetImage ? (
-                  <div className="d-flex align-items-center gap-2">
+                  <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
+                    <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
+                      <span className="material-symbols-outlined fs-5">
+                        search
+                      </span>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control border-0 shadow-none"
+                      placeholder="e.g. sunset, coding, travel"
+                      value={editImageSearchText}
+                      onChange={(event) =>
+                        setEditImageSearchText(event.target.value)
+                      }
+                    />
                     <button
                       type="button"
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => setSelectedEditInternetImage(null)}
+                      className="btn btn-primary px-4 fw-medium rounded-pill m-1"
+                      disabled={isFetchingEditImages}
+                      onClick={handleFetchEditImages}
                     >
-                      Clear Selected Internet Image
+                      {isFetchingEditImages ? "Fetching..." : "Fetch Images"}
                     </button>
-                    <small className="text-muted d-flex align-items-center">
-                      Selected internet image will be used if no file is
-                      uploaded.
-                    </small>
                   </div>
-                ) : (
-                  <small className="text-muted">
-                    Pick an image above, or turn this off to keep current/file
-                    image.
-                  </small>
-                )}
+
+                  <div className="d-flex align-items-center mb-3">
+                    <span className="text-muted small px-3 fw-medium">OR</span>
+                  </div>
+
+                  <div className="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white p-1">
+                    <span className="input-group-text bg-transparent text-muted border-0 ps-3">
+                      <span className="material-symbols-outlined fs-5">
+                        link
+                      </span>
+                    </span>
+                    <input
+                      type="url"
+                      className="form-control border-0 ps-1 shadow-none"
+                      placeholder="Paste an image URL here..."
+                      value={manualImageUrl}
+                      onChange={(event) =>
+                        setManualImageUrl(event.target.value)
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-secondary px-4 fw-medium text-white rounded-pill"
+                      onClick={handleAddManualImageUrl}
+                    >
+                      Add URL
+                    </button>
+                  </div>
+
+                  {editFetchedImages.length > 0 && (
+                    <div className="row g-2 mb-2">
+                      {editFetchedImages.map((imageUrl) => (
+                        <div className="col-4 col-sm-3" key={imageUrl}>
+                          <img
+                            src={imageUrl}
+                            alt="Edit option"
+                            className={`img-fluid w-100 rounded-3 ${
+                              selectedEditInternetImage === imageUrl
+                                ? "border border-4 border-primary shadow-sm"
+                                : "opacity-75"
+                            }`}
+                            style={{
+                              height: "90px",
+                              objectFit: "cover",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                            }}
+                            onMouseOver={(event) => {
+                              if (selectedEditInternetImage !== imageUrl) {
+                                event.currentTarget.style.opacity = "1";
+                              }
+                            }}
+                            onMouseOut={(event) => {
+                              if (selectedEditInternetImage !== imageUrl) {
+                                event.currentTarget.style.opacity = "0.75";
+                              }
+                            }}
+                            onClick={() =>
+                              setSelectedEditInternetImage(imageUrl)
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedEditInternetImage ? (
+                    <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
+                        onClick={() => setSelectedEditInternetImage(null)}
+                      >
+                        Clear Selection
+                      </button>
+                      <small className="text-muted">
+                        Image selected and ready for post.
+                      </small>
+                    </div>
+                  ) : (
+                    <small className="text-muted d-block mt-2">
+                      Select an image above or paste a URL to attach it to your
+                      post.
+                    </small>
+                  )}
+                </div>
               </div>
             )}
           </div>

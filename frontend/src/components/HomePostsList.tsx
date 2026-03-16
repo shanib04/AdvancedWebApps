@@ -7,6 +7,7 @@ type HomePostsListProps = {
   isLoading: boolean;
   posts: Post[];
   filteredPosts: Post[];
+  filterAnimationSeed: number;
   currentUserId: string;
   onPostUpdated: (updatedPost: Post) => void;
   onPostDeleted: (postId: string) => void;
@@ -23,6 +24,7 @@ function HomePostsList({
   isLoading,
   posts,
   filteredPosts,
+  filterAnimationSeed,
   currentUserId,
   onPostUpdated,
   onPostDeleted,
@@ -46,7 +48,7 @@ function HomePostsList({
       <div className="d-flex flex-column gap-3">
         {filteredPosts.map((post) => (
           <PostCard
-            key={post._id}
+            key={`${post._id}-${filterAnimationSeed}`}
             post={post}
             currentUserId={currentUserId}
             onPostUpdated={onPostUpdated}

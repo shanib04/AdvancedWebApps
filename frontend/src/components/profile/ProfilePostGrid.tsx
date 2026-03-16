@@ -9,7 +9,7 @@ interface ProfilePostGridProps {
 const ProfilePostGrid = ({ posts, loading }: ProfilePostGridProps) => {
   if (loading) {
     return (
-      <div className="row g-4">
+      <div className="row g-4 tab-opacity-fade">
         {Array.from({ length: 6 }).map((_, index) => (
           <div key={index} className="col-12 col-sm-6 col-md-4">
             <div
@@ -24,14 +24,14 @@ const ProfilePostGrid = ({ posts, loading }: ProfilePostGridProps) => {
 
   if (posts.length === 0) {
     return (
-      <div className="text-center py-5">
+      <div className="text-center py-5 tab-opacity-fade">
         <p className="text-muted">No posts to display.</p>
       </div>
     );
   }
 
   return (
-    <div className="row g-4">
+    <div className="row g-4 tab-opacity-fade">
       {posts.map((post) => (
         <div key={post._id} className="col-12 col-sm-6 col-md-4">
           <Link to={`/post/${post._id}`} className="text-decoration-none">

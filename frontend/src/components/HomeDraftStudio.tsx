@@ -212,7 +212,7 @@ function HomeDraftStudio({
 
           <textarea
             id="draftText"
-            className="form-control bg-light border-0 p-3 rounded-3 mb-3"
+            className="form-control bg-light border-0 p-3 rounded-3 mb-3 app-scrollbar"
             rows={5}
             value={draftText}
             onChange={(event) => setDraftText(event.target.value)}
@@ -262,22 +262,7 @@ function HomeDraftStudio({
           </div>
 
           <div className="row g-2 mb-3">
-            <div className="col-12 col-md-6">
-              <div className="input-group">
-                <span className="input-group-text">Search</span>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Type what photos should show"
-                  value={draftImageSearchText}
-                  onChange={(event) =>
-                    setDraftImageSearchText(event.target.value)
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="col-12 col-md-6">
+            <div className="col-12">
               <input
                 type="file"
                 accept="image/*"
@@ -287,92 +272,149 @@ function HomeDraftStudio({
                   handleUploadDraftImage(event.target.files?.[0])
                 }
               />
-              <button
-                type="button"
-                className="btn btn-outline-primary w-100"
-                onClick={() => draftImageInputRef.current?.click()}
-                disabled={isUploadingDraftImage}
-              >
-                {isUploadingDraftImage ? (
-                  <span className="d-inline-flex align-items-center gap-2">
+              <div className="d-flex align-items-center justify-content-md-end gap-2">
+                <button
+                  type="button"
+                  className={`btn btn-light rounded-circle d-flex align-items-center justify-content-center p-2 icon-action shadow-sm ${
+                    isUploadingDraftImage
+                      ? "text-white bg-primary border-primary"
+                      : "text-primary"
+                  }`}
+                  onClick={() => draftImageInputRef.current?.click()}
+                  disabled={isUploadingDraftImage}
+                  aria-label="Upload image"
+                >
+                  {isUploadingDraftImage ? (
                     <span className="spinner-border spinner-border-sm" />
-                    Uploading...
-                  </span>
-                ) : (
-                  "Upload Your Image"
-                )}
-              </button>
+                  ) : (
+                    <span className="material-symbols-outlined fs-5">
+                      image
+                    </span>
+                  )}
+                </button>
+                <small className="text-muted mb-0">Upload Your Image</small>
+              </div>
             </div>
           </div>
 
-          <div className="input-group mb-3">
-            <span className="input-group-text bg-white text-muted border-end-0">
-              <span className="material-symbols-outlined fs-5">link</span>
-            </span>
-            <input
-              type="url"
-              className="form-control border-start-0 ps-0"
-              placeholder="Paste an image URL here..."
-              value={manualImageUrl}
-              onChange={(event) => setManualImageUrl(event.target.value)}
-            />
-            <button
-              type="button"
-              className="btn btn-outline-primary px-4"
-              onClick={handleAddManualImageUrl}
-            >
-              Add
-            </button>
-          </div>
+          <div
+            className="p-3 rounded-4 border position-relative tab-opacity-fade shadow-sm"
+            style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+          >
+            <label className="form-label fw-semibold text-primary d-flex align-items-center gap-2 mb-3">
+              <span className="material-symbols-outlined">image_search</span>
+              Find or Link Image
+            </label>
 
-          <div className="row g-2 mb-3">
-            {draftImages.length === 0 && (
-              <div className="col-12">
-                <p className="text-muted small mb-0">
-                  {includeImagesRequested
-                    ? "No automatic images found. Try a different search term."
-                    : "You chose not to fetch images automatically. You can fetch images now using search."}
-                </p>
+            <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
+              <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
+                <span className="material-symbols-outlined fs-5">search</span>
+              </span>
+              <input
+                type="text"
+                className="form-control border-0 shadow-none"
+                placeholder="e.g. nature, coding, coffee"
+                value={draftImageSearchText}
+                onChange={(event) =>
+                  setDraftImageSearchText(event.target.value)
+                }
+              />
+              <button
+                type="button"
+                className="btn btn-primary px-4 fw-medium rounded-pill m-1"
+                disabled={isFetchingDraftImages}
+                onClick={handleFetchMoreDraftImages}
+              >
+                {isFetchingDraftImages ? "Fetching..." : "Fetch Images"}
+              </button>
+            </div>
+
+            <div className="d-flex align-items-center mb-3">
+              <span className="text-muted small px-3 fw-medium">OR</span>
+            </div>
+
+            <div className="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white p-1">
+              <span className="input-group-text bg-transparent text-muted border-0 ps-3">
+                <span className="material-symbols-outlined fs-5">link</span>
+              </span>
+              <input
+                type="url"
+                className="form-control border-0 ps-1 shadow-none"
+                placeholder="Paste an image URL here..."
+                value={manualImageUrl}
+                onChange={(event) => setManualImageUrl(event.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary px-4 fw-medium text-white rounded-pill"
+                onClick={handleAddManualImageUrl}
+              >
+                Add URL
+              </button>
+            </div>
+
+            {draftImages.length > 0 && (
+              <div className="row g-2 mb-2">
+                {draftImages.map((imageUrl) => (
+                  <div className="col-4 col-sm-3" key={imageUrl}>
+                    <img
+                      src={imageUrl}
+                      alt="AI suggestion"
+                      className={`img-fluid w-100 rounded-3 ${
+                        selectedImage === imageUrl
+                          ? "border border-4 border-primary shadow-sm"
+                          : "opacity-75"
+                      }`}
+                      style={{
+                        height: "90px",
+                        objectFit: "cover",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseOver={(event) => {
+                        if (selectedImage !== imageUrl) {
+                          event.currentTarget.style.opacity = "1";
+                        }
+                      }}
+                      onMouseOut={(event) => {
+                        if (selectedImage !== imageUrl) {
+                          event.currentTarget.style.opacity = "0.75";
+                        }
+                      }}
+                      onClick={() => setSelectedImage(imageUrl)}
+                    />
+                  </div>
+                ))}
               </div>
             )}
-            {draftImages.map((imageUrl) => (
-              <div className="col-6" key={imageUrl}>
-                <img
-                  src={imageUrl}
-                  alt="AI suggestion"
-                  className={`img-fluid w-100 rounded-3 ${
-                    selectedImage === imageUrl
-                      ? "border border-4 border-primary shadow"
-                      : "opacity-75"
-                  }`}
-                  style={{
-                    height: "150px",
-                    cursor: "pointer",
-                    objectFit: "cover",
-                  }}
-                  onClick={() => setSelectedImage(imageUrl)}
-                />
+
+            {draftImages.length === 0 ? (
+              <small className="text-muted d-block mt-2">
+                {includeImagesRequested
+                  ? "No automatic images found. Try a different search term."
+                  : "You chose not to fetch images automatically. You can fetch images now using search."}
+              </small>
+            ) : selectedImage ? (
+              <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
+                  onClick={() => setSelectedImage(null)}
+                >
+                  Clear Selection
+                </button>
+                <small className="text-muted">
+                  Image selected and ready for post.
+                </small>
               </div>
-            ))}
+            ) : (
+              <small className="text-muted d-block mt-2">
+                Select an image above or paste a URL to attach it to your post.
+              </small>
+            )}
           </div>
 
           <div className="d-flex justify-content-center gap-2 mt-3">
-            <button
-              type="button"
-              className="btn btn-outline-secondary rounded-pill"
-              disabled={isFetchingDraftImages}
-              onClick={handleFetchMoreDraftImages}
-            >
-              {isFetchingDraftImages ? (
-                <span className="d-inline-flex align-items-center gap-2">
-                  <span className="spinner-border spinner-border-sm" />
-                  Fetching images...
-                </span>
-              ) : (
-                "Fetch Images Now"
-              )}
-            </button>
-
             <button
               type="button"
               className={`btn rounded-pill ${

@@ -45,7 +45,7 @@ function HomeScreen() {
   };
 
   return (
-    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light overflow-auto">
+    <main className="container-fluid min-vh-100 d-flex align-items-center justify-content-center overflow-auto">
       <AppToast toasts={toasts} onClose={removeToast} />
       <div
         className="card border-0 shadow-sm p-4 text-center"

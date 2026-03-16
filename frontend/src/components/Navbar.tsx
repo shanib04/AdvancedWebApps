@@ -72,7 +72,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
 
   return (
     <nav className="navbar navbar-expand-lg glass-navbar sticky-top mb-4">
-      <div className="container">
+      <div className="container-fluid px-4 px-md-5">
         <a
           className="navbar-brand d-flex align-items-center gap-2 text-decoration-none text-dark"
           href="/home"

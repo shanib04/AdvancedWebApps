@@ -62,7 +62,7 @@ function RightAIWidget({ onInitialDraftGenerated }: RightAIWidgetProps) {
         <div className="card-body p-4">
           <h5 className="fw-bold mb-3">✨ AI Post Assistant</h5>
           <textarea
-            className="form-control rounded-4 mb-3"
+            className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
             rows={4}
             placeholder="What should the AI write about?"
             value={prompt}
