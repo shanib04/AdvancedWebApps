@@ -10,6 +10,7 @@ import useAppToast from "../hooks/useAppToast";
 import AppToast from "../components/AppToast";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import { feedCache } from "../utils/feedCache";
+import { mergePostState } from "../utils/postState";
 
 const PostDetailsPage = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -36,7 +37,10 @@ const PostDetailsPage = () => {
         const { data } = await apiClient.get<Post>(`/post/${postId}`, {
           signal: controller.signal,
         });
-        setPost(data);
+        const cachedPost = feedCache.posts.find(
+          (cached) => cached._id === data._id,
+        );
+        setPost(cachedPost ? mergePostState(cachedPost, data) : data);
         setError("");
         setLoading(false);
       } catch (err: unknown) {
@@ -71,10 +75,12 @@ const PostDetailsPage = () => {
   }, [post, commentCount]);
 
   const handlePostUpdated = (updatedPost: Post) => {
-    setPost(updatedPost);
+    setPost((prevPost) =>
+      prevPost ? mergePostState(prevPost, updatedPost) : updatedPost,
+    );
     const cachedPost = feedCache.posts.find((p) => p._id === updatedPost._id);
     if (cachedPost) {
-      Object.assign(cachedPost, updatedPost);
+      Object.assign(cachedPost, mergePostState(cachedPost, updatedPost));
     }
   };
 

@@ -6,6 +6,7 @@ import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
 import { formatDateTimeLocal } from "../utils/dateUtils";
+import { mergePostState } from "../utils/postState";
 
 interface PostCardProps {
   post: Post;
@@ -194,7 +195,7 @@ function PostCard({
         imageUrl: updatedImageUrl,
       });
 
-      onPostUpdated(updateResponse.data);
+      onPostUpdated(mergePostState(post, updateResponse.data));
       setIsEditing(false);
       setEditedImageFile(null);
       if (editImageInputRef.current) {
@@ -255,11 +256,7 @@ function PostCard({
       const updatedPost = response.data?.post as Post | undefined;
 
       if (updatedPost && updatedPost._id) {
-        // Keep the existing comment count when updating via like
-        if (post.comments !== undefined && updatedPost.comments === undefined) {
-          updatedPost.comments = post.comments;
-        }
-        onPostUpdated(updatedPost);
+        onPostUpdated(mergePostState(post, updatedPost));
       }
     } catch (error: unknown) {
       setIsLiked(previousIsLiked);
@@ -280,11 +277,7 @@ function PostCard({
       const updatedPost = response.data?.post as Post | undefined;
 
       if (updatedPost && updatedPost._id) {
-        // Keep the existing comment count when updating via save
-        if (post.comments !== undefined && updatedPost.comments === undefined) {
-          updatedPost.comments = post.comments;
-        }
-        onPostUpdated(updatedPost);
+        onPostUpdated(mergePostState(post, updatedPost));
       }
     } catch (error: unknown) {
       setIsSaved(previousIsSaved);
