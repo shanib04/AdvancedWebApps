@@ -8,12 +8,18 @@ import {
   setStoredSessionUser,
 } from "../../utils/sessionUser";
 
+const BIO_MAX_LINES = 5;
+const BIO_MAX_CHARS = 150;
+
 interface BioSectionProps {
   user: User;
   isOwnProfile: boolean;
   onUserUpdate: (user: User) => void;
   onActionSuccess: (message: string) => void;
 }
+
+const clampBioToMaxLines = (value: string) =>
+  value.split(/\r?\n/).slice(0, BIO_MAX_LINES).join("\n");
 
 const BioSection = ({
   user,
@@ -36,8 +42,9 @@ const BioSection = ({
     setIsSaving(true);
 
     try {
+      const sanitizedBio = clampBioToMaxLines(editingBio).trim();
       const updateResponse = await apiClient.patch(`/user/${user._id}`, {
-        bio: editingBio.trim(),
+        bio: sanitizedBio,
       });
 
       const updatedUser = updateResponse.data;
@@ -78,14 +85,18 @@ const BioSection = ({
             className="form-control rounded-2"
             placeholder="Tell others about yourself"
             value={editingBio}
-            onChange={(e) => setEditingBio(e.target.value.slice(0, 150))}
+            onChange={(e) =>
+              setEditingBio(
+                clampBioToMaxLines(e.target.value).slice(0, BIO_MAX_CHARS),
+              )
+            }
             rows={3}
             disabled={isSaving}
             style={{ resize: "none" }}
           />
           <div className="d-flex justify-content-between align-items-center">
             <small className="text-muted fw-semibold">
-              {editingBio.length}/150 characters
+              {editingBio.length}/{BIO_MAX_CHARS} characters
             </small>
             <div className="d-flex gap-2">
               <button
@@ -135,8 +146,9 @@ const BioSection = ({
                 lineHeight: "1.625",
                 color: "#495057",
                 fontSize: "0.95rem",
-                display: "flex",
-                alignItems: "center",
+                whiteSpace: "pre-line",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
               }}
             >
               {user.bio}
@@ -152,13 +164,15 @@ const BioSection = ({
                     marginLeft: "0.25rem",
                     lineHeight: "1",
                     height: "auto",
+                    display: "inline-flex",
+                    verticalAlign: "baseline",
                   }}
                 >
                   <span
                     className="material-symbols-outlined"
                     style={{
                       fontSize: "18px",
-                      display: "flex",
+                      display: "inline-flex",
                       alignItems: "center",
                     }}
                   >
