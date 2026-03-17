@@ -12,11 +12,8 @@ global.console = {
 
 dotenv.config();
 
-if (process.env.MONGO_URI) {
-  process.env.MONGO_URI = process.env.MONGO_URI.replace(
-    /\/([^/?]+)(\?|$)/,
-    "/$1_test$2",
-  );
+if (process.env.MONGO_TEST_URI) {
+  process.env.MONGO_URI = process.env.MONGO_TEST_URI;
 }
 
 process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-key";
