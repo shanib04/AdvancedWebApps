@@ -762,9 +762,10 @@ function PostCard({
                   : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
               }}
             >
-              bookmark
-            </span>
-          </button>
+                bookmark
+              </span>
+            </button>
+          </div>
 
           {isOwner && !isEditing && (
             <button
@@ -818,7 +819,6 @@ function PostCard({
             </button>
           )}
         </div>
-      </div>
     </article>
   );
 }
