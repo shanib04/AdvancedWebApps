@@ -4,6 +4,7 @@ import apiClient from "../../services/api-client";
 import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
+import AppToast from "../AppToast";
 import {
   getStoredSessionUser,
   setStoredSessionUser,
@@ -30,7 +31,7 @@ const EditProfileModal = ({
   onUserUpdate,
   onActionSuccess,
 }: EditProfileModalProps) => {
-  const { showFailed } = useAppToast();
+  const { toasts, removeToast, showFailed } = useAppToast();
   const [editingUsername, setEditingUsername] = useState(user.username);
   const [editingDisplayName, setEditingDisplayName] = useState(
     user.displayName || "",
@@ -125,12 +126,20 @@ const EditProfileModal = ({
       let photoUrl = editingPhotoUrl;
 
       if (selectedFile) {
-        const formData = new FormData();
-        formData.append("image", selectedFile);
-        const uploadResponse = await apiClient.post("/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        photoUrl = uploadResponse.data?.imageUrl || editingPhotoUrl;
+        try {
+          const formData = new FormData();
+          formData.append("image", selectedFile);
+          const uploadResponse = await apiClient.post("/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+          photoUrl = uploadResponse.data?.imageUrl || editingPhotoUrl;
+        } catch (uploadError: unknown) {
+          showFailed(
+            getUserFriendlyApiError(uploadError, "Failed to upload image."),
+          );
+          setSaving(false);
+          return;
+        }
       }
 
       const finalPhotoUrl = photoUrl || defaultUserPhotoUrl;
@@ -174,6 +183,7 @@ const EditProfileModal = ({
       tabIndex={-1}
       style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
+      <AppToast toasts={toasts} onClose={removeToast} />
       <div
         className="modal-dialog modal-dialog-centered"
         style={{ maxWidth: "500px" }}
