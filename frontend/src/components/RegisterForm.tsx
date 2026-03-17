@@ -25,37 +25,43 @@ import photo7 from "../assets/authPhotos/photo7.png";
 const USERNAME_MAX_LENGTH = 15;
 const DISPLAY_NAME_MAX_LENGTH = 20;
 
-const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters.")
-    .max(
-      USERNAME_MAX_LENGTH,
-      `Username must be at most ${USERNAME_MAX_LENGTH} characters.`,
-    )
-    .regex(
-      /^[a-zA-Z0-9\-_]+$/,
-      "Username can only contain letters, numbers, hyphens, and underscores.",
-    )
-    .transform((val) => val.toLowerCase()),
-  displayName: z
-    .string()
-    .max(
-      DISPLAY_NAME_MAX_LENGTH,
-      `Display name must be at most ${DISPLAY_NAME_MAX_LENGTH} characters.`,
-    )
-    .optional(),
-  email: z.email("Please enter a valid email address."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-  profilePicture: z
-    .instanceof(FileList)
-    .optional()
-    .refine((files) => {
-      if (!files || files.length === 0) return true;
-      const file = files[0];
-      return ["image/png", "image/jpeg", "image/webp"].includes(file.type);
-    }, "Only PNG, JPG, JPEG, and WEBP formats are allowed."),
-});
+const registerSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters.")
+      .max(
+        USERNAME_MAX_LENGTH,
+        `Username must be at most ${USERNAME_MAX_LENGTH} characters.`,
+      )
+      .regex(
+        /^[a-zA-Z0-9\-_]+$/,
+        "Username can only contain letters, numbers, hyphens, and underscores.",
+      )
+      .transform((val) => val.toLowerCase()),
+    displayName: z
+      .string()
+      .max(
+        DISPLAY_NAME_MAX_LENGTH,
+        `Display name must be at most ${DISPLAY_NAME_MAX_LENGTH} characters.`,
+      )
+      .optional(),
+    email: z.email("Please enter a valid email address."),
+    password: z.string().min(6, "Password must be at least 6 characters."),
+    confirmPassword: z.string().min(1, "Please confirm your password."),
+    profilePicture: z
+      .instanceof(FileList)
+      .optional()
+      .refine((files) => {
+        if (!files || files.length === 0) return true;
+        const file = files[0];
+        return ["image/png", "image/jpeg", "image/webp"].includes(file.type);
+      }, "Only PNG, JPG, JPEG, and WEBP formats are allowed."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -202,7 +208,7 @@ function RegisterForm() {
 
   return (
     <main
-      className="login-page container-fluid min-vh-100 px-0"
+      className="login-page register-scroll-page container-fluid min-vh-100 px-0"
       style={{
         fontFamily: '"Spline Sans", sans-serif',
       }}
@@ -217,7 +223,7 @@ function RegisterForm() {
 
         <section className="register-form-panel col-12 col-lg-5 d-flex flex-column align-items-center px-4 px-sm-5 py-4 py-lg-5">
           <div
-            className="register-screen-shell w-100 my-auto flex-shrink-0"
+            className="register-screen-shell w-100 flex-shrink-0"
             style={{ maxWidth: "380px" }}
           >
             <div className="login-brand-row d-flex align-items-center justify-content-center gap-3 mb-4 mb-lg-4">
@@ -450,6 +456,31 @@ function RegisterForm() {
                   style={{ minHeight: "1rem", fontSize: "0.85rem" }}
                 >
                   {errors.password?.message || "\u00A0"}
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="form-label fw-semibold mb-2"
+                  style={{ color: "#1f2937", fontSize: "0.95rem" }}
+                >
+                  Confirm Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm password"
+                  aria-invalid={Boolean(errors.confirmPassword)}
+                  className={`register-input form-control rounded-4 shadow-none ${errors.confirmPassword ? "border-danger" : "border-secondary-subtle"}`}
+                  style={{ fontSize: "0.95rem" }}
+                  {...register("confirmPassword")}
+                />
+                <p
+                  className="small text-danger mt-1 mb-0"
+                  style={{ minHeight: "1rem", fontSize: "0.85rem" }}
+                >
+                  {errors.confirmPassword?.message || "\u00A0"}
                 </p>
               </div>
 
