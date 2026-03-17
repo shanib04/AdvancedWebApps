@@ -331,6 +331,7 @@ function LoginForm() {
                     size="large"
                     logo_alignment="left"
                     width="340"
+                    useOneTap={false}
                   />
                 </div>
               </div>
