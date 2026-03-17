@@ -7,25 +7,47 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-  "username": "Itay",
-  "email": "itay@example.com",
-  "password": "password123"
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "password123",
+  "photoUrl": "https://example.com/photo.jpg"
 }
 
 
 ###
-# Login
+# Login with username or email
 POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-  "username": "john_doe",
+  "username": "testuser",
   "password": "password123"
 }
 
 
 ###
-# Refresh token
+# Login with email instead of username
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "password123"
+}
+
+
+###
+# Sign in with Google
+POST http://localhost:3000/auth/google
+Content-Type: application/json
+
+{
+  "credential": "GOOGLE_CREDENTIAL_TOKEN"
+}
+
+
+###
+# Refresh access token
 POST http://localhost:3000/auth/refresh
 Content-Type: application/json
 
@@ -35,7 +57,7 @@ Content-Type: application/json
 
 
 ###
-# Logout
+# Logout (invalidate refresh token)
 POST http://localhost:3000/auth/logout
 Content-Type: application/json
 
@@ -44,13 +66,13 @@ Content-Type: application/json
 }
 
 
+# User Routes
+
+
 ###
-# Get current user info
+# Get current authenticated user
 GET http://localhost:3000/user/whoami
 Authorization: Bearer ACCESS_TOKEN
-
-
-# User Routes
 
 
 ###
@@ -79,15 +101,16 @@ Authorization: Bearer ACCESS_TOKEN
 
 
 ###
-# Update user
-PUT http://localhost:3000/user/USER_ID
+# Update user profile
+PATCH http://localhost:3000/user/USER_ID
 Content-Type: application/json
 Authorization: Bearer ACCESS_TOKEN
 
 {
   "username": "john_updated",
   "email": "john.updated@example.com",
-  "password": "newpassword123"
+  "password": "newpassword123",
+  "photoUrl": "https://example.com/new-photo.jpg"
 }
 
 
@@ -107,7 +130,7 @@ Content-Type: application/json
 Authorization: Bearer ACCESS_TOKEN
 
 {
-  "content": "asdasdsdads"
+  "content": "This is my first post!"
 }
 
 
@@ -124,29 +147,59 @@ Authorization: Bearer ACCESS_TOKEN
 
 
 ###
+# Get posts by specific user
+GET http://localhost:3000/post?user=USER_ID&page=1
+Authorization: Bearer ACCESS_TOKEN
+
+
+###
 # Get post by ID
 GET http://localhost:3000/post/POST_ID
 Authorization: Bearer ACCESS_TOKEN
 
 
 ###
-# Update post
+# Update post content
 PUT http://localhost:3000/post/POST_ID
 Content-Type: application/json
 Authorization: Bearer ACCESS_TOKEN
 
 {
-  "content": "Updated content!"
+  "content": "Updated post content!"
 }
 
 
-# Comment Routes
+###
+# Toggle like on a post
+POST http://localhost:3000/post/POST_ID/like
+Authorization: Bearer ACCESS_TOKEN
+
+
+###
+# Toggle save on a post
+POST http://localhost:3000/post/POST_ID/save
+Authorization: Bearer ACCESS_TOKEN
+
+
+###
+# Get all posts liked by a user
+GET http://localhost:3000/post/user/USER_ID/liked
+Authorization: Bearer ACCESS_TOKEN
+
+
+###
+# Get all posts saved by a user
+GET http://localhost:3000/post/user/USER_ID/saved
+Authorization: Bearer ACCESS_TOKEN
 
 
 ###
 # Delete post
 DELETE http://localhost:3000/post/POST_ID
 Authorization: Bearer ACCESS_TOKEN
+
+
+# Comment Routes
 
 
 ###
@@ -174,8 +227,8 @@ Authorization: Bearer ACCESS_TOKEN
 
 
 ###
-# Get comments by post ID
-GET http://localhost:3000/comment?post=POST_ID
+# Get comments by post ID (using postId parameter)
+GET http://localhost:3000/comment/post?postId=POST_ID
 Authorization: Bearer ACCESS_TOKEN
 
 
@@ -200,3 +253,69 @@ Authorization: Bearer ACCESS_TOKEN
 # Delete comment
 DELETE http://localhost:3000/comment/COMMENT_ID
 Authorization: Bearer ACCESS_TOKEN
+
+
+# Upload Routes
+
+
+###
+# Upload an image
+POST http://localhost:3000/upload
+Content-Type: multipart/form-data; boundary=UploadBoundary
+
+--UploadBoundary
+Content-Disposition: form-data; name="image"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+< ../public/images/1772213896925-823670813.jpg
+--UploadBoundary--
+
+
+# AI Routes
+
+
+###
+# Generate initial post draft with optional images
+POST http://localhost:3000/api/ai/generateInitialDraft
+Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
+
+{
+  "prompt": "Write a short post about React hooks",
+  "includeImages": true
+}
+
+
+###
+# Generate draft without images
+POST http://localhost:3000/api/ai/generateInitialDraft
+Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
+
+{
+  "prompt": "Write a short post about React hooks",
+  "includeImages": false
+}
+
+
+###
+# Refine existing text with an instruction
+POST http://localhost:3000/api/ai/refineText
+Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
+
+{
+  "currentText": "This is a long and verbose draft that should be shortened and made more concise.",
+  "instruction": "Make it concise and friendly"
+}
+
+
+###
+# Get more images for a keyword
+POST http://localhost:3000/api/ai/getMoreImages
+Content-Type: application/json
+Authorization: Bearer ACCESS_TOKEN
+
+{
+  "keyword": "nature"
+}
