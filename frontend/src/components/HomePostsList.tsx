@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import { Link } from "react-router-dom";
+import { Bookmark, Heart, FilterX } from "lucide-react";
 import type { Post } from "../types/models";
 import PostCard from "./PostCard";
 
@@ -75,9 +76,19 @@ function HomePostsList({
         <div className="card border-0 shadow-sm rounded-5 empty-feed-state mt-1 mb-3">
           <div className="card-body p-4 p-md-5 text-center">
             <div className="empty-feed-icon-wrap mx-auto mb-3">
-              <span className="material-symbols-outlined empty-feed-icon">
-                {isSavedMode ? "bookmark" : "favorite"}
-              </span>
+              {isSavedMode ? (
+                <Bookmark
+                  className="empty-feed-icon"
+                  size={28}
+                  strokeWidth={2.2}
+                />
+              ) : (
+                <Heart
+                  className="empty-feed-icon"
+                  size={28}
+                  strokeWidth={2.2}
+                />
+              )}
             </div>
             <h5 className="fw-bold mb-2">
               {isSavedMode ? "No saved posts yet" : "No liked posts yet"}
@@ -100,9 +111,11 @@ function HomePostsList({
       {hasNoVisiblePosts && (
         <div className="card border-0 shadow-sm rounded-5 empty-filter-state mt-1 mb-3">
           <div className="card-body p-4 text-center">
-            <span className="material-symbols-outlined text-secondary mb-2">
-              filter_alt_off
-            </span>
+            <FilterX
+              size={22}
+              strokeWidth={2.2}
+              className="text-secondary mb-2"
+            />
             <h6 className="fw-semibold mb-1">No posts match your filters</h6>
             <p className="text-muted mb-0 small">
               Try clearing search text or selected users.

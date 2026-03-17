@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 
@@ -60,7 +61,10 @@ function RightAIWidget({ onInitialDraftGenerated }: RightAIWidgetProps) {
     <aside className="position-sticky" style={{ top: "90px" }}>
       <div className="card border-0 shadow-sm rounded-5 ai-widget-card">
         <div className="card-body p-4">
-          <h5 className="fw-bold mb-3">✨ AI Post Assistant</h5>
+          <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
+            <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
+            AI Post Assistant
+          </h5>
           <textarea
             className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
             rows={4}

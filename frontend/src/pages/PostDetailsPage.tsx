@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import apiClient from "../services/api-client";
 import type { Post } from "../types/models";
 import PostCard from "../components/PostCard";
@@ -176,12 +177,7 @@ const PostDetailsPage = () => {
                   className="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-semibold back-feed-btn"
                   onClick={handleReturn}
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "20px" }}
-                  >
-                    arrow_back
-                  </span>
+                  <ArrowLeft size={18} strokeWidth={2.2} />
                   {returnLabel}
                 </button>
               </div>
@@ -196,12 +192,7 @@ const PostDetailsPage = () => {
                 className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-2 back-feed-btn"
                 onClick={handleReturn}
               >
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: "18px" }}
-                >
-                  arrow_back
-                </span>
+                <ArrowLeft size={16} strokeWidth={2.2} />
                 {returnLabel}
               </button>
             </div>

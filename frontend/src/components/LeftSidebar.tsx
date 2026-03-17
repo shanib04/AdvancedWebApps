@@ -1,4 +1,5 @@
 import { getStoredSessionUser } from "../utils/sessionUser";
+import { Bookmark, Heart, House, UserRound } from "lucide-react";
 
 interface LeftSidebarProps {
   activePage?: "home" | "saved" | "liked" | "profile";
@@ -17,7 +18,10 @@ function LeftSidebar({ activePage }: LeftSidebarProps) {
             activePage === "home" ? "active" : ""
           }`}
         >
-          🏠 Home
+          <span className="d-inline-flex align-items-center gap-2">
+            <House size={18} strokeWidth={2.1} />
+            Home
+          </span>
         </a>
         <a
           href="/home?saved=true"
@@ -25,7 +29,10 @@ function LeftSidebar({ activePage }: LeftSidebarProps) {
             activePage === "saved" ? "active" : ""
           }`}
         >
-          🔖 Saved Posts
+          <span className="d-inline-flex align-items-center gap-2">
+            <Bookmark size={18} strokeWidth={2.1} />
+            Saved Posts
+          </span>
         </a>
         <a
           href="/home?liked=true"
@@ -33,7 +40,10 @@ function LeftSidebar({ activePage }: LeftSidebarProps) {
             activePage === "liked" ? "active" : ""
           }`}
         >
-          ❤️ Liked Posts
+          <span className="d-inline-flex align-items-center gap-2">
+            <Heart size={18} strokeWidth={2.1} />
+            Liked Posts
+          </span>
         </a>
         <a
           href={`/profile/${currentUserId}`}
@@ -41,7 +51,10 @@ function LeftSidebar({ activePage }: LeftSidebarProps) {
             activePage === "profile" ? "active" : ""
           }`}
         >
-          👤 My Profile
+          <span className="d-inline-flex align-items-center gap-2">
+            <UserRound size={18} strokeWidth={2.1} />
+            My Profile
+          </span>
         </a>
       </div>
     </aside>
