@@ -22,13 +22,19 @@ body {
   overflow-y: auto;
 }
 
-@media (min-width: 992px) {
-  .register-scroll-page {
-    overflow: auto;
-  }
+.login-form-panel,
+.register-form-panel {
+  scrollbar-gutter: stable;
+}
 
+@media (min-width: 992px) {
   .register-form-panel {
     max-height: 100vh;
+  }
+
+  .login-form-panel,
+  .register-form-panel {
+    overflow-y: scroll;
   }
 }
 
@@ -37,11 +43,6 @@ body {
     overflow: auto;
     max-height: none;
   }
-}
-
-.register-scroll-page {
-  overflow-y: auto;
-  height: 100vh;
 }
 
 .login-input {
@@ -559,6 +560,10 @@ body {
 
 .route-transition {
   animation: route-fade-slide 0.32s ease;
+}
+
+.route-transition--none {
+  animation: none;
 }
 
 @keyframes route-fade-slide {

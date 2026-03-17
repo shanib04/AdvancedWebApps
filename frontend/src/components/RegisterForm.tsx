@@ -202,7 +202,7 @@ function RegisterForm() {
 
   return (
     <main
-      className="login-page register-scroll-page container-fluid min-vh-100 px-0"
+      className="login-page container-fluid min-vh-100 px-0"
       style={{
         fontFamily: '"Spline Sans", sans-serif',
       }}
@@ -212,10 +212,10 @@ function RegisterForm() {
         <AuthPhotoGallery
           images={authGalleryImages}
           counts={[2, 3, 2]}
-          canvasTransform="rotate(-4deg) scale(0.96)"
+          canvasTransform="rotate(-4deg) scale(0.98)"
         />
 
-        <section className="register-form-panel col-12 col-lg-5 d-flex flex-column align-items-center px-4 px-sm-5 py-4 py-lg-5 overflow-auto">
+        <section className="register-form-panel col-12 col-lg-5 d-flex flex-column align-items-center px-4 px-sm-5 py-4 py-lg-5">
           <div
             className="register-screen-shell w-100 my-auto flex-shrink-0"
             style={{ maxWidth: "380px" }}
