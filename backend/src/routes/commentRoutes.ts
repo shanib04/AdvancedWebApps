@@ -16,6 +16,8 @@ const router = Router();
  *   post:
  *     summary: Create a new comment
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -43,6 +45,8 @@ router.post("/", authMiddleware, controller.createComment);
  *   get:
  *     summary: Get all comments
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: user
@@ -66,9 +70,11 @@ router.get("/", authMiddleware, controller.getAllComments);
  *   get:
  *     summary: Get comments by post ID
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: post
+ *         name: postId
  *         required: true
  *         schema:
  *           type: string
@@ -85,6 +91,8 @@ router.get("/post", authMiddleware, controller.getCommentsByPost);
  *   get:
  *     summary: Get a comment by ID
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -106,6 +114,8 @@ router.get("/:id", authMiddleware, controller.getCommentById);
  *   put:
  *     summary: Update a comment by ID
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -137,6 +147,8 @@ router.put("/:id", authMiddleware, controller.updateComment);
  *   delete:
  *     summary: Delete a comment by ID
  *     tags: [Comments]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

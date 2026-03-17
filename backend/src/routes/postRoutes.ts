@@ -17,6 +17,8 @@ const router = Router();
  *   post:
  *     summary: Create a new post
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -41,6 +43,8 @@ router.post("/", authMiddleware, controller.createPost);
  *   get:
  *     summary: Get all posts
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: user
@@ -69,6 +73,8 @@ router.get("/", authMiddleware, controller.getAllPosts);
  *   get:
  *     summary: Get posts liked by a specific user
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -90,6 +96,8 @@ router.get("/user/:userId/liked", authMiddleware, controller.getLikedPosts);
  *   get:
  *     summary: Get posts saved by a specific user
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -111,6 +119,8 @@ router.get("/user/:userId/saved", authMiddleware, controller.getSavedPosts);
  *   get:
  *     summary: Get a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -132,6 +142,8 @@ router.get("/:id", authMiddleware, controller.getPostById);
  *   put:
  *     summary: Update a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -163,6 +175,8 @@ router.put("/:id", authMiddleware, controller.updatePost);
  *   post:
  *     summary: Toggle like/unlike for a post
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -184,6 +198,8 @@ router.post("/:id/like", authMiddleware, controller.toggleLike);
  *   post:
  *     summary: Toggle save/unsave for a post
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -205,6 +221,8 @@ router.post("/:id/save", authMiddleware, controller.toggleSave);
  *   delete:
  *     summary: Delete a post by ID
  *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
