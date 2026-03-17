@@ -41,7 +41,6 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/jest": "^30.0.0",
-    "@types/mongodb-memory-server": "^1.8.0",
     "@types/multer": "^2.0.0",
     "@types/node": "^25.3.0",
     "@types/supertest": "^6.0.3",
