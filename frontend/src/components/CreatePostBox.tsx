@@ -4,7 +4,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import type { Post } from "../types/models";
 import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import {
+  getAiImageSearchErrorMessage,
+  getUserFriendlyApiError,
+} from "../utils/getUserFriendlyApiError";
 import { defaultUserPhotoUrl } from "../utils/photoUtils";
 
 const createPostSchema = z.object({
@@ -92,7 +95,7 @@ function CreatePostBox({
         onActionFailed("No images found for this term. Try another keyword.");
       }
     } catch (error: unknown) {
-      onActionFailed(getUserFriendlyApiError(error, "Failed to fetch images."));
+      onActionFailed(getAiImageSearchErrorMessage(error));
     } finally {
       setIsFetchingCreateImages(false);
     }

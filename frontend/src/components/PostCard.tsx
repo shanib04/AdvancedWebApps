@@ -3,7 +3,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import type { Post, User } from "../types/models";
 import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import {
+  getAiImageSearchErrorMessage,
+  getUserFriendlyApiError,
+} from "../utils/getUserFriendlyApiError";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
 import { formatDateTimeLocal } from "../utils/dateUtils";
 import { mergePostState } from "../utils/postState";
@@ -314,7 +317,7 @@ function PostCard({
         onActionFailed("No images found for this term. Try another keyword.");
       }
     } catch (error: unknown) {
-      onActionFailed(getUserFriendlyApiError(error, "Failed to fetch images."));
+      onActionFailed(getAiImageSearchErrorMessage(error));
     } finally {
       setIsFetchingEditImages(false);
     }

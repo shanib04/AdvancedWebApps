@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import type { Post } from "../types/models";
 import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import {
+  getAiImageSearchErrorMessage,
+  getUserFriendlyApiError,
+} from "../utils/getUserFriendlyApiError";
 
 type InitialDraftPayload = {
   text: string;
@@ -97,9 +100,7 @@ function HomeDraftStudio({
       setSelectedImage(null);
       setDraftKeyword(draftImageSearchText.trim());
     } catch (error: unknown) {
-      onActionFailed(
-        getUserFriendlyApiError(error, "Failed to fetch more images."),
-      );
+      onActionFailed(getAiImageSearchErrorMessage(error));
     } finally {
       setIsFetchingDraftImages(false);
     }

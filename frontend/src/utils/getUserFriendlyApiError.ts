@@ -70,3 +70,41 @@ export const getUserFriendlyApiError = (
 
   return fallbackMessage;
 };
+
+export const getAiImageSearchErrorMessage = (error: unknown) => {
+  if (!(error instanceof AxiosError)) {
+    return "We could not fetch images right now. Please try again in a moment.";
+  }
+
+  const status = error.response?.status;
+  const backendError = (
+    error.response?.data as { error?: string; message?: string } | undefined
+  )?.error;
+  const backendMessage = (
+    error.response?.data as { error?: string; message?: string } | undefined
+  )?.message;
+  const combinedBackendText =
+    `${backendError ?? ""} ${backendMessage ?? ""}`.toLowerCase();
+
+  if (!status) {
+    return "We could not reach the image service. Please check your connection and try again.";
+  }
+
+  // Some backend paths wrap Unsplash 404 as HTTP 500 with this message.
+  if (
+    combinedBackendText.includes("unsplash request failed with status 404") ||
+    (combinedBackendText.includes("unsplash") &&
+      combinedBackendText.includes("status 404"))
+  ) {
+    return "No images were found for this search. Try a different keyword.";
+  }
+
+  if (status === 404) {
+    return "No images were found for this search. Try a different keyword.";
+  }
+
+  return getUserFriendlyApiError(
+    error,
+    "We could not fetch images right now. Please try again in a moment.",
+  );
+};
