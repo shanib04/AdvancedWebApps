@@ -51,7 +51,9 @@ function PostCard({
   const [isLiked, setIsLiked] = useState(Boolean(post.isLiked));
   const [likesCount, setLikesCount] = useState(post.likeCount ?? 0);
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
+  const [showSaveAnimation, setShowSaveAnimation] = useState(false);
   const likeAnimationTimeoutRef = useRef<number | null>(null);
+  const saveAnimationTimeoutRef = useRef<number | null>(null);
   const closeEditPanelTimeoutRef = useRef<number | null>(null);
   const postCardRef = useRef<HTMLElement | null>(null);
   const editImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -71,6 +73,9 @@ function PostCard({
     return () => {
       if (likeAnimationTimeoutRef.current) {
         window.clearTimeout(likeAnimationTimeoutRef.current);
+      }
+      if (saveAnimationTimeoutRef.current) {
+        window.clearTimeout(saveAnimationTimeoutRef.current);
       }
       if (closeEditPanelTimeoutRef.current) {
         window.clearTimeout(closeEditPanelTimeoutRef.current);
@@ -275,6 +280,20 @@ function PostCard({
     const nextIsSaved = !previousIsSaved;
 
     setIsSaved(nextIsSaved);
+
+    if (nextIsSaved) {
+      setShowSaveAnimation(true);
+
+      if (saveAnimationTimeoutRef.current) {
+        window.clearTimeout(saveAnimationTimeoutRef.current);
+      }
+
+      saveAnimationTimeoutRef.current = window.setTimeout(() => {
+        setShowSaveAnimation(false);
+      }, 1000);
+    } else {
+      setShowSaveAnimation(false);
+    }
 
     try {
       const response = await apiClient.post(`/post/${post._id}/save`);
@@ -725,23 +744,39 @@ function PostCard({
             </span>
           </button>
 
-          <button
-            type="button"
-            className="btn btn-sm rounded-pill icon-action save d-flex align-items-center gap-1"
-            onClick={handleSave}
-          >
-            <span
-              className={`material-symbols-outlined ${isSaved ? "text-primary" : "text-secondary"}`}
-              style={{
-                fontSize: "18px",
-                fontVariationSettings: isSaved
-                  ? '"FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24'
-                  : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
-              }}
+          <div className="position-relative">
+            {showSaveAnimation && (
+              <>
+                <span className="material-symbols-outlined text-primary floating-bookmark floating-bookmark-1">
+                  bookmark
+                </span>
+                <span className="material-symbols-outlined text-primary floating-bookmark floating-bookmark-2">
+                  bookmark
+                </span>
+                <span className="material-symbols-outlined text-primary floating-bookmark floating-bookmark-3">
+                  bookmark
+                </span>
+              </>
+            )}
+
+            <button
+              type="button"
+              className="btn btn-sm rounded-pill icon-action save d-flex align-items-center gap-1"
+              onClick={handleSave}
             >
-              bookmark
-            </span>
-          </button>
+              <span
+                className={`material-symbols-outlined ${isSaved ? "text-primary" : "text-secondary"}`}
+                style={{
+                  fontSize: "18px",
+                  fontVariationSettings: isSaved
+                    ? '"FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24'
+                    : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+                }}
+              >
+                bookmark
+              </span>
+            </button>
+          </div>
 
           {isOwner && !isEditing && (
             <button

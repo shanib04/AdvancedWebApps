@@ -558,6 +558,44 @@ body {
   }
 }
 
+.floating-bookmark {
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  font-size: 14px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  animation: float-bookmark-up 1s ease-out forwards;
+}
+
+.floating-bookmark-1 {
+  margin-left: -14px;
+  animation-delay: 0ms;
+}
+
+.floating-bookmark-2 {
+  margin-left: 0;
+  animation-delay: 80ms;
+}
+
+.floating-bookmark-3 {
+  margin-left: 14px;
+  animation-delay: 160ms;
+}
+
+@keyframes float-bookmark-up {
+  0% {
+    transform: translate(-50%, 0) scale(0.8);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: translate(-50%, -34px) scale(1.15);
+    opacity: 0;
+  }
+}
+
 .route-transition {
   animation: route-fade-slide 0.32s ease;
 }

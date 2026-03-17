@@ -207,7 +207,7 @@ function HomeDraftStudio({
           <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
             {" "}
             <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
-            AI Draft Studio
+            AI Post Editor
           </h5>
           <h6
             className="text-muted text-uppercase fw-bold mb-3"
