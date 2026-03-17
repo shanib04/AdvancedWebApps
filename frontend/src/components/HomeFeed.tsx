@@ -451,6 +451,7 @@ function HomeFeed() {
               isSearchActive={isSearchActive}
               isSearchFetching={isSearchFetching}
               hasMore={hasMore}
+              feedMode={isSavedMode ? "saved" : isLikedMode ? "liked" : "home"}
             />
           </section>
 

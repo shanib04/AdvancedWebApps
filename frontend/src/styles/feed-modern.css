@@ -208,6 +208,98 @@
   border-color: rgba(220, 38, 38, 0.55);
 }
 
+.back-feed-btn {
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  color: #1d4ed8;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(239, 246, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.96) 100%
+    ),
+    #ffffff;
+  box-shadow:
+    0 8px 20px rgba(37, 99, 235, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.back-feed-btn:hover,
+.back-feed-btn:focus-visible {
+  border-color: rgba(37, 99, 235, 0.42);
+  color: #1e40af;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(219, 234, 254, 1) 0%,
+      rgba(243, 249, 255, 1) 100%
+    ),
+    #eff6ff;
+  box-shadow:
+    0 12px 24px rgba(37, 99, 235, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.empty-feed-state {
+  background:
+    radial-gradient(
+      circle at 18% 12%,
+      rgba(59, 130, 246, 0.12),
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 82% 88%,
+      rgba(16, 185, 129, 0.12),
+      transparent 45%
+    ),
+    linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.empty-feed-icon-wrap {
+  width: 66px;
+  height: 66px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(59, 130, 246, 0.24);
+  box-shadow: 0 10px 20px rgba(30, 64, 175, 0.14);
+}
+
+.empty-feed-icon {
+  font-size: 28px;
+  color: #2563eb;
+}
+
+.empty-feed-cta {
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  color: #1d4ed8;
+  background: rgba(239, 246, 255, 0.85);
+}
+
+.empty-feed-cta:hover,
+.empty-feed-cta:focus-visible {
+  color: #1e3a8a;
+  background: rgba(219, 234, 254, 1);
+  border-color: rgba(30, 58, 138, 0.35);
+}
+
+.empty-filter-state {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(248, 250, 252, 1) 100%
+  );
+  border: 1px dashed rgba(148, 163, 184, 0.55);
+}
+
 .loading-card {
   min-height: 120px;
   background: #ffffff;

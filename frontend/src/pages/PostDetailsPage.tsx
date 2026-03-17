@@ -132,24 +132,8 @@ const PostDetailsPage = () => {
             <div className="position-sticky" style={{ top: "85px" }}>
               <div className="mb-4">
                 <button
-                  className="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-bold shadow-sm bg-white"
+                  className="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-semibold back-feed-btn"
                   onClick={() => navigate(-1)}
-                  style={{ transition: "all 0.2s" }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.classList.replace(
-                      "btn-outline-secondary",
-                      "btn-secondary",
-                    );
-                    e.currentTarget.classList.replace("bg-white", "text-white");
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.classList.replace(
-                      "btn-secondary",
-                      "btn-outline-secondary",
-                    );
-                    e.currentTarget.classList.add("bg-white");
-                    e.currentTarget.classList.remove("text-white");
-                  }}
                 >
                   <span
                     className="material-symbols-outlined"
@@ -168,10 +152,16 @@ const PostDetailsPage = () => {
           <div className="col-12 col-md-6">
             <div className="mb-3 d-md-none">
               <button
-                className="btn btn-sm btn-outline-secondary"
+                className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-2 back-feed-btn"
                 onClick={() => navigate(-1)}
               >
-                &larr; Back to Feed
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "18px" }}
+                >
+                  arrow_back
+                </span>
+                Back to Feed
               </button>
             </div>
 
