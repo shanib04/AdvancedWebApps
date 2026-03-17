@@ -354,7 +354,11 @@ function CreatePostBox({
                           event.currentTarget.style.opacity = "0.75";
                         }
                       }}
-                      onClick={() => setSelectedCreateImage(imageUrl)}
+                      onClick={() =>
+                        setSelectedCreateImage((prevSelected) =>
+                          prevSelected === imageUrl ? null : imageUrl,
+                        )
+                      }
                     />
                   </div>
                 ))}

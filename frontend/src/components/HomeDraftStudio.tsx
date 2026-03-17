@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Sparkles } from "lucide-react";
 import type { Post } from "../types/models";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
@@ -202,7 +203,11 @@ function HomeDraftStudio({
     <div className="card p-4 shadow-sm border-0 rounded-4">
       <div className="d-flex flex-column gap-4">
         <div className="mb-4">
-          <h5 className="fw-bold mb-3">✨ AI Draft Studio</h5>
+          <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
+            {" "}
+            <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
+            AI Draft Studio
+          </h5>
           <h6
             className="text-muted text-uppercase fw-bold mb-3"
             style={{ fontSize: "0.8rem" }}
@@ -381,7 +386,11 @@ function HomeDraftStudio({
                           event.currentTarget.style.opacity = "0.75";
                         }
                       }}
-                      onClick={() => setSelectedImage(imageUrl)}
+                      onClick={() =>
+                        setSelectedImage((prevSelected) =>
+                          prevSelected === imageUrl ? null : imageUrl,
+                        )
+                      }
                     />
                   </div>
                 ))}
