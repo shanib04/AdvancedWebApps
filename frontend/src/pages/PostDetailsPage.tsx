@@ -23,10 +23,25 @@ const PostDetailsPage = () => {
     undefined,
   );
   const { toasts, showSuccess, showFailed, removeToast } = useAppToast();
+  const shouldFocusCommentInput =
+    Boolean(location.state) &&
+    typeof location.state === "object" &&
+    "focusCommentInput" in location.state &&
+    Boolean(
+      (location.state as { focusCommentInput?: boolean }).focusCommentInput,
+    );
 
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
   const currentUserId = storedUser?._id ?? "";
+
+  useEffect(() => {
+    if (shouldFocusCommentInput) {
+      return;
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [postId, shouldFocusCommentInput]);
 
   useEffect(() => {
     if (!postId) return;
@@ -184,7 +199,7 @@ const PostDetailsPage = () => {
                 postId={post._id}
                 postAuthorId={authorId || ""}
                 onCommentsChange={setCommentCount}
-                autoFocusInput={location.state?.focusCommentInput}
+                autoFocusInput={shouldFocusCommentInput}
               />
             </div>
           </div>
