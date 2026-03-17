@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import type { Post, User } from "../types/models";
 import apiClient from "../services/api-client";
@@ -28,6 +28,7 @@ function PostCard({
   onActionFailed,
 }: PostCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(post.content);
@@ -692,9 +693,21 @@ function PostCard({
             type="button"
             className="btn btn-sm rounded-pill icon-action d-flex align-items-center gap-1 text-secondary"
             onClick={() => {
+              const postPath = `/post/${post._id}`;
+              const fromPath = `${location.pathname}${location.search}`;
+
+              if (location.pathname === postPath) {
+                window.dispatchEvent(
+                  new CustomEvent("focusPostCommentInput", {
+                    detail: { postId: post._id },
+                  }),
+                );
+                return;
+              }
+
               sessionStorage.setItem("lastViewedPostId", post._id);
-              navigate(`/post/${post._id}`, {
-                state: { focusCommentInput: true },
+              navigate(postPath, {
+                state: { focusCommentInput: true, fromPath },
               });
             }}
           >

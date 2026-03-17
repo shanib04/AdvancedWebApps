@@ -12,6 +12,11 @@ import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import { feedCache } from "../utils/feedCache";
 import { mergePostState } from "../utils/postState";
 
+type PostNavigationState = {
+  focusCommentInput?: boolean;
+  fromPath?: string;
+};
+
 const PostDetailsPage = () => {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
@@ -23,13 +28,34 @@ const PostDetailsPage = () => {
     undefined,
   );
   const { toasts, showSuccess, showFailed, removeToast } = useAppToast();
-  const shouldFocusCommentInput =
-    Boolean(location.state) &&
-    typeof location.state === "object" &&
-    "focusCommentInput" in location.state &&
-    Boolean(
-      (location.state as { focusCommentInput?: boolean }).focusCommentInput,
-    );
+  const navigationState =
+    location.state && typeof location.state === "object"
+      ? (location.state as PostNavigationState)
+      : null;
+  const shouldFocusCommentInput = Boolean(navigationState?.focusCommentInput);
+  const fromPath =
+    typeof navigationState?.fromPath === "string"
+      ? navigationState.fromPath
+      : "";
+  const currentPathWithSearch = `${location.pathname}${location.search}`;
+  const canNavigateToSource = Boolean(
+    fromPath && fromPath !== currentPathWithSearch,
+  );
+
+  const returnLabel = fromPath.startsWith("/profile/")
+    ? "Return to Profile"
+    : fromPath.startsWith("/home")
+      ? "Return to Feed"
+      : "Return";
+
+  const handleReturn = () => {
+    if (canNavigateToSource) {
+      navigate(fromPath);
+      return;
+    }
+
+    navigate(-1);
+  };
 
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
@@ -148,7 +174,7 @@ const PostDetailsPage = () => {
               <div className="mb-4">
                 <button
                   className="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-semibold back-feed-btn"
-                  onClick={() => navigate(-1)}
+                  onClick={handleReturn}
                 >
                   <span
                     className="material-symbols-outlined"
@@ -156,7 +182,7 @@ const PostDetailsPage = () => {
                   >
                     arrow_back
                   </span>
-                  Back to Feed
+                  {returnLabel}
                 </button>
               </div>
               <LeftSidebar />
@@ -168,7 +194,7 @@ const PostDetailsPage = () => {
             <div className="mb-3 d-md-none">
               <button
                 className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-2 back-feed-btn"
-                onClick={() => navigate(-1)}
+                onClick={handleReturn}
               >
                 <span
                   className="material-symbols-outlined"
@@ -176,7 +202,7 @@ const PostDetailsPage = () => {
                 >
                   arrow_back
                 </span>
-                Back to Feed
+                {returnLabel}
               </button>
             </div>
 

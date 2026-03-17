@@ -28,6 +28,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const mainInputRef = useRef<HTMLInputElement>(null);
+  const pendingFocusRef = useRef(false);
 
   const currentUser = useSessionUserListener();
 
@@ -87,6 +88,54 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       }, 100);
     }
   }, [autoFocusInput, loading]);
+
+  useEffect(() => {
+    const focusCommentInput = () => {
+      if (loading || !mainInputRef.current) {
+        pendingFocusRef.current = true;
+        return;
+      }
+
+      mainInputRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      mainInputRef.current.focus();
+      pendingFocusRef.current = false;
+    };
+
+    const handleFocusCommentInput = (event: Event) => {
+      const customEvent = event as CustomEvent<{ postId?: string }>;
+      if (customEvent.detail?.postId !== postId) {
+        return;
+      }
+
+      focusCommentInput();
+    };
+
+    window.addEventListener(
+      "focusPostCommentInput",
+      handleFocusCommentInput as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "focusPostCommentInput",
+        handleFocusCommentInput as EventListener,
+      );
+    };
+  }, [postId, loading]);
+
+  useEffect(() => {
+    if (!loading && pendingFocusRef.current && mainInputRef.current) {
+      mainInputRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      mainInputRef.current.focus();
+      pendingFocusRef.current = false;
+    }
+  }, [loading]);
 
   const tree = useMemo(() => {
     const map = new Map<string, CommentTreeItem>();
