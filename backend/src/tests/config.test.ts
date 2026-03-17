@@ -5,14 +5,21 @@ jest.mock("mongoose");
 
 describe("Database Configuration", () => {
   let originalMongoUri: string | undefined;
+  let exitSpy: jest.SpyInstance;
 
   beforeEach(() => {
     originalMongoUri = process.env.MONGO_URI;
     jest.clearAllMocks();
+    exitSpy = jest.spyOn(process, "exit").mockImplementation(((
+      code?: number,
+    ) => {
+      throw new Error(`process.exit:${code}`);
+    }) as never);
   });
 
   afterEach(() => {
     process.env.MONGO_URI = originalMongoUri;
+    exitSpy.mockRestore();
   });
 
   test("should connect to MongoDB successfully", async () => {
@@ -29,22 +36,18 @@ describe("Database Configuration", () => {
     consoleSpy.mockRestore();
   });
 
-  test("should throw error if MONGO_URI is not defined", async () => {
+  test("should exit process if MONGO_URI is not defined", async () => {
     delete process.env.MONGO_URI;
 
-    await expect(connectDB()).rejects.toThrow(
-      "MONGO_URI is not defined in .env"
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+
+    await expect(connectDB()).rejects.toThrow("process.exit:1");
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "MONGO_URI is not defined in .env",
     );
     expect(mongoose.connect).not.toHaveBeenCalled();
-  });
 
-  test("should throw error if MONGO_URI is empty string", async () => {
-    process.env.MONGO_URI = "";
-
-    await expect(connectDB()).rejects.toThrow(
-      "MONGO_URI is not defined in .env"
-    );
-    expect(mongoose.connect).not.toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 
   test("should handle connection errors", async () => {

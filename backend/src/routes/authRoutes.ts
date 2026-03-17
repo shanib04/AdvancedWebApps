@@ -15,6 +15,7 @@ const router = Router();
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -55,6 +56,7 @@ router.post("/register", controller.register);
  *   post:
  *     summary: Login with username and password
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -89,6 +91,7 @@ router.post("/login", controller.login);
  *   post:
  *     summary: Sign in with Google credential
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -115,6 +118,7 @@ router.post("/google", controller.googleSignin);
  *   post:
  *     summary: Refresh the access token
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -141,6 +145,7 @@ router.post("/refresh", controller.refresh);
  *   post:
  *     summary: Logout and invalidate the refresh token
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
