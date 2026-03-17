@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import type { User } from "../../types/models";
 import apiClient from "../../services/api-client";
-import { defaultUserPhotoUrl } from "../../utils/photoUtils";
+import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
 import {
@@ -58,7 +58,7 @@ const EditProfileModal = ({
     if (selectedFile) {
       return URL.createObjectURL(selectedFile);
     }
-    return editingPhotoUrl || defaultUserPhotoUrl;
+    return normalizePhotoUrl(editingPhotoUrl);
   }, [selectedFile, editingPhotoUrl]);
 
   // clean up object URL when file changes or component unmounts
@@ -262,6 +262,12 @@ const EditProfileModal = ({
                   }}
                   referrerPolicy="no-referrer"
                   crossOrigin="anonymous"
+                  onError={(event) => {
+                    const element = event.currentTarget;
+                    if (element.src !== defaultUserPhotoUrl) {
+                      element.src = defaultUserPhotoUrl;
+                    }
+                  }}
                 />
                 <div className="d-flex flex-column gap-2 flex-grow-1">
                   <input
