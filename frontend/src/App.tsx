@@ -1,11 +1,10 @@
 import type { ReactElement } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
-import RegisterForm from "./components/RegisterForm";
-import LoginForm from "./components/LoginForm";
-import HomeFeed from "./components/HomeFeed";
+import RegisterForm from "./components/auth/RegisterForm";
+import LoginForm from "./components/auth/LoginForm";
+import HomeFeed from "./components/feed/HomeFeed";
 import PostDetailsPage from "./pages/PostDetailsPage";
 import UserProfilePage from "./pages/UserProfilePage";
-import AISearchWidget from "./components/AISearchWidget";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const accessToken = localStorage.getItem("accessToken");

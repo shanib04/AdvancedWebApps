@@ -1,27 +1,27 @@
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import useAppToast from "../hooks/useAppToast";
-import apiClient from "../services/api-client";
-import axios from "axios";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import photo1 from "../../assets/authPhotos/photo1.png";
+import photo2 from "../../assets/authPhotos/photo2.png";
+import photo3 from "../../assets/authPhotos/photo3.png";
+import photo4 from "../../assets/authPhotos/photo4.png";
+import photo5 from "../../assets/authPhotos/photo5.png";
+import photo6 from "../../assets/authPhotos/photo6.png";
+import photo7 from "../../assets/authPhotos/photo7.png";
+import webLogo from "../../assets/web-logo.png";
+import useAppToast from "../../hooks/useAppToast";
+import apiClient from "../../services/api-client";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import {
   setStoredSessionUser,
   syncStoredUserFromWhoAmI,
-} from "../utils/sessionUser";
-import AppToast from "./AppToast";
+} from "../../utils/sessionUser";
+import AppToast from "../shared/AppToast";
 import AuthPhotoGallery from "./AuthPhotoGallery";
-import webLogo from "../assets/web-logo.png";
-import photo1 from "../assets/authPhotos/photo1.png";
-import photo2 from "../assets/authPhotos/photo2.png";
-import photo3 from "../assets/authPhotos/photo3.png";
-import photo4 from "../assets/authPhotos/photo4.png";
-import photo5 from "../assets/authPhotos/photo5.png";
-import photo6 from "../assets/authPhotos/photo6.png";
-import photo7 from "../assets/authPhotos/photo7.png";
 
 const loginSchema = z.object({
   identifier: z
@@ -60,6 +60,7 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
+  // submit credentials and store auth tokens
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await apiClient.post("/auth/login", {
@@ -95,6 +96,7 @@ function LoginForm() {
     }
   };
 
+  // finish google login and sync profile photo
   const handleGoogleSuccess = async (credentialResponse: {
     credential?: string;
   }) => {

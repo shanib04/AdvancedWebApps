@@ -7,7 +7,7 @@ import path from "path";
 import app from "./index";
 
 const PORT = process.env.PORT || 3000;
-const HTTPS_PORT = process.env.HTTPS_PORT || 443;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 if (NODE_ENV !== "production") {

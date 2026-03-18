@@ -10,6 +10,7 @@ const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL?.trim(),
 });
 
+// clear all auth tokens from storage and redirect to login
 export const clearAuthStateAndRedirect = () => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
@@ -20,6 +21,7 @@ export const clearAuthStateAndRedirect = () => {
   }
 };
 
+// attach access token to every outgoing request if present
 apiClient.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem("accessToken");
 
@@ -30,6 +32,7 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// auto-refresh access token on 401 - retries original request with new tokens, redirects on failure
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {

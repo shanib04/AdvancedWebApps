@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
-import UserAvatar from "./ComposerAvatar";
+import { useState } from "react";
+import apiClient from "../../services/api-client";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
+import UserAvatar from "../shared/ComposerAvatar";
 
 type InitialDraftPayload = {
   text: string;
@@ -27,6 +27,7 @@ function RightAIWidget({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // call ai post generation endpoint
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       setError("Please enter a prompt first.");

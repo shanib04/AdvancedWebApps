@@ -8,20 +8,24 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import { HandlerResponse } from "../types/models";
 
+// create new post
 export const createPost = async (
   req: AuthRequest,
   res: Response,
 ): HandlerResponse => {
   try {
     const { content, imageUrl } = req.body;
+    // validate required field
     if (!content) {
       return res.status(422).json({ error: "Content is required" });
     }
+    // save to db
     const post = await Post.create({
       user: req.user._id,
       content,
       imageUrl,
     });
+    // fetch with user info
     const populatedPost = await Post.findById(post._id).populate(
       "user",
       "username displayName photoUrl",
@@ -32,12 +36,14 @@ export const createPost = async (
   }
 };
 
+// get all posts with pagination and user's like/save status
 export const getAllPosts = async (
   req: AuthRequest,
   res: Response,
 ): HandlerResponse => {
   try {
     const { user, page } = req.query as { user?: string; page?: string };
+    // validate user id if provided
     if (user && !validateObjectId(user)) {
       return res.status(422).json({ error: "Invalid User ID format" });
     }
@@ -46,6 +52,7 @@ export const getAllPosts = async (
     const pageSize = 5;
     const skip = (pageNumber - 1) * pageSize;
 
+    // fetch posts with pagination
     const posts = await Post.find(user ? { user } : {})
       .populate("user", "username displayName photoUrl")
       .sort({ createdAt: -1 })
@@ -55,6 +62,7 @@ export const getAllPosts = async (
     const postIds = posts.map((post) => post._id);
     const currentUserId = req.user._id;
 
+    // batch fetch likes & saves for all posts
     const [likes, saves] = await Promise.all([
       Like.find({ userId: currentUserId, postId: { $in: postIds } }),
       Save.find({ userId: currentUserId, postId: { $in: postIds } }),
@@ -81,6 +89,7 @@ export const getAllPosts = async (
   }
 };
 
+// get single post by id with like/save status
 export const getPostById = async (
   req: AuthRequest,
   res: Response,
@@ -88,12 +97,15 @@ export const getPostById = async (
   try {
     const { id } = req.params;
     const userId = req.user._id;
+    // validate required param
     if (!id) {
       return res.status(422).json({ error: "Post ID is required" });
     }
+    // validate id format
     if (!validateObjectId(id)) {
       return res.status(422).json({ error: "Invalid Post ID format" });
     }
+    // fetch post with user details
     const post = await Post.findById(id).populate(
       "user",
       "username displayName photoUrl",

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { Post, User } from "../types/models";
-import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
+import type { Post, User } from "../../types/models";
+import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
 
 interface UserFilterWidgetProps {
   posts: Post[];
@@ -21,6 +21,7 @@ export default function UserFilterWidget({
   selectedUserIds,
   onToggleUser,
 }: UserFilterWidgetProps) {
+  // build per-user post counts from visible posts
   const userStats = useMemo(() => {
     const statsMap = new Map<string, UserStat>();
 
@@ -38,7 +39,7 @@ export default function UserFilterWidget({
       }
     });
 
-    // Sort by count descending
+    // sort by count descending
     return Array.from(statsMap.values()).sort((a, b) => b.count - a.count);
   }, [posts]);
 

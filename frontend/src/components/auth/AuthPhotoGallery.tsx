@@ -17,6 +17,7 @@ const FLEX_BY_TILE_COUNT: Record<number, readonly number[]> = {
 const toCount = (value: number) =>
   Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 
+// split images into three columns
 const splitGalleryImages = (
   images: readonly string[],
   counts: GalleryColumnCounts,

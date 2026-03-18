@@ -79,7 +79,7 @@ const BioSection = ({
   return (
     <div>
       {isOwnProfile && isEditing ? (
-        // Edit mode
+        // edit mode
         <div className="d-flex flex-column gap-3">
           <textarea
             className="form-control rounded-2"
@@ -137,7 +137,7 @@ const BioSection = ({
           </div>
         </div>
       ) : (
-        // View mode
+        // view mode
         <div className="d-flex align-items-center" style={{ gap: "0" }}>
           {hasBio ? (
             <p

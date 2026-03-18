@@ -1,14 +1,14 @@
 import { LogOut, Search } from "lucide-react";
 import { useEffect, useMemo } from "react";
-import webLogo from "../assets/web-logo.png";
-import { useSessionUserListener } from "../hooks/useSessionUserListener";
-import apiClient, { clearAuthStateAndRedirect } from "../services/api-client";
-import { defaultUserPhotoUrl, normalizePhotoUrl } from "../utils/photoUtils";
+import webLogo from "../../assets/web-logo.png";
+import { useSessionUserListener } from "../../hooks/useSessionUserListener";
+import apiClient, { clearAuthStateAndRedirect } from "../../services/api-client";
+import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 import {
   getStoredSessionUser,
   syncStoredUserFromWhoAmI,
   type SessionUser,
-} from "../utils/sessionUser";
+} from "../../utils/sessionUser";
 
 interface NavbarProps {
   searchValue: string;
@@ -17,6 +17,7 @@ interface NavbarProps {
 }
 
 function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
+  // call logout endpoint and clear local auth
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -29,7 +30,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
         await apiClient.post("/auth/logout", { refreshToken });
       }
     } catch {
-      // Always continue with local logout even if server logout fails.
+      // keep local logout even if server call fails
     } finally {
       clearAuthStateAndRedirect();
     }
@@ -42,15 +43,16 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
   useEffect(() => {
     const syncUser = async () => {
       try {
+        // sync profile data on mount
         await syncStoredUserFromWhoAmI(initialUser);
       } catch {
-        // Ignore errors - sessionUser will remain as initial value
+        // ignore errors and keep initial session user
       }
     };
 
     syncUser();
 
-    // Listen for storage changes to update user data when profile is updated
+    // sync session user on storage changes
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === "user" && event.newValue) {
         try {
@@ -59,7 +61,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
             new CustomEvent("sessionUserUpdated", { detail: updatedUser }),
           );
         } catch {
-          // Ignore invalid JSON
+          // ignore invalid json
         }
       }
     };

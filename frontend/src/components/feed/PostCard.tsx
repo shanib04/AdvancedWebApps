@@ -1,16 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import type { Post, User } from "../types/models";
-import apiClient from "../services/api-client";
-import {
-  getAiImageSearchErrorMessage,
-  getUserFriendlyApiError,
-} from "../utils/getUserFriendlyApiError";
-import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
-import { formatDateTimeLocal } from "../utils/dateUtils";
-import { mergePostState } from "../utils/postState";
-import AiSuggestionBox from "./AiSuggestionBox";
+import type { Post, User } from "../../types/models";
+import apiClient from "../../services/api-client";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
+import { normalizePhotoUrl, defaultUserPhotoUrl } from "../../utils/photoUtils";
+import { formatDateTimeLocal } from "../../utils/dateUtils";
+import { mergePostState } from "../../utils/postState";
+import AiSuggestionBox from "../ai/AiSuggestionBox";
+import ImagePickerPanel from "../ai/ImagePickerPanel";
+import { useImagePicker } from "../../hooks/useImagePicker";
 
 interface PostCardProps {
   post: Post;
@@ -31,21 +30,16 @@ function PostCard({
   onActionSuccess,
   onActionFailed,
 }: PostCardProps) {
+  // navigation and ui state
   const navigate = useNavigate();
   const location = useLocation();
 
+  // edit mode state
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(post.content);
   const [isRefiningEditText, setIsRefiningEditText] = useState(false);
   const [editSuggestedText, setEditSuggestedText] = useState("");
   const [editedImageFile, setEditedImageFile] = useState<File | null>(null);
-  const [editImageSearchText, setEditImageSearchText] = useState("");
-  const [editFetchedImages, setEditFetchedImages] = useState<string[]>([]);
-  const [selectedEditInternetImage, setSelectedEditInternetImage] = useState<
-    string | null
-  >(null);
-  const [manualImageUrl, setManualImageUrl] = useState("");
-  const [isFetchingEditImages, setIsFetchingEditImages] = useState(false);
   const [isEditInternetImageMode, setIsEditInternetImageMode] = useState(false);
   const [isClosingEditInternetPanel, setIsClosingEditInternetPanel] =
     useState(false);
@@ -60,6 +54,20 @@ function PostCard({
   const closeEditPanelTimeoutRef = useRef<number | null>(null);
   const postCardRef = useRef<HTMLElement | null>(null);
   const editImageInputRef = useRef<HTMLInputElement | null>(null);
+
+  const {
+    searchText: editImageSearchText,
+    setSearchText: setEditImageSearchText,
+    images: editFetchedImages,
+    isFetching: isFetchingEditImages,
+    fetchImages: fetchEditImages,
+    selectedImage: selectedEditInternetImage,
+    setSelectedImage: setSelectedEditInternetImage,
+    manualUrl: manualImageUrl,
+    setManualUrl: setManualImageUrl,
+    addManualUrl: addEditManualUrl,
+    reset: resetEditImagePicker,
+  } = useImagePicker(onActionFailed);
 
   const editedImagePreview = useMemo(
     () => (editedImageFile ? URL.createObjectURL(editedImageFile) : ""),
@@ -117,7 +125,7 @@ function PostCard({
     }
     const lastViewed = sessionStorage.getItem("lastViewedPostId");
     if (lastViewed === post._id && postCardRef.current) {
-      // Images loading above this post can cause layout shifts, so we poll the scroll a few times
+      // poll scroll briefly for image layout shifts
       let attempts = 0;
       const interval = setInterval(() => {
         postCardRef.current?.scrollIntoView({
@@ -126,12 +134,12 @@ function PostCard({
         });
         attempts++;
         if (attempts >= 6) {
-          // 6 attempts * 150ms = 900ms
+          // 6 tries x 150ms = 900ms
           clearInterval(interval);
         }
       }, 150);
 
-      // Fallback in case first interval waits too long
+      // fallback if first interval is delayed
       postCardRef.current?.scrollIntoView({
         behavior: "instant",
         block: "center",
@@ -143,13 +151,13 @@ function PostCard({
     }
   }, [post._id, location.pathname]);
 
-  // Safely extract the populated user object from our strict Post model
+  // extract populated user object safely
   const userObj: User | null =
     typeof post.user === "object" && post.user !== null
       ? (post.user as User)
       : null;
 
-  // Extract ID string if populated object wasn't returned
+  // extract user id if object is missing
   const senderId: string =
     userObj?._id || (typeof post.user === "string" ? post.user : "");
 
@@ -162,7 +170,9 @@ function PostCard({
     ? normalizePhotoUrl(userObj.photoUrl)
     : defaultUserPhotoUrl;
 
+  // delete post with confirmation
   const handleDeletePost = async () => {
+    // ask for confirmation
     const result = await Swal.fire({
       title: "Delete post?",
       text: "This action cannot be undone.",
@@ -178,6 +188,7 @@ function PostCard({
     }
 
     try {
+      // call delete api
       await apiClient.delete(`/post/${post._id}`);
       onPostDeleted(post._id);
       onActionSuccess("Post deleted successfully.");
@@ -186,16 +197,19 @@ function PostCard({
     }
   };
 
+  // save edited post with content and image
   const handleSaveEdit = async () => {
     setIsSavingEdit(true);
 
     try {
       let updatedImageUrl = selectedEditInternetImage ?? post.imageUrl;
 
+      // reupload image if it changed
       if (editedImageFile) {
         const formData = new FormData();
         formData.append("image", editedImageFile);
 
+        // upload new image
         const uploadResponse = await apiClient.post("/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -205,17 +219,21 @@ function PostCard({
         updatedImageUrl = uploadResponse.data?.imageUrl;
       }
 
+      // send updated post to server
       const updateResponse = await apiClient.put(`/post/${post._id}`, {
         content: editedContent,
         imageUrl: updatedImageUrl,
       });
 
+      // update local state
       onPostUpdated(mergePostState(post, updateResponse.data));
       setIsEditing(false);
       setEditedImageFile(null);
+      // clear edit form state
       if (editImageInputRef.current) {
         editImageInputRef.current.value = "";
       }
+      // scroll back to updated post
       if (postCardRef.current) {
         const headerOffset = 96;
         const cardTop =
@@ -228,9 +246,8 @@ function PostCard({
           behavior: "smooth",
         });
       }
-      setEditImageSearchText("");
-      setEditFetchedImages([]);
-      setSelectedEditInternetImage(null);
+      // reset image search state
+      resetEditImagePicker();
       setIsEditInternetImageMode(false);
       onActionSuccess("Post updated successfully.");
     } catch (error: unknown) {
@@ -240,7 +257,9 @@ function PostCard({
     }
   };
 
+  // toggle like with optimistic update
   const handleLike = async () => {
+    // store previous state for rollback
     const previousIsLiked = isLiked;
     const previousLikesCount = likesCount;
 
@@ -249,9 +268,11 @@ function PostCard({
       ? previousLikesCount + 1
       : Math.max(previousLikesCount - 1, 0);
 
+    // update ui immediately
     setIsLiked(nextIsLiked);
     setLikesCount(nextLikesCount);
 
+    // show like animation
     if (nextIsLiked) {
       setShowLikeAnimation(true);
 
@@ -267,13 +288,16 @@ function PostCard({
     }
 
     try {
+      // call like endpoint
       const response = await apiClient.post(`/post/${post._id}/like`);
       const updatedPost = response.data?.post as Post | undefined;
 
+      // sync with server
       if (updatedPost && updatedPost._id) {
         onPostUpdated(mergePostState(post, updatedPost));
       }
     } catch (error: unknown) {
+      // revert on error
       setIsLiked(previousIsLiked);
       setLikesCount(previousLikesCount);
 
@@ -281,12 +305,16 @@ function PostCard({
     }
   };
 
+  // toggle save with optimistic update
   const handleSave = async () => {
+    // store previous save state
     const previousIsSaved = isSaved;
     const nextIsSaved = !previousIsSaved;
 
+    // update ui immediately
     setIsSaved(nextIsSaved);
 
+    // show save animation
     if (nextIsSaved) {
       setShowSaveAnimation(true);
 
@@ -302,18 +330,22 @@ function PostCard({
     }
 
     try {
+      // call save endpoint
       const response = await apiClient.post(`/post/${post._id}/save`);
       const updatedPost = response.data?.post as Post | undefined;
 
+      // sync with server
       if (updatedPost && updatedPost._id) {
         onPostUpdated(mergePostState(post, updatedPost));
       }
     } catch (error: unknown) {
+      // revert on error
       setIsSaved(previousIsSaved);
       onActionFailed(getUserFriendlyApiError(error, "Failed to update save."));
     }
   };
 
+  // fetch edit images from external api
   const handleFetchEditImages = async () => {
     if (!isEditInternetImageMode) {
       return;
@@ -324,30 +356,10 @@ function PostCard({
       return;
     }
 
-    setIsFetchingEditImages(true);
-
-    try {
-      const response = await apiClient.post("/api/ai/getMoreImages", {
-        keyword: editImageSearchText.trim(),
-      });
-
-      const images = Array.isArray(response.data?.images)
-        ? response.data.images
-        : [];
-
-      setEditFetchedImages(images);
-      setSelectedEditInternetImage(null);
-
-      if (images.length === 0) {
-        onActionFailed("No images found for this term. Try another keyword.");
-      }
-    } catch (error: unknown) {
-      onActionFailed(getAiImageSearchErrorMessage(error));
-    } finally {
-      setIsFetchingEditImages(false);
-    }
+    await fetchEditImages(editImageSearchText);
   };
 
+  // refine edited post text with ai
   const handleRefineEditText = async () => {
     const currentText = editedContent.trim();
 
@@ -358,6 +370,7 @@ function PostCard({
     setIsRefiningEditText(true);
 
     try {
+      // call ai refine endpoint
       const response = await apiClient.post("/api/ai/refine-text", {
         text: currentText,
       });
@@ -380,20 +393,21 @@ function PostCard({
     }
   };
 
+  // toggle edit image search mode
   const handleToggleEditInternetImageMode = () => {
     if (isEditInternetImageMode) {
+      // close panel with fade animation
       setIsClosingEditInternetPanel(true);
 
       if (closeEditPanelTimeoutRef.current) {
         window.clearTimeout(closeEditPanelTimeoutRef.current);
       }
 
+      // clear state after animation
       closeEditPanelTimeoutRef.current = window.setTimeout(() => {
         setIsEditInternetImageMode(false);
         setIsClosingEditInternetPanel(false);
-        setEditFetchedImages([]);
-        setSelectedEditInternetImage(null);
-        setManualImageUrl("");
+        resetEditImagePicker();
       }, 200);
       return;
     }
@@ -403,26 +417,9 @@ function PostCard({
   };
 
   const handleAddManualImageUrl = () => {
-    const normalizedUrl = manualImageUrl.trim();
-    if (!normalizedUrl) {
-      onActionFailed("Please enter an image URL.");
-      return;
-    }
-
-    const isHttpUrl = /^https?:\/\//i.test(normalizedUrl);
-    if (!isHttpUrl) {
-      onActionFailed("Image URL must start with http:// or https://");
-      return;
-    }
-
-    setEditFetchedImages((prevImages) =>
-      prevImages.includes(normalizedUrl)
-        ? prevImages
-        : [normalizedUrl, ...prevImages],
+    addEditManualUrl(manualImageUrl, () =>
+      onActionSuccess("Image added to edit options."),
     );
-    setSelectedEditInternetImage(normalizedUrl);
-    setManualImageUrl("");
-    onActionSuccess("Image added to edit options.");
   };
 
   return (
@@ -596,135 +593,21 @@ function PostCard({
             {(isEditInternetImageMode || isClosingEditInternetPanel) && (
               <div className="mb-4 mt-2">
                 <div
-                  className={`p-3 rounded-4 border position-relative shadow-sm ${
-                    isClosingEditInternetPanel
-                      ? "tab-opacity-fade-out"
-                      : "tab-opacity-fade"
-                  }`}
-                  style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
+                  className={isClosingEditInternetPanel ? "tab-opacity-fade-out" : "tab-opacity-fade"}
                 >
-                  <button
-                    type="button"
-                    className="btn-close position-absolute top-0 end-0 m-3"
-                    aria-label="Close"
-                    onClick={handleToggleEditInternetImageMode}
+                  <ImagePickerPanel
+                    searchText={editImageSearchText}
+                    onSearchChange={setEditImageSearchText}
+                    images={editFetchedImages}
+                    selectedImage={selectedEditInternetImage}
+                    onSelectImage={setSelectedEditInternetImage}
+                    manualUrl={manualImageUrl}
+                    onManualUrlChange={setManualImageUrl}
+                    onAddManualUrl={handleAddManualImageUrl}
+                    isFetching={isFetchingEditImages}
+                    onFetch={handleFetchEditImages}
+                    onClose={handleToggleEditInternetImageMode}
                   />
-                  <label className="form-label fw-semibold text-primary d-flex align-items-center gap-2 mb-3">
-                    <span className="material-symbols-outlined">
-                      image_search
-                    </span>
-                    Find or Link Image
-                  </label>
-
-                  <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
-                    <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
-                      <span className="material-symbols-outlined fs-5">
-                        search
-                      </span>
-                    </span>
-                    <input
-                      type="text"
-                      className="form-control border-0 shadow-none"
-                      placeholder="e.g. sunset, coding, travel"
-                      value={editImageSearchText}
-                      onChange={(event) =>
-                        setEditImageSearchText(event.target.value)
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-primary px-4 fw-medium rounded-pill m-1"
-                      disabled={isFetchingEditImages}
-                      onClick={handleFetchEditImages}
-                    >
-                      {isFetchingEditImages ? "Fetching..." : "Fetch Images"}
-                    </button>
-                  </div>
-
-                  <div className="d-flex align-items-center mb-3">
-                    <span className="text-muted small px-3 fw-medium">OR</span>
-                  </div>
-
-                  <div className="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white p-1">
-                    <span className="input-group-text bg-transparent text-muted border-0 ps-3">
-                      <span className="material-symbols-outlined fs-5">
-                        link
-                      </span>
-                    </span>
-                    <input
-                      type="url"
-                      className="form-control border-0 ps-1 shadow-none"
-                      placeholder="Paste an image URL here..."
-                      value={manualImageUrl}
-                      onChange={(event) =>
-                        setManualImageUrl(event.target.value)
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-secondary px-4 fw-medium text-white rounded-pill"
-                      onClick={handleAddManualImageUrl}
-                    >
-                      Add URL
-                    </button>
-                  </div>
-
-                  {editFetchedImages.length > 0 && (
-                    <div className="row g-2 mb-2">
-                      {editFetchedImages.map((imageUrl) => (
-                        <div className="col-4 col-sm-3" key={imageUrl}>
-                          <img
-                            src={imageUrl}
-                            alt="Edit option"
-                            className={`img-fluid w-100 rounded-3 ${
-                              selectedEditInternetImage === imageUrl
-                                ? "border border-4 border-primary shadow-sm"
-                                : "opacity-75"
-                            }`}
-                            style={{
-                              height: "90px",
-                              objectFit: "cover",
-                              cursor: "pointer",
-                              transition: "all 0.2s ease",
-                            }}
-                            onMouseOver={(event) => {
-                              if (selectedEditInternetImage !== imageUrl) {
-                                event.currentTarget.style.opacity = "1";
-                              }
-                            }}
-                            onMouseOut={(event) => {
-                              if (selectedEditInternetImage !== imageUrl) {
-                                event.currentTarget.style.opacity = "0.75";
-                              }
-                            }}
-                            onClick={() =>
-                              setSelectedEditInternetImage(imageUrl)
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {selectedEditInternetImage ? (
-                    <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
-                        onClick={() => setSelectedEditInternetImage(null)}
-                      >
-                        Clear Selection
-                      </button>
-                      <small className="text-muted">
-                        Image selected and ready for post.
-                      </small>
-                    </div>
-                  ) : (
-                    <small className="text-muted d-block mt-2">
-                      Select an image above or paste a URL to attach it to your
-                      post.
-                    </small>
-                  )}
                 </div>
               </div>
             )}

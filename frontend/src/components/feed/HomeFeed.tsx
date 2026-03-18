@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import usePosts from "../hooks/usePosts";
-import type { Post, User } from "../types/models";
-import { feedCache } from "../utils/feedCache";
-import useAppToast from "../hooks/useAppToast";
+import usePosts from "../../hooks/usePosts";
+import type { Post, User } from "../../types/models";
+import { feedCache } from "../../utils/feedCache";
+import useAppToast from "../../hooks/useAppToast";
 import {
   getStoredSessionUser,
   syncStoredUserFromWhoAmI,
   type SessionUser,
-} from "../utils/sessionUser";
-import AppToast from "./AppToast";
+} from "../../utils/sessionUser";
+import AppToast from "../shared/AppToast";
 import CreatePostBox from "./CreatePostBox";
 import HomeDraftStudio from "./HomeDraftStudio";
 import HomePostsList from "./HomePostsList";
-import LeftSidebar from "./LeftSidebar";
-import Navbar from "./Navbar";
-import RightAIWidget from "./RightAIWidget";
+import LeftSidebar from "../layout/LeftSidebar";
+import Navbar from "../layout/Navbar";
+import RightAIWidget from "../ai/RightAIWidget";
 import UserFilterWidget from "./UserFilterWidget";
-import "../styles/feed-modern.css";
-import { normalizePhotoUrl } from "../utils/photoUtils";
-import { mergePostIntoList } from "../utils/postState";
-import apiClient from "../services/api-client";
-import AISearchWidget from "./AISearchWidget";
+import "../../styles/feed-modern.css";
+import { normalizePhotoUrl } from "../../utils/photoUtils";
+import { mergePostIntoList } from "../../utils/postState";
+import apiClient from "../../services/api-client";
+import AISearchWidget from "../ai/AISearchWidget";
 import { Sparkles, SquarePen } from "lucide-react";
 
 type InitialDraftPayload = {
@@ -59,17 +59,17 @@ function HomeFeed() {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const queuedSearchPageRef = useRef(false);
 
-  // Custom posts state for saved mode
+  // posts state for saved mode
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
   const [savedError, setSavedError] = useState("");
   const [savedIsLoading, setSavedIsLoading] = useState(false);
 
-  // Custom posts state for liked mode
+  // posts state for liked mode
   const [likedPosts, setLikedPosts] = useState<Post[]>([]);
   const [likedError, setLikedError] = useState("");
   const [likedIsLoading, setLikedIsLoading] = useState(false);
 
-  // Use different posts based on mode
+  // choose posts by mode
   const { posts, setPosts, error, isLoading, hasMore } = usePosts(page);
   const currentPosts = isSavedMode
     ? savedPosts
@@ -96,6 +96,7 @@ function HomeFeed() {
   useEffect(() => {
     const abortController = new AbortController();
 
+    // keep session user synced
     const syncCurrentUser = async () => {
       try {
         const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
@@ -111,7 +112,7 @@ function HomeFeed() {
 
     syncCurrentUser();
 
-    // Listen for session user updates
+    // handle sessionUserUpdated events
     const handleSessionUserUpdate = (event: CustomEvent<SessionUser>) => {
       setCurrentUser(event.detail);
     };
@@ -136,6 +137,7 @@ function HomeFeed() {
   useEffect(() => {
     if (!currentUserId) return;
 
+    // patch posts after profile edits
     const patchAuthoredPosts = (items: Post[]) =>
       items.map((post) => {
         if (typeof post.user !== "object" || post.user === null) {
@@ -168,7 +170,7 @@ function HomeFeed() {
     setPosts,
   ]);
 
-  // Fetch saved posts when in saved mode
+  // fetch saved posts in saved mode
   useEffect(() => {
     if (!isSavedMode || !currentUserId) return;
 
@@ -193,7 +195,7 @@ function HomeFeed() {
     fetchSavedPosts();
   }, [isSavedMode, currentUserId]);
 
-  // Fetch liked posts when in liked mode
+  // fetch liked posts in liked mode
   useEffect(() => {
     if (!isLikedMode || !currentUserId) return;
 
@@ -218,7 +220,7 @@ function HomeFeed() {
     fetchLikedPosts();
   }, [isLikedMode, currentUserId]);
 
-  // Update page title based on mode
+  // update page title by mode
   useEffect(() => {
     if (isSavedMode) {
       document.title = "Saved Posts - Advanced Web Apps";
@@ -229,6 +231,7 @@ function HomeFeed() {
     }
   }, [isSavedMode, isLikedMode]);
 
+  // apply user and text filters
   const filteredPosts = useMemo(() => {
     let result = currentPosts;
 
@@ -280,6 +283,7 @@ function HomeFeed() {
     const abortController = new AbortController();
     let isDisposed = false;
 
+    // lazy-load users when home search starts
     const loadUsersForSearch = async () => {
       setIsUsersLoading(true);
 
@@ -308,8 +312,9 @@ function HomeFeed() {
       isDisposed = true;
       abortController.abort();
     };
-  }, [isHomeMode, isSearchActive, areUsersLoaded]);
+  }, [isHomeMode, isSearchActive, areUsersLoaded, showFailed]);
 
+  // filter users by search term
   const filteredProfiles = useMemo(() => {
     if (!isHomeMode || !isSearchActive) {
       return [];
@@ -394,11 +399,13 @@ function HomeFeed() {
     };
   }, []);
 
+  // return to ai composer and clear draft
   const resetDraftMode = () => {
     setDraftPayload(null);
     setComposerMode("ai");
   };
 
+  // open draft studio with ai content
   const handleInitialDraftGenerated = (payload: InitialDraftPayload) => {
     setDraftPayload(payload);
     setComposerMode("ai");
@@ -411,11 +418,13 @@ function HomeFeed() {
     }
   };
 
+  // prepend new post and scroll to top
   const handleDraftPublished = (createdPost: Post) => {
     setPosts((prevPosts) => [createdPost, ...prevPosts]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // update this post in all lists and cache
   const handlePostUpdated = (updatedPost: Post) => {
     setPosts(
       (prevPosts) => mergePostIntoList(prevPosts, updatedPost).updatedPosts,
@@ -432,6 +441,7 @@ function HomeFeed() {
     ).updatedPosts;
   };
 
+  // remove deleted post from home feed
   const handlePostDeleted = (postId: string) => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
@@ -440,6 +450,7 @@ function HomeFeed() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // toggle user filter chip in saved and liked modes
   const handleToggleUserFilter = (userId: string) => {
     setSelectedUserFilterIds((prev) =>
       prev.includes(userId)

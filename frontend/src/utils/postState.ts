@@ -3,6 +3,7 @@ import type { Post } from "../types/models";
 const hasOwn = (obj: object, key: PropertyKey) =>
   Object.prototype.hasOwnProperty.call(obj, key);
 
+// merge server post with local flags
 export const mergePostState = (currentPost: Post, incomingPost: Post): Post => {
   const merged: Post = {
     ...currentPost,
@@ -38,6 +39,7 @@ export const mergePostState = (currentPost: Post, incomingPost: Post): Post => {
   return merged;
 };
 
+// update one post in a list by id
 export const mergePostIntoList = (
   posts: Post[],
   incomingPost: Post,

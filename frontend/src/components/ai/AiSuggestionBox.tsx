@@ -1,3 +1,4 @@
+// show ai suggestion with apply and discard actions
 interface AiSuggestionBoxProps {
   text: string;
   onApply: () => void;

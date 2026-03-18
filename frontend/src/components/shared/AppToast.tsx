@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { ToastState } from "../hooks/useAppToast";
+import type { ToastState } from "../../hooks/useAppToast";
 
 interface AppToastProps {
   toasts: ToastState[];
@@ -48,6 +48,7 @@ function ToastItem({
   durationMs,
   onClose,
 }: ToastItemProps) {
+  // auto-dismiss toast after duration
   useEffect(() => {
     const timeout = setTimeout(() => {
       onClose(id);

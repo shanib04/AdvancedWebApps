@@ -4,7 +4,7 @@ import apiClient from "../../services/api-client";
 import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
-import AppToast from "../AppToast";
+import AppToast from "../shared/AppToast";
 import {
   getStoredSessionUser,
   setStoredSessionUser,
@@ -62,7 +62,7 @@ const EditProfileModal = ({
     return normalizePhotoUrl(editingPhotoUrl);
   }, [selectedFile, editingPhotoUrl]);
 
-  // clean up object URL when file changes or component unmounts
+  // revoke object url on file change or unmount
   useEffect(() => {
     return () => {
       if (selectedFile && previewUrl.startsWith("blob:")) {
@@ -114,7 +114,7 @@ const EditProfileModal = ({
         return;
       }
       setSelectedFile(file);
-      setEditingPhotoUrl(""); // Clear URL if file selected
+      setEditingPhotoUrl(""); // clear url when file is selected
     }
   };
 
@@ -214,7 +214,7 @@ const EditProfileModal = ({
                 id="username"
                 value={editingUsername}
                 onChange={(e) => {
-                  // Only allow alphanumeric characters, hyphens, and underscores, and convert to lowercase
+                  // allow lowercase letters, numbers, _, and -
                   const formattedValue = e.target.value
                     .replace(/[^a-zA-Z0-9\-_]/g, "")
                     .toLowerCase();

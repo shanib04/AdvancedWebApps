@@ -14,6 +14,7 @@ export type SessionUser = {
 
 const USER_STORAGE_KEY = "user";
 
+// read session user from local storage
 export const getStoredSessionUser = (): SessionUser | null => {
   const storedUser = localStorage.getItem(USER_STORAGE_KEY);
   if (!storedUser) {
@@ -27,9 +28,10 @@ export const getStoredSessionUser = (): SessionUser | null => {
   }
 };
 
+// normalize session user fields
 export const normalizeSessionUser = (user: SessionUser): SessionUser => {
-  const legacyImageUrl = (user as SessionUser & { imageUrl?: string }).imageUrl;
-  const rawPhoto = user.photoUrl || legacyImageUrl;
+  const originalImageUrl = (user as SessionUser & { imageUrl?: string }).imageUrl;
+  const rawPhoto = user.photoUrl || originalImageUrl;
   const { ...fullUser } = user as SessionUser & {
     imageUrl?: string;
   };
@@ -40,11 +42,12 @@ export const normalizeSessionUser = (user: SessionUser): SessionUser => {
   };
 };
 
+// save session user and broadcast update
 export const setStoredSessionUser = (user: SessionUser) => {
   const normalized = normalizeSessionUser(user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalized));
 
-  // Dispatch custom event for same-tab updates
+  // same-tab update event
   window.dispatchEvent(
     new CustomEvent("sessionUserUpdated", { detail: normalized }),
   );
@@ -52,6 +55,7 @@ export const setStoredSessionUser = (user: SessionUser) => {
   return normalized;
 };
 
+// refresh session user from whoami
 export const syncStoredUserFromWhoAmI = async (
   fallbackUser: SessionUser | null,
 ) => {

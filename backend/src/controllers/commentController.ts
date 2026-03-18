@@ -6,6 +6,7 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import { HandlerResponse } from "../types/models";
 
+// create comment or reply for a post
 export const createComment = async (
   req: AuthRequest,
   res: Response,
@@ -49,6 +50,7 @@ export const createComment = async (
   }
 };
 
+// fetch comments with optional user/post filters
 export const getAllComments = async (
   req: AuthRequest,
   res: Response,
@@ -76,6 +78,7 @@ export const getAllComments = async (
   }
 };
 
+// fetch single comment by id
 export const getCommentById = async (
   req: AuthRequest,
   res: Response,
@@ -101,6 +104,7 @@ export const getCommentById = async (
   }
 };
 
+// fetch comments by post id
 export const getCommentsByPost = async (
   req: AuthRequest,
   res: Response,
@@ -129,6 +133,7 @@ export const getCommentsByPost = async (
   }
 };
 
+// edit own comment content
 export const updateComment = async (
   req: AuthRequest,
   res: Response,
@@ -160,6 +165,7 @@ export const updateComment = async (
   }
 };
 
+// delete comment if you're owner or post owner, including nested replies
 export const deleteComment = async (
   req: AuthRequest,
   res: Response,

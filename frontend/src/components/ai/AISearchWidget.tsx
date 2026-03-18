@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { aiSearchAppData } from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
-import type { Post } from "../types/models";
+import React, { useEffect, useMemo, useState } from "react";
+import { aiSearchAppData } from "../../services/api-client";
+import type { Post } from "../../types/models";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 
 const suggestionDefinitions = [
   {
@@ -78,6 +78,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
   const [error, setError] = useState("");
   const [suggestionStart, setSuggestionStart] = useState(0);
 
+  // build signals from posts for suggestion ranking
   const signals = useMemo<SuggestionSignals>(() => {
     const authorIds = new Set<string>();
     let totalComments = 0;
@@ -121,6 +122,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
     };
   }, [posts, currentUserId]);
 
+  // rank suggestions by signal score and query keyword boosts
   const prioritizedSuggestions = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const tokens = normalized.split(/\s+/).filter((token) => token.length >= 3);
@@ -149,6 +151,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
       .map((suggestion) => suggestion.text);
   }, [query, signals]);
 
+  // show a rotating window of ranked suggestions
   const visibleSuggestions = useMemo(() => {
     if (prioritizedSuggestions.length <= VISIBLE_SUGGESTIONS) {
       return prioritizedSuggestions;
@@ -164,6 +167,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
     setSuggestionStart(0);
   }, [query]);
 
+  // send query to AI search and show the response
   const handleSearch = async () => {
     if (!query.trim()) {
       setError("Please enter a prompt first.");
