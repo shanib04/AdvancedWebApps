@@ -162,18 +162,20 @@ const BioSection = ({
                     textDecoration: "none",
                     padding: "0",
                     marginLeft: "0.25rem",
-                    lineHeight: "1",
                     height: "auto",
-                    display: "inline-flex",
-                    verticalAlign: "baseline",
+                    lineHeight: "inherit",
+                    display: "inline-block",
+                    verticalAlign: "middle",
                   }}
                 >
                   <span
                     className="material-symbols-outlined"
                     style={{
-                      fontSize: "18px",
-                      display: "inline-flex",
-                      alignItems: "center",
+                      fontSize: "17px",
+                      display: "inline-block",
+                      lineHeight: "1",
+                      verticalAlign: "middle",
+                      transform: "translateY(-3px)",
                     }}
                   >
                     edit
@@ -201,16 +203,20 @@ const BioSection = ({
                   textDecoration: "none",
                   padding: "0",
                   marginLeft: "0.25rem",
-                  lineHeight: "1",
                   height: "auto",
+                  lineHeight: "inherit",
+                  display: "inline-block",
+                  verticalAlign: "middle",
                 }}
               >
                 <span
                   className="material-symbols-outlined"
                   style={{
-                    fontSize: "18px",
-                    display: "flex",
-                    alignItems: "center",
+                    fontSize: "17px",
+                    display: "inline-block",
+                    lineHeight: "1",
+                    verticalAlign: "middle",
+                    transform: "translateY(-3px)",
                   }}
                 >
                   edit
