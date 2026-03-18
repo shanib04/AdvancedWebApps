@@ -51,9 +51,9 @@ router.post("/generateInitialDraft", authMiddleware, generateInitialDraft);
 
 /**
  * @swagger
- * /api/ai/refineText:
+ * /api/ai/refine-text:
  *   post:
- *     summary: Refine existing text with an instruction
+ *     summary: Refine text (quick mode or instruction mode)
  *     tags: [AI]
  *     security:
  *       - bearerAuth: []
@@ -63,10 +63,10 @@ router.post("/generateInitialDraft", authMiddleware, generateInitialDraft);
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - currentText
- *               - instruction
  *             properties:
+ *               text:
+ *                 type: string
+ *                 example: today i learned react hooks and they are cool
  *               currentText:
  *                 type: string
  *                 example: This is a long draft that should be shortened.
@@ -83,7 +83,7 @@ router.post("/generateInitialDraft", authMiddleware, generateInitialDraft);
  *       500:
  *         description: AI provider or server error
  */
-router.post("/refineText", authMiddleware, refineText);
+router.post("/refine-text", authMiddleware, refineText);
 
 /**
  * @swagger

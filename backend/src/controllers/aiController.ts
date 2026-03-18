@@ -257,22 +257,26 @@ export const refineText = async (
   res: Response,
 ): HandlerResponse => {
   try {
-    const { currentText, instruction } = req.body as {
+    const { text, currentText, instruction } = req.body as {
+      text?: string;
       currentText?: string;
       instruction?: string;
     };
 
-    if (!currentText || !currentText.trim()) {
-      return res.status(422).json({ error: "currentText is required" });
+    const sourceText = (text || currentText || "").trim();
+    if (!sourceText) {
+      return res.status(422).json({ error: "text is required" });
     }
 
-    if (!instruction || !instruction.trim()) {
-      return res.status(422).json({ error: "instruction is required" });
-    }
-
-    const aiPrompt =
-      "Rewrite this text based on the instruction. Return ONLY the new text string. " +
-      `Text: ${currentText.trim()}. Instruction: ${instruction.trim()}.`;
+    const normalizedInstruction = (instruction || "").trim();
+    const aiPrompt = normalizedInstruction
+      ? "Rewrite this text based on the instruction. Return ONLY the new text string. " +
+        `Text: ${sourceText}. Instruction: ${normalizedInstruction}.`
+      : "You are an expert social media copywriter. " +
+        "Refine the following text to make it more engaging, clear, and professional. " +
+        "Do not add hashtags unless they fit naturally. " +
+        "Return ONLY the refined text without any quotes or extra conversational filler. " +
+        `Text to refine: ${sourceText}`;
 
     const updatedText = (await generateWithGemini(aiPrompt))
       .replace(/```/g, "")
