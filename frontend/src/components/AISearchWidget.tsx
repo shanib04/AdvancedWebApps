@@ -26,7 +26,11 @@ const suggestionDefinitions = [
   },
   {
     text: "List users who commented on my posts.",
-    score: ({ hasCurrentUser, currentUserPostCount, totalComments }: SuggestionSignals) =>
+    score: ({
+      hasCurrentUser,
+      currentUserPostCount,
+      totalComments,
+    }: SuggestionSignals) =>
       hasCurrentUser && currentUserPostCount > 0 && totalComments > 0 ? 32 : 7,
   },
   {
@@ -45,7 +49,7 @@ const suggestionDefinitions = [
   },
 ] as const;
 
-const VISIBLE_SUGGESTIONS = 3;
+const VISIBLE_SUGGESTIONS = 2;
 
 type AISearchWidgetProps = {
   posts?: Post[];
@@ -83,7 +87,9 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
 
     posts.forEach((post) => {
       const authorId =
-        typeof post.user === "object" && post.user !== null ? post.user._id : post.user;
+        typeof post.user === "object" && post.user !== null
+          ? post.user._id
+          : post.user;
 
       if (authorId) {
         authorIds.add(authorId);
@@ -122,7 +128,9 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
     return [...suggestionDefinitions]
       .map((suggestion, index) => {
         const queryBoost = tokens.reduce((score, token) => {
-          return suggestion.text.toLowerCase().includes(token) ? score + 18 : score;
+          return suggestion.text.toLowerCase().includes(token)
+            ? score + 18
+            : score;
         }, 0);
 
         return {
@@ -187,74 +195,76 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
         </h5>
       )}
       {inSection && (
-        <p className="small text-dark fw-semibold mb-2">
-          Data Insights
-        </p>
+        <p className="small text-dark fw-semibold mb-2">Data Insights</p>
       )}
 
-        <textarea
-          className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
-          rows={4}
-          placeholder="Ask about posts, users, comments..."
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+      <textarea
+        className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
+        rows={3}
+        placeholder="Ask about posts, users, comments..."
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
 
-        <p className="small text-muted mb-2">Try a suggested question:</p>
-        <div className="d-flex flex-wrap gap-2 mb-3">
-          {visibleSuggestions.map((suggestion) => (
-            <button
-              key={suggestion}
-              type="button"
-              className="btn btn-sm rounded-pill ai-suggestion-chip"
-              onClick={() => {
-                setQuery(suggestion);
-                setError("");
-              }}
-            >
-              {suggestion}
-            </button>
-          ))}
-        </div>
+      <p className="small text-muted mb-2">Try a suggested question:</p>
+      <div className="ai-suggestions-grid mb-3">
+        {visibleSuggestions.map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            className="btn btn-sm rounded-pill ai-suggestion-chip"
+            onClick={() => {
+              setQuery(suggestion);
+              setError("");
+            }}
+          >
+            <span className="ai-suggestion-chip-text">{suggestion}</span>
+          </button>
+        ))}
+      </div>
 
+      <div className="ai-show-more-slot mb-3">
         {prioritizedSuggestions.length > VISIBLE_SUGGESTIONS && (
           <button
             type="button"
-            className="btn btn-link btn-sm p-0 mb-3"
+            className="btn btn-link btn-sm p-0"
             onClick={() => {
-              setSuggestionStart((previous) =>
-                (previous + VISIBLE_SUGGESTIONS) % prioritizedSuggestions.length,
+              setSuggestionStart(
+                (previous) =>
+                  (previous + VISIBLE_SUGGESTIONS) %
+                  prioritizedSuggestions.length,
               );
             }}
           >
             Show more ideas
           </button>
         )}
+      </div>
 
-        <button
-          type="button"
-          className="btn btn-primary w-100 rounded-pill"
-          disabled={loading}
-          onClick={handleSearch}
-        >
-          {loading ? (
-            <span className="d-inline-flex align-items-center gap-2">
-              <span className="spinner-border spinner-border-sm" />
-              Searching...
-            </span>
-          ) : (
-            "Ask AI"
-          )}
-        </button>
-
-        {error && <p className="text-danger small mt-2 mb-0">{error}</p>}
-
-        {result && (
-          <div className="mt-3 bg-white p-3 rounded-4 border">
-            <strong>AI Answer:</strong>
-            <div className="mt-2">{result}</div>
-          </div>
+      <button
+        type="button"
+        className="btn btn-primary w-100 rounded-pill"
+        disabled={loading}
+        onClick={handleSearch}
+      >
+        {loading ? (
+          <span className="d-inline-flex align-items-center gap-2">
+            <span className="spinner-border spinner-border-sm" />
+            Searching...
+          </span>
+        ) : (
+          "Ask AI"
         )}
+      </button>
+
+      {error && <p className="text-danger small mt-2 mb-0">{error}</p>}
+
+      {result && (
+        <div className="mt-3 bg-white p-3 rounded-4 border ai-insights-answer">
+          <strong>AI Answer:</strong>
+          <div className="mt-2">{result}</div>
+        </div>
+      )}
     </>
   );
 
@@ -264,7 +274,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
 
   return (
     <div className="card border-0 shadow-sm rounded-5 ai-widget-card">
-      <div className="card-body p-4">{content}</div>
+      <div className="card-body p-3">{content}</div>
     </div>
   );
 };

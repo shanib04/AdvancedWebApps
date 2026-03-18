@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import ComposerAvatar from "./ComposerAvatar";
 
 type InitialDraftPayload = {
   text: string;
@@ -13,11 +14,13 @@ type InitialDraftPayload = {
 interface RightAIWidgetProps {
   onInitialDraftGenerated: (payload: InitialDraftPayload) => void;
   inSection?: boolean;
+  currentUserPhoto?: string;
 }
 
 function RightAIWidget({
   onInitialDraftGenerated,
   inSection = false,
+  currentUserPhoto,
 }: RightAIWidgetProps) {
   const [prompt, setPrompt] = useState("");
   const [includeImages, setIncludeImages] = useState(true);
@@ -64,52 +67,53 @@ function RightAIWidget({
   const content = (
     <>
       {inSection ? (
-        <div className="ai-alt-panel">
-          <p className="small text-dark fw-semibold mb-1 d-flex align-items-center gap-2 ai-alt-title">
-            <Sparkles size={16} strokeWidth={2.2} className="text-primary" />
-            Post Generation
-          </p>
-          <p className="small text-muted mb-3 ai-alt-hint">
-            Prefer a shortcut? This is an alternative to writing a post manually.
-          </p>
-
-          <textarea
-            className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
-            rows={4}
-            placeholder="What should the AI write about?"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-          />
-
-          <div className="form-check form-switch mb-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              role="switch"
-              id="include-ai-images"
-              checked={includeImages}
-              onChange={(event) => setIncludeImages(event.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="include-ai-images">
-              Include images from the internet
-            </label>
+        <div className="px-1">
+          <div className="d-flex gap-3 mb-3">
+            <ComposerAvatar photoUrl={currentUserPhoto} />
+            <div className="w-100">
+              <div className="create-message-shell">
+                <textarea
+                  className="form-control create-message-input px-3 py-2 fs-6 rounded-4 app-scrollbar ai-assistant-prompt"
+                  rows={3}
+                  placeholder="What should the AI write about?"
+                  value={prompt}
+                  onChange={(event) => setPrompt(event.target.value)}
+                />
+              </div>
+            </div>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-primary btn-sm w-100 rounded-pill"
-            disabled={isLoading}
-            onClick={handleGenerate}
-          >
-            {isLoading ? (
-              <span className="d-inline-flex align-items-center gap-2">
-                <span className="spinner-border spinner-border-sm" />
-                Generating...
-              </span>
-            ) : (
-              "Generate Post"
-            )}
-          </button>
+          <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2 px-1 pb-1">
+            <div className="form-check form-switch mb-0 ms-1">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="include-ai-images"
+                checked={includeImages}
+                onChange={(event) => setIncludeImages(event.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="include-ai-images">
+                Find images online
+              </label>
+            </div>
+
+            <button
+              type="button"
+              className="btn publish-btn text-white rounded-pill px-4 py-2 fw-semibold shadow-sm"
+              disabled={isLoading}
+              onClick={handleGenerate}
+            >
+              {isLoading ? (
+                <span className="d-inline-flex align-items-center gap-2">
+                  <span className="spinner-border spinner-border-sm" />
+                  Generating...
+                </span>
+              ) : (
+                "Generate Post"
+              )}
+            </button>
+          </div>
 
           {error && <p className="text-danger small mt-2 mb-0">{error}</p>}
         </div>
@@ -138,7 +142,7 @@ function RightAIWidget({
               onChange={(event) => setIncludeImages(event.target.checked)}
             />
             <label className="form-check-label" htmlFor="include-ai-images">
-              Include images from the internet
+              Find images online
             </label>
           </div>
 

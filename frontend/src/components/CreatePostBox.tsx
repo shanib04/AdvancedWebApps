@@ -8,8 +8,8 @@ import {
   getAiImageSearchErrorMessage,
   getUserFriendlyApiError,
 } from "../utils/getUserFriendlyApiError";
-import { defaultUserPhotoUrl } from "../utils/photoUtils";
 import AiSuggestionBox from "./AiSuggestionBox";
+import ComposerAvatar from "./ComposerAvatar";
 
 const createPostSchema = z.object({
   text: z.string().min(1, "Post text is required."),
@@ -170,7 +170,7 @@ function CreatePostBox({
     );
     setSelectedCreateImage(normalizedUrl);
     setManualImageUrl("");
-    onActionSuccess("Image added to draft.");
+    onActionSuccess("Image added to post.");
   };
 
   const onSubmit = async (data: CreatePostFormData) => {
@@ -220,24 +220,12 @@ function CreatePostBox({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="d-flex gap-3 mb-2">
-        <img
-          src={currentUserPhoto}
-          alt="Your avatar"
-          className="avatar-soft shadow-sm bg-white"
-          referrerPolicy="no-referrer"
-          crossOrigin="anonymous"
-          onError={(event) => {
-            const element = event.currentTarget;
-            if (element.src !== defaultUserPhotoUrl) {
-              element.src = defaultUserPhotoUrl;
-            }
-          }}
-        />
+        <ComposerAvatar photoUrl={currentUserPhoto} />
         <div className="w-100">
           <div className="create-message-shell">
             <textarea
               id="text"
-              className="form-control create-message-input px-3 py-2 fs-5 rounded-4"
+              className="form-control create-message-input px-3 py-2 fs-6 rounded-4"
               rows={selectedImagePreview || selectedCreateImage ? 2 : 3}
               placeholder="Share something with your community..."
               {...register("text")}
@@ -444,8 +432,8 @@ function CreatePostBox({
 
       <hr className="my-2 opacity-10 mx-2" style={{ borderColor: "#cbd5e1" }} />
 
-      <div className="d-flex justify-content-between align-items-center mt-2 px-2 pb-1">
-        <div className="d-flex gap-2">
+      <div className="create-post-toolbar d-flex justify-content-between align-items-center mt-2 px-2 pb-1">
+        <div className="create-post-tools d-flex gap-2">
           <button
             type="button"
             className={`btn btn-light rounded-circle d-flex align-items-center justify-content-center p-2 icon-action shadow-sm ${
@@ -492,7 +480,7 @@ function CreatePostBox({
 
           <button
             type="button"
-            className="btn btn-outline-primary btn-sm rounded-pill d-inline-flex align-items-center gap-2 ai-refine-btn"
+            className="btn btn-outline-primary btn-sm rounded-pill d-inline-flex align-items-center gap-2 ai-refine-btn ai-refine-btn-compact"
             onClick={handleRefineText}
             disabled={!watch("text")?.trim() || isRefining || isSubmitting}
           >

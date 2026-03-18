@@ -22,6 +22,7 @@ import { normalizePhotoUrl } from "../utils/photoUtils";
 import { mergePostIntoList } from "../utils/postState";
 import apiClient from "../services/api-client";
 import AISearchWidget from "./AISearchWidget";
+import { Sparkles, SquarePen } from "lucide-react";
 
 type InitialDraftPayload = {
   text: string;
@@ -42,8 +43,7 @@ function HomeFeed() {
   }, [page]);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDraftMode, setIsDraftMode] = useState(false);
-  const [isAiPostGeneratorOpen, setIsAiPostGeneratorOpen] = useState(false);
+  const [composerMode, setComposerMode] = useState<"manual" | "ai">("manual");
   const [selectedUserFilterIds, setSelectedUserFilterIds] = useState<string[]>(
     [],
   );
@@ -395,13 +395,13 @@ function HomeFeed() {
   }, []);
 
   const resetDraftMode = () => {
-    setIsDraftMode(false);
     setDraftPayload(null);
+    setComposerMode("ai");
   };
 
   const handleInitialDraftGenerated = (payload: InitialDraftPayload) => {
     setDraftPayload(payload);
-    setIsDraftMode(true);
+    setComposerMode("ai");
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     if (payload.includeImagesRequested && (payload.images || []).length === 0) {
@@ -470,9 +470,69 @@ function HomeFeed() {
           <section className="col-12 col-lg-6">
             {!isSavedMode && !isLikedMode && (
               <div className="card border-0 shadow-sm rounded-5 mb-4 create-post-card">
-                <div className="card-body p-4">
-                  {!isDraftMode ? (
-                    <>
+                <div className="card-body p-4 composer-card-body">
+                  <div
+                    className="btn-group composer-mode-toggle composer-mode-floating"
+                    role="tablist"
+                    aria-label="Composer mode"
+                  >
+                    <button
+                      type="button"
+                      className={`btn btn-sm rounded-pill d-inline-flex align-items-center gap-2 ${
+                        composerMode === "manual"
+                          ? "btn-primary"
+                          : "btn-outline-primary"
+                      }`}
+                      onClick={() => {
+                        setComposerMode("manual");
+                        setDraftPayload(null);
+                      }}
+                      aria-pressed={composerMode === "manual"}
+                    >
+                      <SquarePen size={15} strokeWidth={2.2} />
+                      Manual
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn btn-sm rounded-pill d-inline-flex align-items-center gap-2 ${
+                        composerMode === "ai"
+                          ? "btn-primary"
+                          : "btn-outline-primary"
+                      }`}
+                      onClick={() => setComposerMode("ai")}
+                      aria-pressed={composerMode === "ai"}
+                    >
+                      <Sparkles size={15} strokeWidth={2.2} />
+                      AI
+                    </button>
+                  </div>
+
+                  <div className="d-flex flex-wrap align-items-center gap-3 mb-2 composer-header">
+                    <div className="d-flex align-items-center gap-2">
+                      <span className="composer-title-icon" aria-hidden="true">
+                        {composerMode === "ai" ? (
+                          <Sparkles size={16} strokeWidth={2.2} />
+                        ) : (
+                          <SquarePen size={16} strokeWidth={2.2} />
+                        )}
+                      </span>
+                      <div>
+                        <h5 className="fw-bold mb-0">Create Post</h5>
+                        <small className="text-muted composer-subtitle">
+                          Pick your flow and start writing faster.
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`composer-pane ${
+                      composerMode === "ai"
+                        ? "composer-pane-ai"
+                        : "composer-pane-manual"
+                    }`}
+                  >
+                    {composerMode === "manual" ? (
                       <CreatePostBox
                         currentUserPhoto={currentUserPhoto}
                         onPostCreated={(post) => {
@@ -482,46 +542,24 @@ function HomeFeed() {
                         onActionSuccess={showSuccess}
                         onActionFailed={showFailed}
                       />
-
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary btn-sm rounded-pill mt-3 px-3"
-                        onClick={() =>
-                          setIsAiPostGeneratorOpen((previous) => !previous)
-                        }
-                        aria-expanded={isAiPostGeneratorOpen}
-                      >
-                        {isAiPostGeneratorOpen
-                          ? "Hide AI post generator"
-                          : "Generate a post with AI"}
-                      </button>
-
-                      {isAiPostGeneratorOpen && (
-                        <>
-                          <hr className="my-4" />
-                          <RightAIWidget
-                            onInitialDraftGenerated={handleInitialDraftGenerated}
-                            inSection
-                          />
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <HomeDraftStudio
-                      initialDraft={
-                        draftPayload || {
-                          text: "",
-                          keyword: "",
-                          images: [],
-                          includeImagesRequested: true,
-                        }
-                      }
-                      onClose={resetDraftMode}
-                      onDraftPublished={handleDraftPublished}
-                      onActionSuccess={showSuccess}
-                      onActionFailed={showFailed}
-                    />
-                  )}
+                    ) : draftPayload ? (
+                      <HomeDraftStudio
+                        initialDraft={draftPayload}
+                        onClose={resetDraftMode}
+                        onDraftPublished={handleDraftPublished}
+                        onActionSuccess={showSuccess}
+                        onActionFailed={showFailed}
+                      />
+                    ) : (
+                      <div className="ai-composer-shell">
+                        <RightAIWidget
+                          onInitialDraftGenerated={handleInitialDraftGenerated}
+                          inSection
+                          currentUserPhoto={currentUserPhoto}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -550,11 +588,8 @@ function HomeFeed() {
           <aside className="col-lg-3 d-none d-lg-block">
             {!isSavedMode && !isLikedMode && (
               <div
-                className="position-sticky sidebar-scroll-soft"
+                className="ai-insights-wrap"
                 style={{
-                  top: "85px",
-                  maxHeight: "calc(100vh - 100px)",
-                  overflowY: "auto",
                   paddingRight: "4px",
                 }}
               >
