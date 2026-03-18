@@ -56,7 +56,7 @@ function HomeDraftStudio({
 
   const handleRefineDraft = async () => {
     if (!draftText.trim() || !refineInstruction.trim()) {
-      onActionFailed("Draft text and instruction are required.");
+      onActionFailed("Post text and instruction are required.");
       return;
     }
 
@@ -174,7 +174,7 @@ function HomeDraftStudio({
 
   const handlePublishDraft = async () => {
     if (!draftText.trim()) {
-      onActionFailed("Draft text is required.");
+      onActionFailed("Post text is required.");
       return;
     }
 
@@ -190,11 +190,11 @@ function HomeDraftStudio({
         onDraftPublished(createResponse.data as Post);
       }
 
-      onActionSuccess("Draft published successfully.");
+      onActionSuccess("Post published successfully.");
       onClose();
     } catch (error: unknown) {
       onActionFailed(
-        getUserFriendlyApiError(error, "Failed to publish draft."),
+        getUserFriendlyApiError(error, "Failed to publish post."),
       );
     } finally {
       setIsPublishingDraft(false);
