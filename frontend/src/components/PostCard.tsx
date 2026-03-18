@@ -290,7 +290,7 @@ function PostCard({
 
       saveAnimationTimeoutRef.current = window.setTimeout(() => {
         setShowSaveAnimation(false);
-      }, 1000);
+      }, 360);
     } else {
       setShowSaveAnimation(false);
     }
@@ -699,13 +699,16 @@ function PostCard({
               onClick={handleLike}
             >
               <span
-                className={`material-symbols-outlined ${isLiked ? "text-danger" : "text-secondary"}`}
+                className="material-symbols-outlined"
                 style={{
                   fontSize: "18px",
-                  color: isLiked ? "#dc3545" : undefined,
+                  color: isLiked ? "#dc2626" : "#6c757d",
+                  fontVariationSettings: isLiked
+                    ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
+                    : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
                 }}
               >
-                {isLiked ? "favorite" : "favorite_border"}
+                favorite
               </span>
               <span>{likesCount}</span>
             </button>
@@ -744,39 +747,24 @@ function PostCard({
             </span>
           </button>
 
-          <div className="position-relative">
-            {showSaveAnimation && (
-              <>
-                <span className="material-symbols-outlined text-primary floating-bookmark floating-bookmark-1">
-                  bookmark
-                </span>
-                <span className="material-symbols-outlined text-primary floating-bookmark floating-bookmark-2">
-                  bookmark
-                </span>
-                <span className="material-symbols-outlined text-primary floating-bookmark floating-bookmark-3">
-                  bookmark
-                </span>
-              </>
-            )}
-
-            <button
-              type="button"
-              className="btn btn-sm rounded-pill icon-action save d-flex align-items-center gap-1"
-              onClick={handleSave}
+          <button
+            type="button"
+            className="btn btn-sm rounded-pill icon-action save d-flex align-items-center gap-1"
+            onClick={handleSave}
+          >
+            <span
+              className={`material-symbols-outlined save-icon ${showSaveAnimation ? "save-icon-pop" : ""}`}
+              style={{
+                fontSize: "18px",
+                color: isSaved ? "#2563eb" : "#6c757d",
+                fontVariationSettings: isSaved
+                  ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
+                  : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+              }}
             >
-              <span
-                className={`material-symbols-outlined ${isSaved ? "text-primary" : "text-secondary"}`}
-                style={{
-                  fontSize: "18px",
-                  fontVariationSettings: isSaved
-                    ? '"FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24'
-                    : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
-                }}
-              >
-                bookmark
-              </span>
-            </button>
-          </div>
+              bookmark
+            </span>
+          </button>
 
           {isOwner && !isEditing && (
             <button

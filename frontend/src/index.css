@@ -546,6 +546,14 @@ body {
   animation-delay: 160ms;
 }
 
+.save-icon {
+  transform-origin: center;
+}
+
+.save-icon-pop {
+  animation: save-bookmark-pop 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @keyframes float-heart-up {
   0% {
     transform: translate(-50%, 0) scale(0.8);
@@ -558,41 +566,20 @@ body {
   }
 }
 
-.floating-bookmark {
-  position: absolute;
-  left: 50%;
-  top: -10px;
-  font-size: 14px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  opacity: 0;
-  animation: float-bookmark-up 1s ease-out forwards;
-}
-
-.floating-bookmark-1 {
-  margin-left: -14px;
-  animation-delay: 0ms;
-}
-
-.floating-bookmark-2 {
-  margin-left: 0;
-  animation-delay: 80ms;
-}
-
-.floating-bookmark-3 {
-  margin-left: 14px;
-  animation-delay: 160ms;
-}
-
-@keyframes float-bookmark-up {
+@keyframes save-bookmark-pop {
   0% {
-    transform: translate(-50%, 0) scale(0.8);
-    opacity: 0.95;
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(13, 110, 253, 0));
+  }
+
+  60% {
+    transform: scale(1.38);
+    filter: drop-shadow(0 0 6px rgba(13, 110, 253, 0.45));
   }
 
   100% {
-    transform: translate(-50%, -34px) scale(1.15);
-    opacity: 0;
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(13, 110, 253, 0));
   }
 }
 
@@ -653,10 +640,6 @@ body {
 
 .btn-delete-profile {
   transition: all 0.2s ease-in-out !important;
-}
-.btn-delete-profile:hover {
-  background-color: #dc3545 !important;
-  color: white !important;
 }
 
 .list-group-item {
