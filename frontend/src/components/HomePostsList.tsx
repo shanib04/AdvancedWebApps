@@ -52,12 +52,16 @@ function HomePostsList({
 
   const isSavedMode = feedMode === "saved";
   const isLikedMode = feedMode === "liked";
+  const isHomeMode = feedMode === "home";
 
   const [showAllProfiles, setShowAllProfiles] = useState(false);
-  const totalSearchResults = filteredPosts.length + filteredProfiles.length;
+  const visibleFilteredProfiles = isHomeMode ? filteredProfiles : [];
+  const profileSearchLoading = isHomeMode && isProfileSearchLoading;
+  const totalSearchResults =
+    filteredPosts.length + visibleFilteredProfiles.length;
   const visibleProfiles = showAllProfiles
-    ? filteredProfiles
-    : filteredProfiles.slice(0, 3);
+    ? visibleFilteredProfiles
+    : visibleFilteredProfiles.slice(0, 3);
 
   useEffect(() => {
     if (!isSearchActive) {
@@ -75,12 +79,12 @@ function HomePostsList({
         </div>
       )}
 
-      {isSearchActive && (
+      {isSearchActive && isHomeMode && (
         <div className="card border-0 shadow-sm rounded-5 mb-3">
           <div className="card-body p-3 p-md-4">
             <div className="d-flex align-items-center justify-content-between mb-2">
               <h6 className="mb-0 fw-semibold">Profiles</h6>
-              {isProfileSearchLoading && (
+              {profileSearchLoading && (
                 <span className="d-inline-flex align-items-center gap-2 small text-muted">
                   <span className="spinner-border spinner-border-sm text-primary" />
                   Searching profiles...
@@ -88,7 +92,7 @@ function HomePostsList({
               )}
             </div>
 
-            {filteredProfiles.length === 0 && !isProfileSearchLoading ? (
+            {visibleFilteredProfiles.length === 0 && !profileSearchLoading ? (
               <p className="text-muted mb-0 small">
                 No profile matches for this search.
               </p>
@@ -134,7 +138,7 @@ function HomePostsList({
                   </Link>
                 ))}
 
-                {filteredProfiles.length > 3 && (
+                {visibleFilteredProfiles.length > 3 && (
                   <button
                     type="button"
                     className="btn btn-link btn-sm text-start px-1"
@@ -220,7 +224,7 @@ function HomePostsList({
         className="py-4 text-center text-muted loader-slot"
       >
         {isSearchActive ? (
-          isSearchFetching || isProfileSearchLoading ? (
+          isSearchFetching || profileSearchLoading ? (
             <span className="d-inline-flex align-items-center gap-2">
               <span className="spinner-border spinner-border-sm text-primary" />
               Searching...

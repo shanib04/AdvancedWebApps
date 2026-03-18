@@ -33,6 +33,7 @@ function HomeFeed() {
   const [searchParams] = useSearchParams();
   const isSavedMode = searchParams.get("saved") === "true";
   const isLikedMode = searchParams.get("liked") === "true";
+  const isHomeMode = !isSavedMode && !isLikedMode;
   const [page, setPage] = useState(feedCache.page);
 
   useEffect(() => {
@@ -254,8 +255,14 @@ function HomeFeed() {
         typeof post.user === "object" && post.user !== null
           ? (post.user.username ?? "")
           : "";
-      const userMatch = userName.toLowerCase().includes(normalized);
-      return contentMatch || userMatch;
+      const displayName =
+        typeof post.user === "object" && post.user !== null
+          ? (post.user.displayName ?? "")
+          : "";
+      const creatorMatch =
+        userName.toLowerCase().includes(normalized) ||
+        displayName.toLowerCase().includes(normalized);
+      return contentMatch || creatorMatch;
     });
   }, [currentPosts, searchTerm, selectedUserFilterIds]);
 
@@ -264,7 +271,7 @@ function HomeFeed() {
   const isSearchFetching = isSearchActive && hasMore;
 
   useEffect(() => {
-    if (!isSearchActive || areUsersLoaded) {
+    if (!isHomeMode || !isSearchActive || areUsersLoaded) {
       return;
     }
 
@@ -299,10 +306,10 @@ function HomeFeed() {
       isDisposed = true;
       abortController.abort();
     };
-  }, [isSearchActive, areUsersLoaded]);
+  }, [isHomeMode, isSearchActive, areUsersLoaded]);
 
   const filteredProfiles = useMemo(() => {
-    if (!isSearchActive) {
+    if (!isHomeMode || !isSearchActive) {
       return [];
     }
 
@@ -314,7 +321,7 @@ function HomeFeed() {
 
       return username.includes(normalized) || displayName.includes(normalized);
     });
-  }, [isSearchActive, normalizedSearchTerm, searchableUsers]);
+  }, [isHomeMode, isSearchActive, normalizedSearchTerm, searchableUsers]);
 
   useEffect(() => {
     if (!isSearchActive) {
