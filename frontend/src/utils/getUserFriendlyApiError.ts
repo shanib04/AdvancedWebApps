@@ -10,6 +10,8 @@ export const getUserFriendlyApiError = (
 
   const status = error.response?.status;
   const backendError = (error.response?.data as { error?: string })?.error;
+  const requestUrl = error.config?.url || "";
+  const isUploadRequest = requestUrl.includes("/upload");
 
   if (!status) {
     return "We could not reach the server. Please check your connection and try again.";
@@ -38,6 +40,38 @@ export const getUserFriendlyApiError = (
     backendError === "Incorrect username, email, or password"
   ) {
     return backendError;
+  }
+
+  if (isUploadRequest) {
+    if (status === 413) {
+      return "Error uploading image. Image file is too large.";
+    }
+
+    if (
+      backendError?.toLowerCase().includes("too large") ||
+      backendError?.toLowerCase().includes("file size") ||
+      backendError?.toLowerCase().includes("limit_file_size")
+    ) {
+      return "Error uploading image. Image file is too large.";
+    }
+
+    if (
+      backendError?.toLowerCase().includes("format") ||
+      backendError?.toLowerCase().includes("jpg") ||
+      backendError?.toLowerCase().includes("jpeg") ||
+      backendError?.toLowerCase().includes("png") ||
+      backendError?.toLowerCase().includes("webp")
+    ) {
+      return "Error uploading image. Invalid image format.";
+    }
+
+    if (status === 400 || status >= 500) {
+      return "Error uploading image. Please try again.";
+    }
+  }
+
+  if (status === 413) {
+    return "Error uploading image. Image file is too large.";
   }
 
   if (status === 400 || status === 422) {

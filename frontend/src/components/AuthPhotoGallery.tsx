@@ -47,13 +47,17 @@ function AuthPhotoGallery({
   const columns = splitGalleryImages(images, counts);
 
   return (
-    <section className="login-gallery-panel col-lg-7 d-none d-lg-flex position-relative align-items-center justify-content-start ps-4 ps-xl-5 pe-0 py-3 overflow-hidden">
+    <section className="login-gallery-panel col-lg-7 d-none d-lg-flex position-relative align-items-center justify-content-start pe-0 py-3 overflow-hidden">
       <div className="login-gallery-fade position-absolute top-0 end-0 h-100" />
       <div
         className="login-gallery-canvas position-relative w-100"
         style={{
-          maxWidth: "1100px",
+          maxWidth: "none",
+          width: "110%",
+          marginLeft: "-3%",
+          marginTop: "5vh",
           transform: canvasTransform,
+          transformOrigin: "left center",
         }}
       >
         <div className="row g-3 h-100">

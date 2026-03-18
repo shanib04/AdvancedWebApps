@@ -56,7 +56,7 @@ function HomeDraftStudio({
 
   const handleRefineDraft = async () => {
     if (!draftText.trim() || !refineInstruction.trim()) {
-      onActionFailed("Draft text and instruction are required.");
+      onActionFailed("Post text and instruction are required.");
       return;
     }
 
@@ -174,7 +174,7 @@ function HomeDraftStudio({
 
   const handlePublishDraft = async () => {
     if (!draftText.trim()) {
-      onActionFailed("Draft text is required.");
+      onActionFailed("Post text is required.");
       return;
     }
 
@@ -190,11 +190,11 @@ function HomeDraftStudio({
         onDraftPublished(createResponse.data as Post);
       }
 
-      onActionSuccess("Draft published successfully.");
+      onActionSuccess("Post published successfully.");
       onClose();
     } catch (error: unknown) {
       onActionFailed(
-        getUserFriendlyApiError(error, "Failed to publish draft."),
+        getUserFriendlyApiError(error, "Failed to publish post."),
       );
     } finally {
       setIsPublishingDraft(false);
@@ -207,7 +207,7 @@ function HomeDraftStudio({
           <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
             {" "}
             <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
-            AI Draft Studio
+            AI Post Editor
           </h5>
           <h6
             className="text-muted text-uppercase fw-bold mb-3"

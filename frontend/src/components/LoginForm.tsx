@@ -143,7 +143,7 @@ function LoginForm() {
           canvasTransform="rotate(-4deg) scale(0.98)"
         />
 
-        <section className="login-form-panel col-12 col-lg-5 d-flex flex-column align-items-center px-4 px-sm-5 py-4 py-lg-5 overflow-auto">
+        <section className="login-form-panel col-12 col-lg-5 d-flex flex-column align-items-center justify-content-center px-4 px-sm-5 py-4 py-lg-5">
           <div
             className="login-form-shell w-100 my-auto flex-shrink-0"
             style={{ maxWidth: "380px" }}

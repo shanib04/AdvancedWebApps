@@ -51,7 +51,9 @@ function PostCard({
   const [isLiked, setIsLiked] = useState(Boolean(post.isLiked));
   const [likesCount, setLikesCount] = useState(post.likeCount ?? 0);
   const [showLikeAnimation, setShowLikeAnimation] = useState(false);
+  const [showSaveAnimation, setShowSaveAnimation] = useState(false);
   const likeAnimationTimeoutRef = useRef<number | null>(null);
+  const saveAnimationTimeoutRef = useRef<number | null>(null);
   const closeEditPanelTimeoutRef = useRef<number | null>(null);
   const postCardRef = useRef<HTMLElement | null>(null);
   const editImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -71,6 +73,9 @@ function PostCard({
     return () => {
       if (likeAnimationTimeoutRef.current) {
         window.clearTimeout(likeAnimationTimeoutRef.current);
+      }
+      if (saveAnimationTimeoutRef.current) {
+        window.clearTimeout(saveAnimationTimeoutRef.current);
       }
       if (closeEditPanelTimeoutRef.current) {
         window.clearTimeout(closeEditPanelTimeoutRef.current);
@@ -275,6 +280,20 @@ function PostCard({
     const nextIsSaved = !previousIsSaved;
 
     setIsSaved(nextIsSaved);
+
+    if (nextIsSaved) {
+      setShowSaveAnimation(true);
+
+      if (saveAnimationTimeoutRef.current) {
+        window.clearTimeout(saveAnimationTimeoutRef.current);
+      }
+
+      saveAnimationTimeoutRef.current = window.setTimeout(() => {
+        setShowSaveAnimation(false);
+      }, 360);
+    } else {
+      setShowSaveAnimation(false);
+    }
 
     try {
       const response = await apiClient.post(`/post/${post._id}/save`);
@@ -680,13 +699,16 @@ function PostCard({
               onClick={handleLike}
             >
               <span
-                className={`material-symbols-outlined ${isLiked ? "text-danger" : "text-secondary"}`}
+                className="material-symbols-outlined"
                 style={{
                   fontSize: "18px",
-                  color: isLiked ? "#dc3545" : undefined,
+                  color: isLiked ? "#dc2626" : "#6c757d",
+                  fontVariationSettings: isLiked
+                    ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
+                    : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
                 }}
               >
-                {isLiked ? "favorite" : "favorite_border"}
+                favorite
               </span>
               <span>{likesCount}</span>
             </button>
@@ -731,11 +753,12 @@ function PostCard({
             onClick={handleSave}
           >
             <span
-              className={`material-symbols-outlined ${isSaved ? "text-primary" : "text-secondary"}`}
+              className={`material-symbols-outlined save-icon ${showSaveAnimation ? "save-icon-pop" : ""}`}
               style={{
                 fontSize: "18px",
+                color: isSaved ? "#2563eb" : "#6c757d",
                 fontVariationSettings: isSaved
-                  ? '"FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24'
+                  ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
                   : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
               }}
             >
