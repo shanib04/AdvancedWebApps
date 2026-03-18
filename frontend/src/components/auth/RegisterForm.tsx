@@ -4,23 +4,23 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
-import useAppToast from "../hooks/useAppToast";
-import AppToast from "./AppToast";
-import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import photo1 from "../../assets/authPhotos/photo1.png";
+import photo2 from "../../assets/authPhotos/photo2.png";
+import photo3 from "../../assets/authPhotos/photo3.png";
+import photo4 from "../../assets/authPhotos/photo4.png";
+import photo5 from "../../assets/authPhotos/photo5.png";
+import photo6 from "../../assets/authPhotos/photo6.png";
+import photo7 from "../../assets/authPhotos/photo7.png";
+import webLogo from "../../assets/web-logo.png";
+import useAppToast from "../../hooks/useAppToast";
+import apiClient from "../../services/api-client";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import {
   setStoredSessionUser,
   syncStoredUserFromWhoAmI,
-} from "../utils/sessionUser";
+} from "../../utils/sessionUser";
+import AppToast from "../shared/AppToast";
 import AuthPhotoGallery from "./AuthPhotoGallery";
-import webLogo from "../assets/web-logo.png";
-import photo1 from "../assets/authPhotos/photo1.png";
-import photo2 from "../assets/authPhotos/photo2.png";
-import photo3 from "../assets/authPhotos/photo3.png";
-import photo4 from "../assets/authPhotos/photo4.png";
-import photo5 from "../assets/authPhotos/photo5.png";
-import photo6 from "../assets/authPhotos/photo6.png";
-import photo7 from "../assets/authPhotos/photo7.png";
 
 const USERNAME_MAX_LENGTH = 15;
 const DISPLAY_NAME_MAX_LENGTH = 20;
@@ -93,6 +93,7 @@ function RegisterForm() {
 
   const profilePictureRegistration = register("profilePicture");
 
+  // revoke blob url on unmount to avoid memory leaks
   useEffect(() => {
     return () => {
       if (profilePreviewUrl) {
@@ -105,6 +106,7 @@ function RegisterForm() {
     setIsLoading(true);
 
     try {
+      // upload profile picture first if selected, then register using returned url
       let photoUrl: string | undefined;
       const selectedImage = data.profilePicture?.[0];
 

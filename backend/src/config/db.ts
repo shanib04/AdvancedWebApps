@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// connect mongoose once at server startup
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
 

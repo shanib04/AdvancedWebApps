@@ -10,6 +10,7 @@ export interface ToastState {
 
 function useAppToast() {
   const [toasts, setToasts] = useState<ToastState[]>([]);
+  // use a ref for the id counter so increments don't trigger renders
   const toastIdRef = useRef(1);
 
   const removeToast = useCallback((id: number) => {
@@ -18,6 +19,7 @@ function useAppToast() {
     );
   }, []);
 
+  // add a new toast with auto-incrementing id
   const addToast = (message: string, variant: ToastVariant) => {
     const toastId = toastIdRef.current;
     toastIdRef.current += 1;

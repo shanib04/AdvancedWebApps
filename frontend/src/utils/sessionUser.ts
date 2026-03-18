@@ -14,6 +14,7 @@ export type SessionUser = {
 
 const USER_STORAGE_KEY = "user";
 
+// read session user from localStorage - returns null if missing or invalid json
 export const getStoredSessionUser = (): SessionUser | null => {
   const storedUser = localStorage.getItem(USER_STORAGE_KEY);
   if (!storedUser) {
@@ -27,6 +28,7 @@ export const getStoredSessionUser = (): SessionUser | null => {
   }
 };
 
+// normalize user object - handles legacy imageUrl field from older api responses
 export const normalizeSessionUser = (user: SessionUser): SessionUser => {
   const legacyImageUrl = (user as SessionUser & { imageUrl?: string }).imageUrl;
   const rawPhoto = user.photoUrl || legacyImageUrl;
@@ -40,6 +42,7 @@ export const normalizeSessionUser = (user: SessionUser): SessionUser => {
   };
 };
 
+// save user to localStorage and broadcast a custom event so other components update immediately
 export const setStoredSessionUser = (user: SessionUser) => {
   const normalized = normalizeSessionUser(user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(normalized));
@@ -52,6 +55,7 @@ export const setStoredSessionUser = (user: SessionUser) => {
   return normalized;
 };
 
+// fetch fresh user data from /user/whoami and merge into session - redirects on 401 or 404
 export const syncStoredUserFromWhoAmI = async (
   fallbackUser: SessionUser | null,
 ) => {

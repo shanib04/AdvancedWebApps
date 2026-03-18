@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Sparkles } from "lucide-react";
-import type { Post } from "../types/models";
-import apiClient from "../services/api-client";
-import {
-  getAiImageSearchErrorMessage,
-  getUserFriendlyApiError,
-} from "../utils/getUserFriendlyApiError";
+import { useImagePicker } from "../../hooks/useImagePicker";
+import apiClient from "../../services/api-client";
+import type { Post } from "../../types/models";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
+import ImagePickerPanel from "../ai/ImagePickerPanel";
 
 type InitialDraftPayload = {
   text: string;
@@ -32,16 +30,25 @@ function HomeDraftStudio({
   const [draftText, setDraftText] = useState("");
   const [refineInstruction, setRefineInstruction] = useState("");
   const [draftKeyword, setDraftKeyword] = useState("");
-  const [draftImageSearchText, setDraftImageSearchText] = useState("");
-  const [draftImages, setDraftImages] = useState<string[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [manualImageUrl, setManualImageUrl] = useState("");
   const [includeImagesRequested, setIncludeImagesRequested] = useState(true);
   const [isRefiningDraft, setIsRefiningDraft] = useState(false);
-  const [isFetchingDraftImages, setIsFetchingDraftImages] = useState(false);
   const [isUploadingDraftImage, setIsUploadingDraftImage] = useState(false);
   const [isPublishingDraft, setIsPublishingDraft] = useState(false);
   const draftImageInputRef = useRef<HTMLInputElement | null>(null);
+
+  const {
+    searchText: draftImageSearchText,
+    setSearchText: setDraftImageSearchText,
+    images: draftImages,
+    setImages: setDraftImages,
+    isFetching: isFetchingDraftImages,
+    fetchImages: fetchDraftImages,
+    selectedImage,
+    setSelectedImage,
+    manualUrl: manualImageUrl,
+    setManualUrl: setManualImageUrl,
+    addManualUrl: addDraftManualUrl,
+  } = useImagePicker(onActionFailed);
 
   useEffect(() => {
     setDraftText(initialDraft.text || "");
@@ -52,8 +59,15 @@ function HomeDraftStudio({
     setManualImageUrl("");
     setRefineInstruction("");
     setIncludeImagesRequested(initialDraft.includeImagesRequested);
-  }, [initialDraft]);
+  }, [
+    initialDraft,
+    setDraftImageSearchText,
+    setDraftImages,
+    setSelectedImage,
+    setManualImageUrl,
+  ]);
 
+  // call AI refine endpoint to apply the user's style instruction to the draft text
   const handleRefineDraft = async () => {
     if (!draftText.trim() || !refineInstruction.trim()) {
       onActionFailed("Post text and instruction are required.");
@@ -80,32 +94,18 @@ function HomeDraftStudio({
     }
   };
 
+  // search unsplash for more images using the current keyword
   const handleFetchMoreDraftImages = async () => {
     if (!draftImageSearchText.trim()) {
       onActionFailed("No keyword available for image search.");
       return;
     }
 
-    setIsFetchingDraftImages(true);
-
-    try {
-      const response = await apiClient.post("/api/ai/getMoreImages", {
-        keyword: draftImageSearchText.trim(),
-      });
-
-      const images = Array.isArray(response.data?.images)
-        ? response.data.images
-        : [];
-      setDraftImages(images);
-      setSelectedImage(null);
-      setDraftKeyword(draftImageSearchText.trim());
-    } catch (error: unknown) {
-      onActionFailed(getAiImageSearchErrorMessage(error));
-    } finally {
-      setIsFetchingDraftImages(false);
-    }
+    await fetchDraftImages(draftImageSearchText);
+    setDraftKeyword(draftImageSearchText.trim());
   };
 
+  // upload a local file and add it to the draft image pool
   const handleUploadDraftImage = async (file?: File) => {
     if (!file) {
       return;
@@ -149,29 +149,7 @@ function HomeDraftStudio({
     }
   };
 
-  const handleAddManualImageUrl = () => {
-    const normalizedUrl = manualImageUrl.trim();
-    if (!normalizedUrl) {
-      onActionFailed("Please enter an image URL.");
-      return;
-    }
-
-    const isHttpUrl = /^https?:\/\//i.test(normalizedUrl);
-    if (!isHttpUrl) {
-      onActionFailed("Image URL must start with http:// or https://");
-      return;
-    }
-
-    setDraftImages((prevImages) =>
-      prevImages.includes(normalizedUrl)
-        ? prevImages
-        : [normalizedUrl, ...prevImages],
-    );
-    setSelectedImage(normalizedUrl);
-    setManualImageUrl("");
-    onActionSuccess("Image added to draft.");
-  };
-
+  // create the post with the current draft text and selected image, then notify parent
   const handlePublishDraft = async () => {
     if (!draftText.trim()) {
       onActionFailed("Post text is required.");
@@ -202,8 +180,7 @@ function HomeDraftStudio({
     <div className="draft-studio-shell d-flex flex-column gap-3">
       <div className="draft-studio-block">
         <h5 className="fw-bold mb-2 d-flex align-items-center gap-2">
-          <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
-          AI Draft Studio
+          AI Post Studio
         </h5>
         <p className="text-muted mb-3 draft-studio-subtitle">
           Fine-tune your text, pick media, and publish.
@@ -289,124 +266,32 @@ function HomeDraftStudio({
           </div>
         </div>
 
-        <div
-          className="p-3 rounded-4 border position-relative tab-opacity-fade shadow-sm"
-          style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
-        >
-          <label className="form-label fw-semibold text-primary d-flex align-items-center gap-2 mb-3">
-            <span className="material-symbols-outlined">image_search</span>
-            Find or Link Image
-          </label>
+        <ImagePickerPanel
+          searchText={draftImageSearchText}
+          onSearchChange={setDraftImageSearchText}
+          images={draftImages}
+          selectedImage={selectedImage}
+          onSelectImage={setSelectedImage}
+          manualUrl={manualImageUrl}
+          onManualUrlChange={setManualImageUrl}
+          onAddManualUrl={() =>
+            addDraftManualUrl(manualImageUrl, () =>
+              onActionSuccess("Image added to draft."),
+            )
+          }
+          isFetching={isFetchingDraftImages}
+          onFetch={handleFetchMoreDraftImages}
+          onClose={() => undefined}
+          showCloseButton={false}
+        />
 
-          <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
-            <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
-              <span className="material-symbols-outlined fs-5">search</span>
-            </span>
-            <input
-              type="text"
-              className="form-control border-0 shadow-none"
-              placeholder="e.g. nature, coding, coffee"
-              value={draftImageSearchText}
-              onChange={(event) => setDraftImageSearchText(event.target.value)}
-            />
-            <button
-              type="button"
-              className="btn btn-primary px-4 fw-medium rounded-pill m-1"
-              disabled={isFetchingDraftImages}
-              onClick={handleFetchMoreDraftImages}
-            >
-              {isFetchingDraftImages ? "Fetching..." : "Fetch Images"}
-            </button>
-          </div>
-
-          <div className="d-flex align-items-center mb-3">
-            <span className="text-muted small px-3 fw-medium">OR</span>
-          </div>
-
-          <div className="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white p-1">
-            <span className="input-group-text bg-transparent text-muted border-0 ps-3">
-              <span className="material-symbols-outlined fs-5">link</span>
-            </span>
-            <input
-              type="url"
-              className="form-control border-0 ps-1 shadow-none"
-              placeholder="Paste an image URL here..."
-              value={manualImageUrl}
-              onChange={(event) => setManualImageUrl(event.target.value)}
-            />
-            <button
-              type="button"
-              className="btn btn-secondary px-4 fw-medium text-white rounded-pill"
-              onClick={handleAddManualImageUrl}
-            >
-              Add URL
-            </button>
-          </div>
-
-          {draftImages.length > 0 && (
-            <div className="row g-2 mb-2">
-              {draftImages.map((imageUrl) => (
-                <div className="col-4 col-sm-3" key={imageUrl}>
-                  <img
-                    src={imageUrl}
-                    alt="AI suggestion"
-                    className={`img-fluid w-100 rounded-3 ${
-                      selectedImage === imageUrl
-                        ? "border border-4 border-primary shadow-sm"
-                        : "opacity-75"
-                    }`}
-                    style={{
-                      height: "90px",
-                      objectFit: "cover",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseOver={(event) => {
-                      if (selectedImage !== imageUrl) {
-                        event.currentTarget.style.opacity = "1";
-                      }
-                    }}
-                    onMouseOut={(event) => {
-                      if (selectedImage !== imageUrl) {
-                        event.currentTarget.style.opacity = "0.75";
-                      }
-                    }}
-                    onClick={() =>
-                      setSelectedImage((prevSelected) =>
-                        prevSelected === imageUrl ? null : imageUrl,
-                      )
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {draftImages.length === 0 ? (
-            <small className="text-muted d-block mt-2">
-              {includeImagesRequested
-                ? "No automatic images found. Try a different search term."
-                : "You chose not to fetch images automatically. You can fetch images now using search."}
-            </small>
-          ) : selectedImage ? (
-            <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
-                onClick={() => setSelectedImage(null)}
-              >
-                Clear Selection
-              </button>
-              <small className="text-muted">
-                Image selected and ready for post.
-              </small>
-            </div>
-          ) : (
-            <small className="text-muted d-block mt-2">
-              Select an image above or paste a URL to attach it to your post.
-            </small>
-          )}
-        </div>
+        {draftImages.length === 0 && (
+          <small className="text-muted d-block mt-2">
+            {includeImagesRequested
+              ? "No automatic images found. Try a different search term."
+              : "You chose not to fetch images automatically. You can fetch images now using search."}
+          </small>
+        )}
 
         <div className="d-flex justify-content-center gap-2 mt-3">
           <button
@@ -442,7 +327,7 @@ function HomeDraftStudio({
               Publishing...
             </span>
           ) : (
-            "Publish Draft"
+            "Publish Post"
           )}
         </button>
       </div>

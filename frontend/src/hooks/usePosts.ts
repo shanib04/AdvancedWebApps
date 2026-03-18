@@ -10,6 +10,7 @@ function usePosts(page: number) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(feedCache.posts.length === 0);
   const [hasMore, setHasMore] = useState(feedCache.hasMore);
+  // track latest request so stale responses from previous pages don't override newer ones
   const latestRequestId = useRef(0);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ function usePosts(page: number) {
         feedCache.hasMore = newHasMore;
 
         setPosts((prevPosts) => {
+          // deduplicate by id so paginated results don't duplicate existing posts
           const uniquePosts = new Map<string, Post>();
 
           prevPosts.forEach((post) => {
@@ -50,7 +52,7 @@ function usePosts(page: number) {
         setHasMore(false);
         feedCache.hasMore = false;
 
-        // If unauthorized, clear token and redirect to login
+        // session expired - wipe credentials and go to login
         if (
           axios.isAxiosError(err) &&
           (err.response?.status === 401 || err.response?.status === 403)

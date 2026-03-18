@@ -1,3 +1,4 @@
+// normalize unknown errors into readable strings for api responses
 export const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {
     return error.message;

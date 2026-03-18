@@ -1,14 +1,14 @@
 import { LogOut, Search } from "lucide-react";
 import { useEffect, useMemo } from "react";
-import webLogo from "../assets/web-logo.png";
-import { useSessionUserListener } from "../hooks/useSessionUserListener";
-import apiClient, { clearAuthStateAndRedirect } from "../services/api-client";
-import { defaultUserPhotoUrl, normalizePhotoUrl } from "../utils/photoUtils";
+import webLogo from "../../assets/web-logo.png";
+import { useSessionUserListener } from "../../hooks/useSessionUserListener";
+import apiClient, { clearAuthStateAndRedirect } from "../../services/api-client";
+import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 import {
   getStoredSessionUser,
   syncStoredUserFromWhoAmI,
   type SessionUser,
-} from "../utils/sessionUser";
+} from "../../utils/sessionUser";
 
 interface NavbarProps {
   searchValue: string;
@@ -17,6 +17,7 @@ interface NavbarProps {
 }
 
 function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
+  // call logout endpoint and wipe local tokens
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -42,6 +43,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
   useEffect(() => {
     const syncUser = async () => {
       try {
+        // sync profile data from server on mount
         await syncStoredUserFromWhoAmI(initialUser);
       } catch {
         // Ignore errors - sessionUser will remain as initial value
@@ -50,7 +52,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
 
     syncUser();
 
-    // Listen for storage changes to update user data when profile is updated
+    // propagate storage changes (e.g. from another tab) to session user state
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === "user" && event.newValue) {
         try {

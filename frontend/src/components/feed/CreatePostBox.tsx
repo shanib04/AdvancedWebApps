@@ -2,14 +2,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import type { Post } from "../types/models";
-import apiClient from "../services/api-client";
-import {
-  getAiImageSearchErrorMessage,
-  getUserFriendlyApiError,
-} from "../utils/getUserFriendlyApiError";
-import AiSuggestionBox from "./AiSuggestionBox";
-import UserAvatar from "./ComposerAvatar";
+import type { Post } from "../../types/models";
+import apiClient from "../../services/api-client";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
+import AiSuggestionBox from "../ai/AiSuggestionBox";
+import UserAvatar from "../shared/ComposerAvatar";
+import ImagePickerPanel from "../ai/ImagePickerPanel";
+import { useImagePicker } from "../../hooks/useImagePicker";
 
 const createPostSchema = z.object({
   text: z.string().min(1, "Post text is required."),
@@ -25,23 +24,31 @@ interface CreatePostBoxProps {
   onActionFailed: (msg: string) => void;
 }
 
+// form for creating a new post
 function CreatePostBox({
   currentUserPhoto,
   onPostCreated,
   onActionSuccess,
   onActionFailed,
 }: CreatePostBoxProps) {
-  const [createImageSearchText, setCreateImageSearchText] = useState("");
-  const [createImages, setCreateImages] = useState<string[]>([]);
   const [isRefining, setIsRefining] = useState(false);
   const [suggestedText, setSuggestedText] = useState("");
-  const [selectedCreateImage, setSelectedCreateImage] = useState<string | null>(
-    null,
-  );
-  const [manualImageUrl, setManualImageUrl] = useState("");
-  const [isFetchingCreateImages, setIsFetchingCreateImages] = useState(false);
   const [isCreateInternetImageMode, setIsCreateInternetImageMode] =
     useState(false);
+
+  const {
+    searchText: createImageSearchText,
+    setSearchText: setCreateImageSearchText,
+    images: createImages,
+    isFetching: isFetchingCreateImages,
+    fetchImages: fetchCreateImages,
+    selectedImage: selectedCreateImage,
+    setSelectedImage: setSelectedCreateImage,
+    manualUrl: manualImageUrl,
+    setManualUrl: setManualImageUrl,
+    addManualUrl: addCreateManualUrl,
+    reset: resetCreateImagePicker,
+  } = useImagePicker(onActionFailed);
 
   const imageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -71,6 +78,7 @@ function CreatePostBox({
     };
   }, [selectedImagePreview]);
 
+  // hit AI endpoint to improve post text
   const handleRefineText = async () => {
     const currentText = watch("text")?.trim() || "";
 
@@ -81,6 +89,7 @@ function CreatePostBox({
     setIsRefining(true);
 
     try {
+      // call AI service
       const response = await apiClient.post("/api/ai/refine-text", {
         text: currentText,
       });
@@ -103,86 +112,41 @@ function CreatePostBox({
     }
   };
 
+  // fetch images from Unsplash based on search keyword
   const handleFetchCreateImages = async () => {
     if (!isCreateInternetImageMode) {
       return;
     }
 
-    if (!createImageSearchText.trim()) {
-      onActionFailed("Please enter a keyword to fetch images.");
-      return;
-    }
-
-    setIsFetchingCreateImages(true);
-
-    try {
-      const response = await apiClient.post("/api/ai/getMoreImages", {
-        keyword: createImageSearchText.trim(),
-      });
-
-      const images = Array.isArray(response.data?.images)
-        ? response.data.images
-        : [];
-      setCreateImages(images);
-      setSelectedCreateImage(null);
-
-      if (images.length === 0) {
-        onActionFailed("No images found for this term. Try another keyword.");
-      }
-    } catch (error: unknown) {
-      onActionFailed(getAiImageSearchErrorMessage(error));
-    } finally {
-      setIsFetchingCreateImages(false);
-    }
+    await fetchCreateImages(createImageSearchText);
   };
 
+  // toggle between upload and search image modes
   const handleToggleCreateInternetImageMode = () => {
     setIsCreateInternetImageMode((prevMode) => {
       const nextMode = !prevMode;
 
       if (!nextMode) {
-        setSelectedCreateImage(null);
-        setCreateImages([]);
-        setManualImageUrl("");
+        resetCreateImagePicker();
       }
 
       return nextMode;
     });
   };
 
-  const handleAddManualImageUrl = () => {
-    const normalizedUrl = manualImageUrl.trim();
-    if (!normalizedUrl) {
-      onActionFailed("Please enter an image URL.");
-      return;
-    }
-
-    const isHttpUrl = /^https?:\/\//i.test(normalizedUrl);
-    if (!isHttpUrl) {
-      onActionFailed("Image URL must start with http:// or https://");
-      return;
-    }
-
-    setCreateImages((prevImages) =>
-      prevImages.includes(normalizedUrl)
-        ? prevImages
-        : [normalizedUrl, ...prevImages],
-    );
-    setSelectedCreateImage(normalizedUrl);
-    setManualImageUrl("");
-    onActionSuccess("Image added to post.");
-  };
-
+  // submit form - upload image if needed then create post
   const onSubmit = async (data: CreatePostFormData) => {
     try {
       let uploadedImageUrl: string | undefined =
         selectedCreateImage || undefined;
       const selectedImageFile = data.image?.[0];
 
+      // handle local file upload
       if (selectedImageFile) {
         const formData = new FormData();
         formData.append("image", selectedImageFile);
 
+        // upload to server
         const uploadResponse = await apiClient.post("/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -192,6 +156,7 @@ function CreatePostBox({
         uploadedImageUrl = uploadResponse.data?.imageUrl;
       }
 
+      // create the post
       const createResponse = await apiClient.post("/post", {
         content: data.text,
         imageUrl: uploadedImageUrl,
@@ -202,13 +167,13 @@ function CreatePostBox({
       }
 
       onActionSuccess("Post created successfully.");
+      // reset form state
       setSuggestedText("");
-      setCreateImageSearchText("");
-      setCreateImages([]);
-      setSelectedCreateImage(null);
       setIsCreateInternetImageMode(false);
+      resetCreateImagePicker();
       reset();
 
+      // clear file input
       if (imageInputRef.current) {
         imageInputRef.current.value = "";
       }
@@ -307,126 +272,21 @@ function CreatePostBox({
 
       {isCreateInternetImageMode && (
         <div className="mb-4 mt-2 px-2">
-          <div
-            className="p-3 rounded-4 border position-relative tab-opacity-fade shadow-sm"
-            style={{ backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
-          >
-            <button
-              type="button"
-              className="btn-close position-absolute top-0 end-0 m-3"
-              aria-label="Close"
-              onClick={handleToggleCreateInternetImageMode}
-            />
-            <label className="form-label fw-semibold text-primary d-flex align-items-center gap-2 mb-3">
-              <span className="material-symbols-outlined">image_search</span>
-              Find or Link Image
-            </label>
-
-            <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
-              <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
-                <span className="material-symbols-outlined fs-5">search</span>
-              </span>
-              <input
-                type="text"
-                className="form-control border-0 shadow-none"
-                placeholder="e.g. nature, coding, coffee"
-                value={createImageSearchText}
-                onChange={(event) =>
-                  setCreateImageSearchText(event.target.value)
-                }
-              />
-              <button
-                type="button"
-                className="btn btn-primary px-4 fw-medium rounded-pill m-1"
-                disabled={isFetchingCreateImages}
-                onClick={handleFetchCreateImages}
-              >
-                {isFetchingCreateImages ? "Fetching..." : "Fetch Images"}
-              </button>
-            </div>
-
-            <div className="d-flex align-items-center mb-3">
-              <span className="text-muted small px-3 fw-medium">OR</span>
-            </div>
-
-            <div className="input-group mb-4 shadow-sm rounded-pill overflow-hidden bg-white p-1">
-              <span className="input-group-text bg-transparent text-muted border-0 ps-3">
-                <span className="material-symbols-outlined fs-5">link</span>
-              </span>
-              <input
-                type="url"
-                className="form-control border-0 ps-1 shadow-none"
-                placeholder="Paste an image URL here..."
-                value={manualImageUrl}
-                onChange={(event) => setManualImageUrl(event.target.value)}
-              />
-              <button
-                type="button"
-                className="btn btn-secondary px-4 fw-medium text-white rounded-pill"
-                onClick={handleAddManualImageUrl}
-              >
-                Add URL
-              </button>
-            </div>
-
-            {createImages.length > 0 && (
-              <div className="row g-2 mb-2">
-                {createImages.map((imageUrl) => (
-                  <div className="col-4 col-sm-3" key={imageUrl}>
-                    <img
-                      src={imageUrl}
-                      alt="Internet option"
-                      className={`img-fluid w-100 rounded-3 ${
-                        selectedCreateImage === imageUrl
-                          ? "border border-4 border-primary shadow-sm"
-                          : "opacity-75"
-                      }`}
-                      style={{
-                        height: "90px",
-                        objectFit: "cover",
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseOver={(event) => {
-                        if (selectedCreateImage !== imageUrl) {
-                          event.currentTarget.style.opacity = "1";
-                        }
-                      }}
-                      onMouseOut={(event) => {
-                        if (selectedCreateImage !== imageUrl) {
-                          event.currentTarget.style.opacity = "0.75";
-                        }
-                      }}
-                      onClick={() =>
-                        setSelectedCreateImage((prevSelected) =>
-                          prevSelected === imageUrl ? null : imageUrl,
-                        )
-                      }
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {selectedCreateImage ? (
-              <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
-                  onClick={() => setSelectedCreateImage(null)}
-                >
-                  Clear Selection
-                </button>
-                <small className="text-muted">
-                  Image selected and ready for post.
-                </small>
-              </div>
-            ) : (
-              <small className="text-muted d-block mt-2">
-                Select an image above or paste a URL to attach it to your post.
-              </small>
-            )}
-          </div>
+          <ImagePickerPanel
+            searchText={createImageSearchText}
+            onSearchChange={setCreateImageSearchText}
+            images={createImages}
+            selectedImage={selectedCreateImage}
+            onSelectImage={setSelectedCreateImage}
+            manualUrl={manualImageUrl}
+            onManualUrlChange={setManualImageUrl}
+            onAddManualUrl={() =>
+              addCreateManualUrl(manualImageUrl, onActionSuccess)
+            }
+            isFetching={isFetchingCreateImages}
+            onFetch={handleFetchCreateImages}
+            onClose={handleToggleCreateInternetImageMode}
+          />
         </div>
       )}
 

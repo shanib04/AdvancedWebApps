@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { getStoredSessionUser, type SessionUser } from "../utils/sessionUser";
 
-/**
- * Custom hook that listens for session user updates via custom events.
- * Returns the current user from storage and subscribes to the "sessionUserUpdated" event.
- * When the session user is updated anywhere in the app, this hook will update.
- */
+// listens for sessionUserUpdated custom events and refreshes the current user state
 export function useSessionUserListener() {
   const [currentUser, setCurrentUser] = useState<SessionUser | null>(
     getStoredSessionUser(),

@@ -59,6 +59,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const canEdit = isCommentOwner;
   const canDelete = isCommentOwner || currentUser?._id === postAuthorId;
 
+  // save inline edit for this comment
   const handleEditSubmit = () => {
     if (!editContent.trim()) return;
     onEditComment(comment._id, editContent);
@@ -70,6 +71,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     ? normalizePhotoUrl(userObj.photoUrl)
     : defaultUserPhotoUrl;
 
+  // submit reply under current comment
   const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyContent.trim()) return;
@@ -94,6 +96,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   // Calculate total nested replies to know when to show the "View X replies" button
+  // count all nested replies to label the expand button
   const getTotalSubRepliesCount = (node: CommentTreeItem): number => {
     if (!node.replies || node.replies.length === 0) return 0;
     return node.replies.reduce(

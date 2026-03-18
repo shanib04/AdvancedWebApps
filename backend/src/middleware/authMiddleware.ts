@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 export type AuthRequest = Request & { user: { _id: string } };
 
+// verify bearer jwt and attach user id to req
 const authMiddleware = (
   req: AuthRequest,
   res: Response,

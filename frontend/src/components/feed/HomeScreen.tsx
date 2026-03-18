@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAppToast from "../hooks/useAppToast";
-import AppToast from "./AppToast";
-import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
-import { defaultUserPhotoUrl } from "../utils/photoUtils";
+import useAppToast from "../../hooks/useAppToast";
+import AppToast from "../shared/AppToast";
+import apiClient from "../../services/api-client";
+import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
+import { defaultUserPhotoUrl } from "../../utils/photoUtils";
 
 interface LoggedInUser {
   username?: string;
@@ -18,15 +18,16 @@ function HomeScreen() {
   const storedUser = localStorage.getItem("user");
   const user: LoggedInUser = storedUser ? JSON.parse(storedUser) : {};
   const username = user.username || "User";
-  const fallbackImage = defaultUserPhotoUrl;
-  const profileImage = user.photoUrl || fallbackImage;
+  const profileImage = user.photoUrl || defaultUserPhotoUrl;
 
+  // redirect to login if no auth tokens in storage
   useEffect(() => {
     if (!accessToken || !storedUser) {
       navigate("/login", { replace: true });
     }
   }, [accessToken, storedUser, navigate]);
 
+  // call logout endpoint, then clear everything locally and go to login
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -35,7 +36,12 @@ function HomeScreen() {
         await apiClient.post("/auth/logout", { refreshToken });
       }
     } catch (err) {
-      showFailed(getUserFriendlyApiError(err, "Logout completed locally, but server logout failed."));
+      showFailed(
+        getUserFriendlyApiError(
+          err,
+          "Logout completed locally, but server logout failed.",
+        ),
+      );
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");

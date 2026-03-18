@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { HandlerResponse } from "../types/models";
 
+// return absolute image url for uploaded file
 export const uploadImage = async (
   req: Request,
   res: Response,

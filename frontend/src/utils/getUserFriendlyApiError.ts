@@ -1,5 +1,6 @@
 import { AxiosError } from "axios";
 
+// maps axios errors to user-readable messages - handles auth, upload, conflict, and server errors
 export const getUserFriendlyApiError = (
   error: unknown,
   fallbackMessage: string,
@@ -109,6 +110,7 @@ export const getUserFriendlyApiError = (
   return fallbackMessage;
 };
 
+// specialized variant for image search errors - maps unsplash 404s to user-friendly messages
 export const getAiImageSearchErrorMessage = (error: unknown) => {
   if (!(error instanceof AxiosError)) {
     return "We could not fetch images right now. Please try again in a moment.";

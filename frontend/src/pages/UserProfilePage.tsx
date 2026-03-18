@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import apiClient from "../services/api-client";
 import type { User, Post } from "../types/models";
-import Navbar from "../components/Navbar";
-import LeftSidebar from "../components/LeftSidebar";
+import Navbar from "../components/layout/Navbar";
+import LeftSidebar from "../components/layout/LeftSidebar";
 import ProfileHeader from "../components/profile/ProfileHeader";
 import ProfileTabs from "../components/profile/ProfileTabs";
 import ProfilePostGrid from "../components/profile/ProfilePostGrid";
 import { getStoredSessionUser } from "../utils/sessionUser";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import useAppToast from "../hooks/useAppToast";
-import AppToast from "../components/AppToast";
+import AppToast from "../components/shared/AppToast";
 
 type ProfileTab = "posts" | "liked" | "saved";
 

@@ -1,3 +1,4 @@
+// displays an ai suggestion with apply/discard controls - renders nothing if text is empty
 interface AiSuggestionBoxProps {
   text: string;
   onApply: () => void;

@@ -1,4 +1,4 @@
-import { getStoredSessionUser } from "../utils/sessionUser";
+import { getStoredSessionUser } from "../../utils/sessionUser";
 import { Bookmark, Heart, House, UserRound } from "lucide-react";
 
 interface LeftSidebarProps {
@@ -6,6 +6,7 @@ interface LeftSidebarProps {
 }
 
 function LeftSidebar({ activePage }: LeftSidebarProps) {
+  // read current user id from storage to build the profile link
   const currentUser = getStoredSessionUser();
   const currentUserId = currentUser?._id ?? "";
 

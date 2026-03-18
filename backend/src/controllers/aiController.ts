@@ -14,6 +14,7 @@ import Post from "../models/postModel";
 import Comment from "../models/commentModel";
 import User from "../models/userModel";
 
+// read api keys from process env first, then fallback env file
 const getGeminiApiKey = () => normalizeEnvValue(getEnvValue("GEMINI_API_KEY"));
 
 const getUnsplashApiKey = () =>
@@ -24,6 +25,7 @@ const backendEnvFilePath = path.resolve(__dirname, "backend/.env");
 
 const normalizeEnvValue = (value: string) => value.trim().replace(/^"|"$/g, "");
 
+// parse and cache env file once to avoid repeated disk reads
 const loadEnvFile = (envFilePath: string) => {
   if (parsedEnvCache.has(envFilePath)) {
     return parsedEnvCache.get(envFilePath) || {};
@@ -137,6 +139,7 @@ const getAiSearchErrorDetails = (error: unknown) => {
   };
 };
 
+// try candidate gemini models until one returns text
 const generateWithGemini = async (prompt: string) => {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
@@ -163,6 +166,7 @@ const generateWithGemini = async (prompt: string) => {
   throw new Error(lastErrorMessage || "No supported Gemini model succeeded");
 };
 
+// extract strict json object from model response text
 const extractDraftJson = (raw: string): ParsedInitialDraft => {
   const cleaned = raw
     .replace(/```json/gi, "")
@@ -260,6 +264,7 @@ const fetchUnsplashImagesSafe = async (
   }
 };
 
+// generate first draft text and optionally fetch matching images
 export const generateInitialDraft = async (
   req: Request,
   res: Response,
@@ -325,6 +330,7 @@ export const generateInitialDraft = async (
   }
 };
 
+// rewrite post text in either guided or default refinement mode
 export const refineText = async (
   req: Request,
   res: Response,
@@ -363,6 +369,7 @@ export const refineText = async (
   }
 };
 
+// fetch more images for a keyword from unsplash
 export const getMoreImages = async (
   req: Request,
   res: Response,

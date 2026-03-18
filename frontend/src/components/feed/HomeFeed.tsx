@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import usePosts from "../hooks/usePosts";
-import type { Post, User } from "../types/models";
-import { feedCache } from "../utils/feedCache";
-import useAppToast from "../hooks/useAppToast";
+import usePosts from "../../hooks/usePosts";
+import type { Post, User } from "../../types/models";
+import { feedCache } from "../../utils/feedCache";
+import useAppToast from "../../hooks/useAppToast";
 import {
   getStoredSessionUser,
   syncStoredUserFromWhoAmI,
   type SessionUser,
-} from "../utils/sessionUser";
-import AppToast from "./AppToast";
+} from "../../utils/sessionUser";
+import AppToast from "../shared/AppToast";
 import CreatePostBox from "./CreatePostBox";
 import HomeDraftStudio from "./HomeDraftStudio";
 import HomePostsList from "./HomePostsList";
-import LeftSidebar from "./LeftSidebar";
-import Navbar from "./Navbar";
-import RightAIWidget from "./RightAIWidget";
+import LeftSidebar from "../layout/LeftSidebar";
+import Navbar from "../layout/Navbar";
+import RightAIWidget from "../ai/RightAIWidget";
 import UserFilterWidget from "./UserFilterWidget";
-import "../styles/feed-modern.css";
-import { normalizePhotoUrl } from "../utils/photoUtils";
-import { mergePostIntoList } from "../utils/postState";
-import apiClient from "../services/api-client";
-import AISearchWidget from "./AISearchWidget";
+import "../../styles/feed-modern.css";
+import { normalizePhotoUrl } from "../../utils/photoUtils";
+import { mergePostIntoList } from "../../utils/postState";
+import apiClient from "../../services/api-client";
+import AISearchWidget from "../ai/AISearchWidget";
 import { Sparkles, SquarePen } from "lucide-react";
 
 type InitialDraftPayload = {
@@ -96,6 +96,7 @@ function HomeFeed() {
   useEffect(() => {
     const abortController = new AbortController();
 
+    // keep session user synced with server and local event updates
     const syncCurrentUser = async () => {
       try {
         const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
@@ -111,7 +112,7 @@ function HomeFeed() {
 
     syncCurrentUser();
 
-    // Listen for session user updates
+    // propagate sessionUserUpdated events (e.g. after profile edit) to local state
     const handleSessionUserUpdate = (event: CustomEvent<SessionUser>) => {
       setCurrentUser(event.detail);
     };
@@ -136,6 +137,7 @@ function HomeFeed() {
   useEffect(() => {
     if (!currentUserId) return;
 
+    // patch loaded posts when current user edits profile details
     const patchAuthoredPosts = (items: Post[]) =>
       items.map((post) => {
         if (typeof post.user !== "object" || post.user === null) {
@@ -229,6 +231,7 @@ function HomeFeed() {
     }
   }, [isSavedMode, isLikedMode]);
 
+  // apply selected-user and text filters on top of current mode posts
   const filteredPosts = useMemo(() => {
     let result = currentPosts;
 
@@ -280,6 +283,7 @@ function HomeFeed() {
     const abortController = new AbortController();
     let isDisposed = false;
 
+    // lazy-load users only when search starts in home mode
     const loadUsersForSearch = async () => {
       setIsUsersLoading(true);
 
@@ -308,8 +312,9 @@ function HomeFeed() {
       isDisposed = true;
       abortController.abort();
     };
-  }, [isHomeMode, isSearchActive, areUsersLoaded]);
+  }, [isHomeMode, isSearchActive, areUsersLoaded, showFailed]);
 
+  // filter the loaded user list by the current search term
   const filteredProfiles = useMemo(() => {
     if (!isHomeMode || !isSearchActive) {
       return [];
@@ -394,11 +399,13 @@ function HomeFeed() {
     };
   }, []);
 
+  // go back to ai composer mode and clear the draft
   const resetDraftMode = () => {
     setDraftPayload(null);
     setComposerMode("ai");
   };
 
+  // open draft studio with the ai-generated payload
   const handleInitialDraftGenerated = (payload: InitialDraftPayload) => {
     setDraftPayload(payload);
     setComposerMode("ai");
@@ -411,11 +418,13 @@ function HomeFeed() {
     }
   };
 
+  // prepend the newly published post and scroll to top
   const handleDraftPublished = (createdPost: Post) => {
     setPosts((prevPosts) => [createdPost, ...prevPosts]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // update this post across home/saved/liked lists and cache
   const handlePostUpdated = (updatedPost: Post) => {
     setPosts(
       (prevPosts) => mergePostIntoList(prevPosts, updatedPost).updatedPosts,
@@ -432,6 +441,7 @@ function HomeFeed() {
     ).updatedPosts;
   };
 
+  // remove the deleted post from the home feed list
   const handlePostDeleted = (postId: string) => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
@@ -440,6 +450,7 @@ function HomeFeed() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // toggle a user filter chip in saved/liked mode
   const handleToggleUserFilter = (userId: string) => {
     setSelectedUserFilterIds((prev) =>
       prev.includes(userId)

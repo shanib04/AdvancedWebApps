@@ -6,9 +6,11 @@ import { OAuth2Client } from "google-auth-library";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import { HandlerResponse, JwtDecodedPayload, Tokens } from "../types/models";
 
+// build the fallback avatar url served from backend public assets
 const getDefaultPhotoUrl = (req: Request) =>
   `${req.protocol}://${req.get("host")}/public/images/default-user.svg`;
 
+// normalize profile photo urls (absolute, root-relative, or fallback)
 const resolveUserPhotoUrl = (req: Request, photoUrl?: string) => {
   const normalized = photoUrl?.trim();
 
@@ -29,6 +31,7 @@ const resolveUserPhotoUrl = (req: Request, photoUrl?: string) => {
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+// decode refresh token and safely extract userId
 const decodeRefreshToken = (
   refreshToken: string,
   secret: string,
@@ -99,6 +102,7 @@ const generateToken = (userId: string): Tokens => {
   return { accessToken, refreshToken };
 };
 
+// register local user, issue tokens, and return normalized user profile
 export const register = async (
   req: Request,
   res: Response,
@@ -157,6 +161,7 @@ export const register = async (
   }
 };
 
+// login with username/email + password, then issue fresh tokens
 export const login = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { username, email, identifier, password } = req.body;
@@ -207,6 +212,7 @@ export const login = async (req: Request, res: Response): HandlerResponse => {
   }
 };
 
+// google oauth sign-in (creates user on first login)
 export const googleSignin = async (
   req: Request,
   res: Response,
@@ -288,6 +294,7 @@ export const googleSignin = async (
   }
 };
 
+// rotate refresh token and issue a new access token pair
 export const refresh = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { refreshToken } = req.body;
@@ -326,6 +333,7 @@ export const refresh = async (req: Request, res: Response): HandlerResponse => {
   }
 };
 
+// revoke a specific refresh token and keep others intact
 export const logout = async (req: Request, res: Response): HandlerResponse => {
   try {
     const { refreshToken } = req.body;

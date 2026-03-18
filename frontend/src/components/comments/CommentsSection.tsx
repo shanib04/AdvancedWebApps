@@ -39,6 +39,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   useEffect(() => {
     const controller = new AbortController();
 
+    // load all comments for this post when section mounts or post changes
     const fetchComments = async () => {
       try {
         const { data } = await apiClient.get<Comment[]>(
@@ -137,6 +138,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     }
   }, [loading]);
 
+  // flatten list -> nested tree so replies render under parents
   const tree = useMemo(() => {
     const map = new Map<string, CommentTreeItem>();
     const roots: CommentTreeItem[] = [];
@@ -175,6 +177,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     return roots;
   }, [comments]);
 
+  // submit a new top-level comment
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -200,6 +203,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     setComments((prev) => [...prev, newReply]);
   };
 
+  // edit existing comment content and patch local state
   const handleEditComment = async (commentId: string, newContent: string) => {
     try {
       await apiClient.put(`/comment/${commentId}`, { content: newContent });
@@ -214,6 +218,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     }
   };
 
+  // delete a comment and all nested replies from local state
   const handleDeleteComment = async (commentId: string) => {
     const result = await Swal.fire({
       title: "Delete comment?",

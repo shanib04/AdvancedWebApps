@@ -1,9 +1,9 @@
-import { useEffect, useState, type RefObject } from "react";
+import { useState, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { Bookmark, Heart, FilterX } from "lucide-react";
-import type { Post, User } from "../types/models";
+import type { Post, User } from "../../types/models";
 import PostCard from "./PostCard";
-import { defaultUserPhotoUrl, normalizePhotoUrl } from "../utils/photoUtils";
+import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 
 type FeedMode = "home" | "saved" | "liked";
 
@@ -54,20 +54,17 @@ function HomePostsList({
   const isLikedMode = feedMode === "liked";
   const isHomeMode = feedMode === "home";
 
+  // collapse extra profile results when search query changes
   const [showAllProfiles, setShowAllProfiles] = useState(false);
+  // only show profile search results in home mode - saved/liked have no user search
   const visibleFilteredProfiles = isHomeMode ? filteredProfiles : [];
   const profileSearchLoading = isHomeMode && isProfileSearchLoading;
   const totalSearchResults =
     filteredPosts.length + visibleFilteredProfiles.length;
-  const visibleProfiles = showAllProfiles
+  const shouldShowAllProfiles = isSearchActive && showAllProfiles;
+  const visibleProfiles = shouldShowAllProfiles
     ? visibleFilteredProfiles
     : visibleFilteredProfiles.slice(0, 3);
-
-  useEffect(() => {
-    if (!isSearchActive) {
-      setShowAllProfiles(false);
-    }
-  }, [isSearchActive]);
 
   return (
     <>

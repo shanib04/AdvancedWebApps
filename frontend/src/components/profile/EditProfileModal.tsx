@@ -4,7 +4,7 @@ import apiClient from "../../services/api-client";
 import { defaultUserPhotoUrl, normalizePhotoUrl } from "../../utils/photoUtils";
 import { getUserFriendlyApiError } from "../../utils/getUserFriendlyApiError";
 import useAppToast from "../../hooks/useAppToast";
-import AppToast from "../AppToast";
+import AppToast from "../shared/AppToast";
 import {
   getStoredSessionUser,
   setStoredSessionUser,

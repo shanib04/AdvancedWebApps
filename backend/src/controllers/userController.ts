@@ -7,17 +7,20 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import { HandlerResponse, UserUpdateFields } from "../types/models";
 
+// create new user
 export const createUser = async (
   req: Request,
   res: Response,
 ): HandlerResponse => {
   try {
     const { username, email, password } = req.body;
+    // validate required fields
     if (!username || !email || !password) {
       return res
         .status(422)
         .json({ error: "username, email and password are required" });
     }
+    // check if user already exists
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
       const errorMsg =
@@ -26,6 +29,7 @@ export const createUser = async (
           : "Email already exists";
       return res.status(409).json({ error: errorMsg });
     }
+    // hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       username,
@@ -38,11 +42,13 @@ export const createUser = async (
   }
 };
 
+// get all users
 export const getAllUsers = async (
   req: Request,
   res: Response,
 ): HandlerResponse => {
   try {
+    // fetch all users without password field
     const users = await User.find().select("-password");
     res.json(users);
   } catch (error: unknown) {
@@ -50,24 +56,28 @@ export const getAllUsers = async (
   }
 };
 
+// get single user by id
 export const getUserById = async (
   req: Request,
   res: Response,
 ): HandlerResponse => {
   try {
     const { id } = req.params;
+    // validate required param
     if (!id) {
       return res.status(422).json({ error: "User ID is required" });
     }
+    // validate id format
     if (!mongoose.Types.ObjectId.isValid(String(id))) {
       return res.status(422).json({ error: "Invalid User ID format" });
     }
+    // fetch user without password
     const user = await User.findById(id).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Count posts for this user
+    // count the users posts
     const postsCount = await Post.countDocuments({ user: id });
 
     const userWithPostCount = {
