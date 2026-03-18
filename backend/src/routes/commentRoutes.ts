@@ -75,13 +75,25 @@ router.get("/", authMiddleware, controller.getAllComments);
  *     parameters:
  *       - in: query
  *         name: postId
- *         required: true
+ *         required: false
  *         schema:
  *           type: string
- *         description: The ID of the post
+ *         description: The ID of the post (preferred)
+ *       - in: query
+ *         name: post
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Legacy alias for postId
  *     responses:
  *       200:
  *         description: List of comments for the post
+ *       422:
+ *         description: Missing or invalid postId/post query parameter
+ *       404:
+ *         description: Post not found
+ *       500:
+ *         description: Server error
  */
 router.get("/post", authMiddleware, controller.getCommentsByPost);
 

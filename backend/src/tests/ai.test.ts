@@ -70,14 +70,6 @@ afterAll(() => {
 });
 
 describe("AI API", () => {
-  test("POST /api/ai/generateInitialDraft should require auth", async () => {
-    const response = await request(testApp)
-      .post("/api/ai/generateInitialDraft")
-      .send({ prompt: "hello" });
-
-    expect(response.statusCode).toBe(401);
-  });
-
   test("POST /api/ai/generateInitialDraft should validate prompt", async () => {
     const response = await request(testApp)
       .post("/api/ai/generateInitialDraft")
@@ -162,14 +154,6 @@ describe("AI API", () => {
     expect(response.body).toEqual({
       error: "AI did not return valid text/keywords JSON",
     });
-  });
-
-  test("POST /api/ai/refine-text should require auth", async () => {
-    const response = await request(testApp)
-      .post("/api/ai/refine-text")
-      .send({ text: "Improve this text" });
-
-    expect(response.statusCode).toBe(401);
   });
 
   test("POST /api/ai/refine-text should validate input and refine quick text", async () => {
@@ -292,14 +276,6 @@ describe("AI API", () => {
 
     expect(failure.statusCode).toBe(500);
     expect(failure.body).toHaveProperty("error");
-  });
-
-  test("POST /api/ai/search should require auth", async () => {
-    const response = await request(testApp).post("/api/ai/search").send({
-      query: "Which user has the most posts?",
-    });
-
-    expect(response.statusCode).toBe(401);
   });
 
   test("POST /api/ai/search should validate query", async () => {

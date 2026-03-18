@@ -151,7 +151,9 @@ router.post("/getMoreImages", authMiddleware, getMoreImages);
  *       422:
  *         $ref: '#/components/responses/ValidationError'
  *       500:
- *         description: AI provider or server error
+ *         description: Unexpected server error
+ *       503:
+ *         description: AI provider temporarily unavailable
  */
 router.post("/search", authMiddleware, aiSearchAppData);
 

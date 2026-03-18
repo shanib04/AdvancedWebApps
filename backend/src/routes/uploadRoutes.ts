@@ -34,6 +34,10 @@ const router = Router();
  *         description: Image uploaded successfully
  *       400:
  *         description: Image file is missing or invalid
+ *       413:
+ *         description: Uploaded file is too large
+ *       500:
+ *         description: Unexpected server error
  */
 router.post("/", upload.single("image"), uploadImage);
 
