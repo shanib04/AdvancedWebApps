@@ -366,6 +366,20 @@
   min-height: 48px;
 }
 
+.profile-search-meta {
+  min-width: 0;
+  padding-right: 10px;
+}
+
+.profile-search-bio {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .ai-widget-card {
   background:
     linear-gradient(#ffffff, #ffffff) padding-box,
