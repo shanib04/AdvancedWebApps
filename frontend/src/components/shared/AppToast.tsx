@@ -48,7 +48,7 @@ function ToastItem({
   durationMs,
   onClose,
 }: ToastItemProps) {
-  // auto-dismiss after durationMs using a timeout
+  // auto-dismiss toast after duration
   useEffect(() => {
     const timeout = setTimeout(() => {
       onClose(id);

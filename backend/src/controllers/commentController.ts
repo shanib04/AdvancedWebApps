@@ -104,7 +104,7 @@ export const getCommentById = async (
   }
 };
 
-// fetch comments by post id (supports postId and legacy post query keys)
+// fetch comments by post id
 export const getCommentsByPost = async (
   req: AuthRequest,
   res: Response,

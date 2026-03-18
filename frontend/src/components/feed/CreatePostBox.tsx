@@ -24,7 +24,7 @@ interface CreatePostBoxProps {
   onActionFailed: (msg: string) => void;
 }
 
-// form for creating a new post
+// create post form
 function CreatePostBox({
   currentUserPhoto,
   onPostCreated,
@@ -78,7 +78,7 @@ function CreatePostBox({
     };
   }, [selectedImagePreview]);
 
-  // hit AI endpoint to improve post text
+  // call ai endpoint to refine post text
   const handleRefineText = async () => {
     const currentText = watch("text")?.trim() || "";
 
@@ -89,7 +89,7 @@ function CreatePostBox({
     setIsRefining(true);
 
     try {
-      // call AI service
+      // call ai refine service
       const response = await apiClient.post("/api/ai/refine-text", {
         text: currentText,
       });
@@ -112,7 +112,7 @@ function CreatePostBox({
     }
   };
 
-  // fetch images from Unsplash based on search keyword
+  // fetch unsplash images by keyword
   const handleFetchCreateImages = async () => {
     if (!isCreateInternetImageMode) {
       return;
@@ -121,7 +121,7 @@ function CreatePostBox({
     await fetchCreateImages(createImageSearchText);
   };
 
-  // toggle between upload and search image modes
+  // toggle upload and web image modes
   const handleToggleCreateInternetImageMode = () => {
     setIsCreateInternetImageMode((prevMode) => {
       const nextMode = !prevMode;
@@ -134,19 +134,19 @@ function CreatePostBox({
     });
   };
 
-  // submit form - upload image if needed then create post
+  // submit post and upload image if needed
   const onSubmit = async (data: CreatePostFormData) => {
     try {
       let uploadedImageUrl: string | undefined =
         selectedCreateImage || undefined;
       const selectedImageFile = data.image?.[0];
 
-      // handle local file upload
+      // upload local image file
       if (selectedImageFile) {
         const formData = new FormData();
         formData.append("image", selectedImageFile);
 
-        // upload to server
+        // upload image to server
         const uploadResponse = await apiClient.post("/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -156,7 +156,7 @@ function CreatePostBox({
         uploadedImageUrl = uploadResponse.data?.imageUrl;
       }
 
-      // create the post
+      // create post
       const createResponse = await apiClient.post("/post", {
         content: data.text,
         imageUrl: uploadedImageUrl,

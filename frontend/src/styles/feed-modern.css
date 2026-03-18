@@ -1,4 +1,4 @@
-/* used in Navbar.tsx */
+/* navbar */
 .glass-navbar {
   background: rgba(255, 255, 255, 0.72) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.6);
@@ -6,13 +6,13 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* used in Navbar.tsx */
+/* navbar search */
 .search-glow {
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(79, 124, 255, 0.2);
 }
 
-/* used in HomeFeed.tsx */
+/* create post card */
 .create-post-card {
   background:
     radial-gradient(circle at 5% 8%, rgba(59, 130, 246, 0.08), transparent 44%),
@@ -26,18 +26,18 @@
   box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08) !important;
 }
 
-/* used in CreatePostBox.tsx */
+/* composer body */
 .composer-card-body {
   position: relative;
 }
 
-/* used in CreatePostBox.tsx */
+/* composer header */
 .composer-header {
   padding: 0.1rem 13.2rem 0.4rem 0.2rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
-/* used in CreatePostBox.tsx */
+/* composer mode toggle */
 .composer-mode-floating {
   position: absolute;
   top: 1.5rem;
@@ -45,7 +45,7 @@
   z-index: 2;
 }
 
-/* used in CreatePostBox.tsx */
+/* composer icon */
 .composer-title-icon {
   width: 1.95rem;
   height: 1.95rem;
@@ -58,12 +58,12 @@
   box-shadow: 0 6px 12px rgba(37, 99, 235, 0.15);
 }
 
-/* used in CreatePostBox.tsx */
+/* composer subtitle */
 .composer-subtitle {
   letter-spacing: 0.01em;
 }
 
-/* used in CreatePostBox.tsx */
+/* composer mode buttons */
 .composer-mode-toggle {
   padding: 0.18rem;
   border-radius: 999px;
@@ -71,7 +71,7 @@
   gap: 0.35rem;
 }
 
-/* used in CreatePostBox.tsx */
+/* composer mode button */
 .composer-mode-toggle .btn {
   border-width: 1px;
   min-width: 96px;
@@ -79,28 +79,28 @@
   font-weight: 700;
 }
 
-/* used in CreatePostBox.tsx */
+/* active composer mode */
 .composer-mode-toggle .btn.btn-primary {
   box-shadow: 0 0.4rem 0.9rem rgba(79, 124, 255, 0.22);
 }
 
-/* used in CreatePostBox.tsx */
+/* composer pane */
 .composer-pane {
   margin-top: 0.55rem;
   animation: composerPaneEnter 0.24s ease;
 }
 
-/* used in CreatePostBox.tsx */
+/* manual composer pane */
 .composer-pane-manual {
   background: transparent;
 }
 
-/* used in CreatePostBox.tsx */
+/* ai composer pane */
 .composer-pane-ai {
   background: transparent;
 }
 
-/* used in RightAIWidget.tsx, CreatePostBox.tsx */
+/* ai composer shell */
 .ai-composer-shell {
   background: transparent;
   border: 0;
@@ -109,7 +109,7 @@
   box-shadow: none;
 }
 
-/* used in ComposerAvatar.tsx, multiple chat components */
+/* soft avatar */
 .avatar-soft {
   width: 44px;
   height: 44px;
@@ -119,38 +119,38 @@
   background-color: #ffffff;
 }
 
-/* used in PostCard.tsx, HomePostsList.tsx */
+/* post card hover */
 .post-card-hover {
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-/* used in HomePostsList.tsx */
+/* post card entry */
 .post-card-animate {
   animation: post-fade-in 0.35s ease;
 }
 
-/* used in PostCard.tsx, HomePostsList.tsx */
+/* post card hover state */
 .post-card-hover:hover {
   transform: translateY(-4px);
   box-shadow: 0 1rem 2rem rgba(30, 41, 59, 0.12) !important;
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx */
+/* publish button */
 .publish-btn {
   background: linear-gradient(135deg, #4f7cff 0%, #8b5cf6 100%);
   border: none;
   box-shadow: 0 0.5rem 1rem rgba(79, 124, 255, 0.3);
 }
 
-/* used in UserFilterWidget.tsx */
+/* active user filter */
 .list-group-item-action.active {
   background-color: #fff;
   color: var(--bs-list-group-action-hover-color);
 }
 
-/* used in PostCard.tsx - like/save/edit/delete buttons */
+/* action buttons */
 .icon-action {
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(255, 255, 255, 0.85);
@@ -213,31 +213,31 @@
   transform: rotate(-10deg) scale(1.1);
 }
 
-/* used in PostCard.tsx */
+/* like button */
 .icon-action.like:hover {
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.35);
 }
 
-/* used in PostCard.tsx */
+/* save button */
 .icon-action.save:hover {
   background: rgba(59, 130, 246, 0.12);
   border-color: rgba(59, 130, 246, 0.35);
 }
 
-/* used in PostCard.tsx */
+/* edit button */
 .icon-action.edit:hover {
   background: rgba(245, 158, 11, 0.15);
   border-color: rgba(245, 158, 11, 0.35);
 }
 
-/* used in PostCard.tsx */
+/* delete button */
 .icon-action.delete:hover {
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.35);
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx, PostCard.tsx */
+/* image preview */
 .preview-thumb {
   width: 92px;
   height: 92px;
@@ -246,7 +246,7 @@
   border: 1px solid rgba(148, 163, 184, 0.3);
 }
 
-/* used in CreatePostBox.tsx - textarea wrapper */
+/* post input shell */
 .create-message-shell {
   position: relative;
   margin-top: 0;
@@ -263,7 +263,7 @@
     background-color 0.2s ease;
 }
 
-/* used in CreatePostBox.tsx - text input field */
+/* post input */
 .create-message-input {
   margin-top: 0;
   background-color: transparent;
@@ -280,7 +280,7 @@
   scroll-behavior: smooth;
 }
 
-/* global scrollbar styling */
+/* app scrollbar */
 .app-scrollbar {
   overflow-y: auto;
   scrollbar-width: thin;
@@ -289,7 +289,7 @@
   scroll-behavior: smooth;
 }
 
-/* used in LeftSidebar.tsx - subtle scrollbar */
+/* sidebar scrollbar */
 .sidebar-scroll-soft {
   overflow-y: auto;
   scrollbar-width: thin;
@@ -303,13 +303,13 @@
   scrollbar-color: rgba(79, 124, 255, 0.28) transparent;
 }
 
-/* used in RightAIWidget.tsx */
+/* ai prompt */
 .ai-assistant-prompt {
   resize: none;
   max-height: 9.5rem;
 }
 
-/* used in RightAIWidget.tsx - alternative section styling */
+/* ai alt panel */
 .ai-alt-panel {
   border: 1px solid rgba(79, 124, 255, 0.28);
   border-radius: 0.95rem;
@@ -317,7 +317,7 @@
   padding: 0.7rem 0.8rem;
 }
 
-/* used in RightAIWidget.tsx */
+/* ai composer panel */
 .ai-composer-panel {
   border: 1px solid rgba(148, 163, 184, 0.26);
   border-radius: 1.2rem;
@@ -334,12 +334,12 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
-/* used in HomeDraftStudio.tsx */
+/* draft studio shell */
 .draft-studio-shell {
   padding: 0.2rem 0.15rem 0;
 }
 
-/* used in HomeDraftStudio.tsx */
+/* draft studio block */
 .draft-studio-block {
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 1.2rem;
@@ -356,18 +356,18 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
-/* used in HomeDraftStudio.tsx */
+/* draft subtitle */
 .draft-studio-subtitle {
   line-height: 1.35;
 }
 
-/* used in HomeDraftStudio.tsx */
+/* draft label */
 .draft-studio-label {
   letter-spacing: 0.06em;
   font-size: 0.74rem;
 }
 
-/* used in HomeDraftStudio.tsx */
+/* draft refine input */
 .draft-refine-group .form-control {
   border: 1px solid rgba(148, 163, 184, 0.3);
   border-top-left-radius: 999px;
@@ -375,14 +375,14 @@
   padding-left: 0.95rem;
 }
 
-/* used in HomeDraftStudio.tsx */
+/* draft refine button */
 .draft-refine-group .btn {
   border-top-right-radius: 999px;
   border-bottom-right-radius: 999px;
   font-weight: 600;
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx */
+/* ai mode badge */
 .ai-mode-badge {
   color: #1d4ed8 !important;
   border-color: rgba(59, 130, 246, 0.35) !important;
@@ -390,17 +390,17 @@
   font-weight: 700;
 }
 
-/* used in RightAIWidget.tsx */
+/* ai alt title */
 .ai-alt-title {
   color: #111827;
 }
 
-/* used in RightAIWidget.tsx */
+/* ai alt hint */
 .ai-alt-hint {
   line-height: 1.35;
 }
 
-/* used in AISearchWidget.tsx */
+/* ai suggestion chip */
 .ai-suggestion-chip {
   border: 1px solid rgba(59, 130, 246, 0.32);
   color: #1e3a8a;
@@ -421,7 +421,7 @@
     transform 0.2s ease;
 }
 
-/* used in AISearchWidget.tsx */
+/* ai suggestion chip hover */
 .ai-suggestion-chip:hover,
 .ai-suggestion-chip:focus-visible {
   background: rgba(219, 234, 254, 0.65);
@@ -430,7 +430,7 @@
   transform: translateY(-1px);
 }
 
-/* used in AISearchWidget.tsx */
+/* ai suggestion text */
 .ai-suggestion-chip-text {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -440,48 +440,48 @@
   line-height: 1.25;
 }
 
-/* used in AISearchWidget.tsx */
+/* ai suggestions grid */
 .ai-suggestions-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.5rem;
 }
 
-/* used in AISearchWidget.tsx */
+/* ai more slot */
 .ai-show-more-slot {
   min-height: 1.5rem;
 }
 
-/* used in AISearchWidget.tsx */
+/* ai insights wrap */
 .ai-insights-wrap {
   position: static;
 }
 
-/* used in AISearchWidget.tsx */
+/* ai answer */
 .ai-insights-answer {
   font-size: 0.95rem;
   line-height: 1.45;
 }
 
-/* used in RightAIWidget.tsx, AISearchWidget.tsx */
+/* ai widget body */
 .ai-widget-card .card-body {
   padding: 1rem !important;
 }
 
-/* used in CreatePostBox.tsx - tab switching */
+/* tab fade out */
 .tab-opacity-fade-out {
   animation: tabFadeOut 0.2s ease-in forwards;
   pointer-events: none;
 }
 
-/* used in CreatePostBox.tsx */
+/* post input focus */
 .create-message-input:focus {
   background-color: transparent;
   border: 0 !important;
   box-shadow: none !important;
 }
 
-/* used in CreatePostBox.tsx */
+/* post input shell focus */
 .create-message-shell:focus-within {
   background: #ffffff;
   border-color: rgba(79, 124, 255, 0.45);
@@ -552,7 +552,7 @@
   height: 0;
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx, PostCard.tsx */
+/* remove image button */
 .remove-image-btn {
   width: 1.75rem;
   height: 1.75rem;
@@ -564,13 +564,13 @@
   line-height: 1;
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx, PostCard.tsx */
+/* remove image icon */
 .remove-image-icon {
   font-size: 16px;
   line-height: 1;
 }
 
-/* used in Navbar.tsx */
+/* logout button */
 .logout-btn {
   border: 1px solid rgba(239, 68, 68, 0.45);
   background: #fff;
@@ -578,7 +578,7 @@
   font-weight: 600;
 }
 
-/* used in Navbar.tsx */
+/* logout button hover */
 .logout-btn:hover,
 .logout-btn:focus-visible {
   background: rgba(239, 68, 68, 0.08);
@@ -586,7 +586,7 @@
   border-color: rgba(220, 38, 38, 0.55);
 }
 
-/* used in EditProfileModal.tsx, CommentsSection.tsx */
+/* back button */
 .back-feed-btn {
   border: 1px solid rgba(37, 99, 235, 0.24);
   color: #1d4ed8;
@@ -625,7 +625,7 @@
   transform: translateY(-1px);
 }
 
-/* used in HomePostsList.tsx, CommentsSection.tsx */
+/* empty state */
 .empty-feed-state {
   background:
     radial-gradient(
@@ -642,7 +642,7 @@
   border: 1px solid rgba(148, 163, 184, 0.24);
 }
 
-/* used in HomePostsList.tsx, CommentsSection.tsx */
+/* empty state icon */
 .empty-feed-icon-wrap {
   width: 66px;
   height: 66px;
@@ -654,20 +654,20 @@
   box-shadow: 0 10px 20px rgba(30, 64, 175, 0.14);
 }
 
-/* used in HomePostsList.tsx, CommentsSection.tsx */
+/* empty icon */
 .empty-feed-icon {
   font-size: 28px;
   color: #2563eb;
 }
 
-/* used in HomePostsList.tsx, CommentsSection.tsx */
+/* empty state action */
 .empty-feed-cta {
   border: 1px solid rgba(37, 99, 235, 0.28);
   color: #1d4ed8;
   background: rgba(239, 246, 255, 0.85);
 }
 
-/* used in HomePostsList.tsx, CommentsSection.tsx */
+/* empty state action hover */
 .empty-feed-cta:hover,
 .empty-feed-cta:focus-visible {
   color: #1e3a8a;
@@ -675,7 +675,7 @@
   border-color: rgba(30, 58, 138, 0.35);
 }
 
-/* used in HomePostsList.tsx - filter empty state */
+/* empty filter state */
 .empty-filter-state {
   background: linear-gradient(
     180deg,
@@ -685,20 +685,20 @@
   border: 1px dashed rgba(148, 163, 184, 0.55);
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx, PostCard.tsx, AiSuggestionBox.tsx */
+/* ai refine button */
 .ai-refine-btn {
   border-color: rgba(59, 130, 246, 0.42);
   color: #1d4ed8;
   background: rgba(239, 246, 255, 0.72);
 }
 
-/* used in AiSuggestionBox.tsx */
+/* compact ai button */
 .ai-refine-btn-compact {
   min-width: 8.4rem;
   font-weight: 600;
 }
 
-/* used in CreatePostBox.tsx, HomeDraftStudio.tsx, PostCard.tsx, AiSuggestionBox.tsx */
+/* ai refine button hover */
 .ai-refine-btn:hover,
 .ai-refine-btn:focus-visible {
   border-color: rgba(37, 99, 235, 0.62);
@@ -706,7 +706,7 @@
   background: rgba(219, 234, 254, 0.9);
 }
 
-/* used in AiSuggestionBox.tsx */
+/* ai suggestion box */
 .ai-suggestion-box {
   background: #f8fafc;
   border-color: #e2e8f0 !important;
@@ -736,24 +736,24 @@
   }
 }
 
-/* used as loader skeleton in HomePostsList.tsx */
+/* loading card */
 .loading-card {
   min-height: 120px;
   background: #ffffff;
 }
 
-/* used in loading skeletons across components */
+/* loader slot */
 .loader-slot {
   min-height: 48px;
 }
 
-/* used in HomePostsList.tsx */
+/* profile search meta */
 .profile-search-meta {
   min-width: 0;
   padding-right: 10px;
 }
 
-/* used in HomePostsList.tsx */
+/* profile search bio */
 .profile-search-bio {
   display: block;
   width: 100%;
@@ -763,7 +763,7 @@
   white-space: nowrap;
 }
 
-/* used in RightAIWidget.tsx, AISearchWidget.tsx */
+/* ai widget card */
 .ai-widget-card {
   background:
     linear-gradient(#ffffff, #ffffff) padding-box,
@@ -771,7 +771,7 @@
   border: 1px solid transparent;
 }
 
-/* used in loading skeleton components */
+/* shimmer */
 .shimmer {
   position: relative;
   overflow: hidden;

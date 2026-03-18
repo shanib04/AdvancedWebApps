@@ -27,7 +27,7 @@ function RightAIWidget({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // call AI generate post endpoint and pass the result up to the parent
+  // call ai post generation endpoint
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       setError("Please enter a prompt first.");

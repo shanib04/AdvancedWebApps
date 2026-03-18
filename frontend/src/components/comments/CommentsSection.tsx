@@ -39,7 +39,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   useEffect(() => {
     const controller = new AbortController();
 
-    // load all comments for this post when section mounts or post changes
+    // load comments when post changes
     const fetchComments = async () => {
       try {
         const { data } = await apiClient.get<Comment[]>(
@@ -138,17 +138,17 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     }
   }, [loading]);
 
-  // flatten list -> nested tree so replies render under parents
+  // turn flat comments into a reply tree
   const tree = useMemo(() => {
     const map = new Map<string, CommentTreeItem>();
     const roots: CommentTreeItem[] = [];
 
-    // Initialize map
+    // initialize map
     comments.forEach((c) => {
       map.set(c._id, { ...c, replies: [] });
     });
 
-    // Build tree
+    // build tree
     comments.forEach((c) => {
       const node = map.get(c._id);
       if (!node) return;
@@ -160,14 +160,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       }
     });
 
-    // Sort by createdAt - used for comments
+    // sort comments by newest first
     const sortByDateDesc = (a: CommentTreeItem, b: CommentTreeItem) =>
       new Date(b.createdAt || 0).getTime() -
       new Date(a.createdAt || 0).getTime();
 
     roots.sort(sortByDateDesc);
 
-    // Recursively sort replies desc (newest on top)
+    // sort replies recursively by newest first
     const sortReplies = (items: CommentTreeItem[]) => {
       items.sort(sortByDateDesc);
       items.forEach((item) => sortReplies(item.replies));
@@ -177,7 +177,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     return roots;
   }, [comments]);
 
-  // submit a new top-level comment
+  // submit a top-level comment
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -203,7 +203,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     setComments((prev) => [...prev, newReply]);
   };
 
-  // edit existing comment content and patch local state
+  // edit comment and patch local state
   const handleEditComment = async (commentId: string, newContent: string) => {
     try {
       await apiClient.put(`/comment/${commentId}`, { content: newContent });
@@ -218,7 +218,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     }
   };
 
-  // delete a comment and all nested replies from local state
+  // delete comment and nested replies from local state
   const handleDeleteComment = async (commentId: string) => {
     const result = await Swal.fire({
       title: "Delete comment?",

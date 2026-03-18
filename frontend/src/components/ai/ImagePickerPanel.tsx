@@ -1,19 +1,19 @@
 interface ImagePickerPanelProps {
-  // text input for search
+  // search text
   searchText: string;
   onSearchChange: (text: string) => void;
 
-  // images list
+  // image selection
   images: string[];
   selectedImage: string | null;
   onSelectImage: (imageUrl: string | null) => void;
 
-  // manual url
+  // manual url input
   manualUrl: string;
   onManualUrlChange: (url: string) => void;
   onAddManualUrl: () => void;
 
-  // loading & control
+  // loading and actions
   isFetching: boolean;
   onFetch: () => void;
   onClose: () => void;
@@ -21,7 +21,7 @@ interface ImagePickerPanelProps {
 
 }
 
-// reusable image picker ui - used in post create/edit
+// reusable image picker for post create and edit
 export default function ImagePickerPanel({
   searchText,
   onSearchChange,
@@ -55,7 +55,7 @@ export default function ImagePickerPanel({
         Find or Link Image
       </label>
 
-      {/* search bar */}
+      {/* search input */}
       <div className="input-group mb-3 shadow-sm rounded-pill overflow-hidden bg-white">
         <span className="input-group-text bg-transparent border-0 ps-3 text-muted">
           <span className="material-symbols-outlined fs-5">search</span>
@@ -140,7 +140,7 @@ export default function ImagePickerPanel({
         </div>
       )}
 
-      {/* selection feedback */}
+      {/* selection status */}
       {selectedImage ? (
         <div className="d-flex align-items-center gap-2 mt-3 pt-2 border-top">
           <button

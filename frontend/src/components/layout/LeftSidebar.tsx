@@ -6,7 +6,7 @@ interface LeftSidebarProps {
 }
 
 function LeftSidebar({ activePage }: LeftSidebarProps) {
-  // read current user id from storage to build the profile link
+  // read user id from storage for profile link
   const currentUser = getStoredSessionUser();
   const currentUserId = currentUser?._id ?? "";
 

@@ -67,7 +67,7 @@ function HomeDraftStudio({
     setManualImageUrl,
   ]);
 
-  // call AI refine endpoint to apply the user's style instruction to the draft text
+  // call ai refine endpoint for draft text
   const handleRefineDraft = async () => {
     if (!draftText.trim() || !refineInstruction.trim()) {
       onActionFailed("Post text and instruction are required.");
@@ -94,7 +94,7 @@ function HomeDraftStudio({
     }
   };
 
-  // search unsplash for more images using the current keyword
+  // fetch unsplash images by current keyword
   const handleFetchMoreDraftImages = async () => {
     if (!draftImageSearchText.trim()) {
       onActionFailed("No keyword available for image search.");
@@ -105,7 +105,7 @@ function HomeDraftStudio({
     setDraftKeyword(draftImageSearchText.trim());
   };
 
-  // upload a local file and add it to the draft image pool
+  // upload local file to draft image pool
   const handleUploadDraftImage = async (file?: File) => {
     if (!file) {
       return;
@@ -149,7 +149,7 @@ function HomeDraftStudio({
     }
   };
 
-  // create the post with the current draft text and selected image, then notify parent
+  // create post from draft and selected image
   const handlePublishDraft = async () => {
     if (!draftText.trim()) {
       onActionFailed("Post text is required.");

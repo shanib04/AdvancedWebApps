@@ -51,7 +51,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     ? normalizePhotoUrl(currentUser.photoUrl)
     : defaultUserPhotoUrl;
 
-  // Safely extract the user object from our string | User type union
+  // extract user object from string-or-user value
   const userObj = typeof comment.user === "object" ? comment.user : null;
 
   const isAuthor = userObj?._id === postAuthorId;
@@ -59,7 +59,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const canEdit = isCommentOwner;
   const canDelete = isCommentOwner || currentUser?._id === postAuthorId;
 
-  // save inline edit for this comment
+  // save this comment edit
   const handleEditSubmit = () => {
     if (!editContent.trim()) return;
     onEditComment(comment._id, editContent);
@@ -71,7 +71,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     ? normalizePhotoUrl(userObj.photoUrl)
     : defaultUserPhotoUrl;
 
-  // submit reply under current comment
+  // submit reply for this comment
   const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!replyContent.trim()) return;
@@ -86,7 +86,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
       onReplyPosted(data);
       setReplyContent("");
       setShowReplyBox(false);
-      setIsExpanded(true); // Automatically show replies when posting a new one
+      setIsExpanded(true); // show replies after posting
     } catch (err) {
       console.error(err);
       showFailed(getUserFriendlyApiError(err, "Failed to post reply."));
@@ -95,8 +95,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     }
   };
 
-  // Calculate total nested replies to know when to show the "View X replies" button
-  // count all nested replies to label the expand button
+  // count nested replies for the expand label
   const getTotalSubRepliesCount = (node: CommentTreeItem): number => {
     if (!node.replies || node.replies.length === 0) return 0;
     return node.replies.reduce(

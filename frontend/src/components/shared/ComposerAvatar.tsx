@@ -1,6 +1,6 @@
 import { defaultUserPhotoUrl } from "../../utils/photoUtils";
 
-// small avatar image with automatic fallback to the default svg on load error
+// show avatar with fallback image on load error
 interface ComposerAvatarProps {
   photoUrl?: string;
   alt?: string;

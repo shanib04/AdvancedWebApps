@@ -78,7 +78,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
   const [error, setError] = useState("");
   const [suggestionStart, setSuggestionStart] = useState(0);
 
-  // compute contextual signals from the current post list used to rank suggestions relevantly
+  // build signals from posts for suggestion ranking
   const signals = useMemo<SuggestionSignals>(() => {
     const authorIds = new Set<string>();
     let totalComments = 0;
@@ -122,7 +122,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
     };
   }, [posts, currentUserId]);
 
-  // rank all suggestions by signal score + query keyword boost, ties broken by original index
+  // rank suggestions by signal score and query keyword boosts
   const prioritizedSuggestions = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     const tokens = normalized.split(/\s+/).filter((token) => token.length >= 3);
@@ -151,7 +151,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
       .map((suggestion) => suggestion.text);
   }, [query, signals]);
 
-  // cycle through the ranked list to show a rolling window of suggestions
+  // show a rotating window of ranked suggestions
   const visibleSuggestions = useMemo(() => {
     if (prioritizedSuggestions.length <= VISIBLE_SUGGESTIONS) {
       return prioritizedSuggestions;
@@ -167,7 +167,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
     setSuggestionStart(0);
   }, [query]);
 
-  // send user query to the ai search endpoint and render the result
+  // send query to AI search and show the response
   const handleSearch = async () => {
     if (!query.trim()) {
       setError("Please enter a prompt first.");

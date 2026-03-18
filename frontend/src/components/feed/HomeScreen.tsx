@@ -20,14 +20,14 @@ function HomeScreen() {
   const username = user.username || "User";
   const profileImage = user.photoUrl || defaultUserPhotoUrl;
 
-  // redirect to login if no auth tokens in storage
+  // redirect to login when tokens are missing
   useEffect(() => {
     if (!accessToken || !storedUser) {
       navigate("/login", { replace: true });
     }
   }, [accessToken, storedUser, navigate]);
 
-  // call logout endpoint, then clear everything locally and go to login
+  // call logout then clear auth and go to login
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 

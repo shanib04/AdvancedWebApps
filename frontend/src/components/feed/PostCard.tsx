@@ -30,7 +30,7 @@ function PostCard({
   onActionSuccess,
   onActionFailed,
 }: PostCardProps) {
-  // handle navigation and UI state
+  // navigation and ui state
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -125,7 +125,7 @@ function PostCard({
     }
     const lastViewed = sessionStorage.getItem("lastViewedPostId");
     if (lastViewed === post._id && postCardRef.current) {
-      // Images loading above this post can cause layout shifts, so we poll the scroll a few times
+      // poll scroll briefly for image layout shifts
       let attempts = 0;
       const interval = setInterval(() => {
         postCardRef.current?.scrollIntoView({
@@ -134,12 +134,12 @@ function PostCard({
         });
         attempts++;
         if (attempts >= 6) {
-          // 6 attempts * 150ms = 900ms
+          // 6 tries x 150ms = 900ms
           clearInterval(interval);
         }
       }, 150);
 
-      // Fallback in case first interval waits too long
+      // fallback if first interval is delayed
       postCardRef.current?.scrollIntoView({
         behavior: "instant",
         block: "center",
@@ -151,13 +151,13 @@ function PostCard({
     }
   }, [post._id, location.pathname]);
 
-  // Safely extract the populated user object from our strict Post model
+  // extract populated user object safely
   const userObj: User | null =
     typeof post.user === "object" && post.user !== null
       ? (post.user as User)
       : null;
 
-  // Extract ID string if populated object wasn't returned
+  // extract user id if object is missing
   const senderId: string =
     userObj?._id || (typeof post.user === "string" ? post.user : "");
 
@@ -172,7 +172,7 @@ function PostCard({
 
   // delete post with confirmation
   const handleDeletePost = async () => {
-    // ask user to confirm
+    // ask for confirmation
     const result = await Swal.fire({
       title: "Delete post?",
       text: "This action cannot be undone.",
@@ -188,7 +188,7 @@ function PostCard({
     }
 
     try {
-      // call delete API
+      // call delete api
       await apiClient.delete(`/post/${post._id}`);
       onPostDeleted(post._id);
       onActionSuccess("Post deleted successfully.");
@@ -197,14 +197,14 @@ function PostCard({
     }
   };
 
-  // save edited post with new content and image
+  // save edited post with content and image
   const handleSaveEdit = async () => {
     setIsSavingEdit(true);
 
     try {
       let updatedImageUrl = selectedEditInternetImage ?? post.imageUrl;
 
-      // handle image reupload if changed
+      // reupload image if it changed
       if (editedImageFile) {
         const formData = new FormData();
         formData.append("image", editedImageFile);
@@ -229,11 +229,11 @@ function PostCard({
       onPostUpdated(mergePostState(post, updateResponse.data));
       setIsEditing(false);
       setEditedImageFile(null);
-      // clear form state
+      // clear edit form state
       if (editImageInputRef.current) {
         editImageInputRef.current.value = "";
       }
-      // scroll back to show updated post
+      // scroll back to updated post
       if (postCardRef.current) {
         const headerOffset = 96;
         const cardTop =
@@ -257,9 +257,9 @@ function PostCard({
     }
   };
 
-  // toggle like status with optimistic update
+  // toggle like with optimistic update
   const handleLike = async () => {
-    // save previous state in case api fails
+    // store previous state for rollback
     const previousIsLiked = isLiked;
     const previousLikesCount = likesCount;
 
@@ -268,11 +268,11 @@ function PostCard({
       ? previousLikesCount + 1
       : Math.max(previousLikesCount - 1, 0);
 
-    // update UI immediately
+    // update ui immediately
     setIsLiked(nextIsLiked);
     setLikesCount(nextLikesCount);
 
-    // show animation if liked
+    // show like animation
     if (nextIsLiked) {
       setShowLikeAnimation(true);
 
@@ -305,16 +305,16 @@ function PostCard({
     }
   };
 
-  // toggle save status with optimistic update
+  // toggle save with optimistic update
   const handleSave = async () => {
-    // save previous state
+    // store previous save state
     const previousIsSaved = isSaved;
     const nextIsSaved = !previousIsSaved;
 
-    // update UI immediately
+    // update ui immediately
     setIsSaved(nextIsSaved);
 
-    // show animation if saved
+    // show save animation
     if (nextIsSaved) {
       setShowSaveAnimation(true);
 
@@ -345,7 +345,7 @@ function PostCard({
     }
   };
 
-  // fetch images for edit from external api
+  // fetch edit images from external api
   const handleFetchEditImages = async () => {
     if (!isEditInternetImageMode) {
       return;
@@ -359,7 +359,7 @@ function PostCard({
     await fetchEditImages(editImageSearchText);
   };
 
-  // improve edited post text using AI
+  // refine edited post text with ai
   const handleRefineEditText = async () => {
     const currentText = editedContent.trim();
 
@@ -370,7 +370,7 @@ function PostCard({
     setIsRefiningEditText(true);
 
     try {
-      // call AI refine endpoint
+      // call ai refine endpoint
       const response = await apiClient.post("/api/ai/refine-text", {
         text: currentText,
       });
@@ -396,7 +396,7 @@ function PostCard({
   // toggle edit image search mode
   const handleToggleEditInternetImageMode = () => {
     if (isEditInternetImageMode) {
-      // closing panel with fade animation
+      // close panel with fade animation
       setIsClosingEditInternetPanel(true);
 
       if (closeEditPanelTimeoutRef.current) {

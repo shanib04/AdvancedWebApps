@@ -93,7 +93,7 @@ function RegisterForm() {
 
   const profilePictureRegistration = register("profilePicture");
 
-  // revoke blob url on unmount to avoid memory leaks
+  // revoke blob url on unmount
   useEffect(() => {
     return () => {
       if (profilePreviewUrl) {
@@ -106,7 +106,7 @@ function RegisterForm() {
     setIsLoading(true);
 
     try {
-      // upload profile picture first if selected, then register using returned url
+      // upload profile photo first, then register
       let photoUrl: string | undefined;
       const selectedImage = data.profilePicture?.[0];
 

@@ -2,7 +2,7 @@ export type DateInput = string | number | Date | null | undefined;
 
 const DEFAULT_FALLBACK = "";
 
-// safely parse various input types into a Date - returns null for invalid/empty values
+// parse date input safely
 const toDate = (value: DateInput): Date | null => {
   if (value === null || value === undefined || value === "") {
     return null;
@@ -16,7 +16,7 @@ type FormatDateLocalOptions = {
   fallback?: string;
 };
 
-// format a date/timestamp into a locale-aware datetime string
+// format date as local date and time
 export const formatDateTimeLocal = (
   value: DateInput,
   { fallback = DEFAULT_FALLBACK }: FormatDateLocalOptions = {},

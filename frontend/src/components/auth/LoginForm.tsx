@@ -60,7 +60,7 @@ function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  // submit credentials, store tokens, redirect to home
+  // submit credentials and store auth tokens
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await apiClient.post("/auth/login", {
@@ -96,7 +96,7 @@ function LoginForm() {
     }
   };
 
-  // google oauth flow - sync photo from whoami if not returned in token payload
+  // finish google login and sync profile photo
   const handleGoogleSuccess = async (credentialResponse: {
     credential?: string;
   }) => {

@@ -1,6 +1,6 @@
 import { AxiosError } from "axios";
 
-// maps axios errors to user-readable messages - handles auth, upload, conflict, and server errors
+// map api errors to friendly messages
 export const getUserFriendlyApiError = (
   error: unknown,
   fallbackMessage: string,
@@ -18,7 +18,7 @@ export const getUserFriendlyApiError = (
     return "We could not reach the server. Please check your connection and try again.";
   }
 
-  // Map specific backend errors directly if needed
+  // map specific backend errors
   if (status === 409 && backendError) {
     if (backendError.includes("Username")) {
       return "This username is already used. Please choose another one.";
@@ -110,7 +110,7 @@ export const getUserFriendlyApiError = (
   return fallbackMessage;
 };
 
-// specialized variant for image search errors - maps unsplash 404s to user-friendly messages
+// map image search errors to friendly messages
 export const getAiImageSearchErrorMessage = (error: unknown) => {
   if (!(error instanceof AxiosError)) {
     return "We could not fetch images right now. Please try again in a moment.";
@@ -130,7 +130,7 @@ export const getAiImageSearchErrorMessage = (error: unknown) => {
     return "We could not reach the image service. Please check your connection and try again.";
   }
 
-  // Some backend paths wrap Unsplash 404 as HTTP 500 with this message.
+  // some backend paths wrap unsplash 404 as 500
   if (
     combinedBackendText.includes("unsplash request failed with status 404") ||
     (combinedBackendText.includes("unsplash") &&

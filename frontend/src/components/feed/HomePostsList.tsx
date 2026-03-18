@@ -54,9 +54,9 @@ function HomePostsList({
   const isLikedMode = feedMode === "liked";
   const isHomeMode = feedMode === "home";
 
-  // collapse extra profile results when search query changes
+  // collapse extra profile results on query change
   const [showAllProfiles, setShowAllProfiles] = useState(false);
-  // only show profile search results in home mode - saved/liked have no user search
+  // show profile results only in home mode
   const visibleFilteredProfiles = isHomeMode ? filteredProfiles : [];
   const profileSearchLoading = isHomeMode && isProfileSearchLoading;
   const totalSearchResults =

@@ -1,13 +1,13 @@
 import type { Post } from "../types/models";
 
-// module-level cache shared across usePosts hook instances - survives re-renders but not navigation
+// shared cache for usePosts instances
 export const feedCache = {
   page: 1,
   posts: [] as Post[],
   hasMore: true,
 };
 
-// reset the cache, e.g. after logout or forced refresh
+// reset the feed cache
 export const clearFeedCache = () => {
   feedCache.page = 1;
   feedCache.posts = [];

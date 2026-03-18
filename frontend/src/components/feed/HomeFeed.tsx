@@ -59,17 +59,17 @@ function HomeFeed() {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const queuedSearchPageRef = useRef(false);
 
-  // Custom posts state for saved mode
+  // posts state for saved mode
   const [savedPosts, setSavedPosts] = useState<Post[]>([]);
   const [savedError, setSavedError] = useState("");
   const [savedIsLoading, setSavedIsLoading] = useState(false);
 
-  // Custom posts state for liked mode
+  // posts state for liked mode
   const [likedPosts, setLikedPosts] = useState<Post[]>([]);
   const [likedError, setLikedError] = useState("");
   const [likedIsLoading, setLikedIsLoading] = useState(false);
 
-  // Use different posts based on mode
+  // choose posts by mode
   const { posts, setPosts, error, isLoading, hasMore } = usePosts(page);
   const currentPosts = isSavedMode
     ? savedPosts
@@ -96,7 +96,7 @@ function HomeFeed() {
   useEffect(() => {
     const abortController = new AbortController();
 
-    // keep session user synced with server and local event updates
+    // keep session user synced
     const syncCurrentUser = async () => {
       try {
         const mergedUser = await syncStoredUserFromWhoAmI(initialUser);
@@ -112,7 +112,7 @@ function HomeFeed() {
 
     syncCurrentUser();
 
-    // propagate sessionUserUpdated events (e.g. after profile edit) to local state
+    // handle sessionUserUpdated events
     const handleSessionUserUpdate = (event: CustomEvent<SessionUser>) => {
       setCurrentUser(event.detail);
     };
@@ -137,7 +137,7 @@ function HomeFeed() {
   useEffect(() => {
     if (!currentUserId) return;
 
-    // patch loaded posts when current user edits profile details
+    // patch posts after profile edits
     const patchAuthoredPosts = (items: Post[]) =>
       items.map((post) => {
         if (typeof post.user !== "object" || post.user === null) {
@@ -170,7 +170,7 @@ function HomeFeed() {
     setPosts,
   ]);
 
-  // Fetch saved posts when in saved mode
+  // fetch saved posts in saved mode
   useEffect(() => {
     if (!isSavedMode || !currentUserId) return;
 
@@ -195,7 +195,7 @@ function HomeFeed() {
     fetchSavedPosts();
   }, [isSavedMode, currentUserId]);
 
-  // Fetch liked posts when in liked mode
+  // fetch liked posts in liked mode
   useEffect(() => {
     if (!isLikedMode || !currentUserId) return;
 
@@ -220,7 +220,7 @@ function HomeFeed() {
     fetchLikedPosts();
   }, [isLikedMode, currentUserId]);
 
-  // Update page title based on mode
+  // update page title by mode
   useEffect(() => {
     if (isSavedMode) {
       document.title = "Saved Posts - Advanced Web Apps";
@@ -231,7 +231,7 @@ function HomeFeed() {
     }
   }, [isSavedMode, isLikedMode]);
 
-  // apply selected-user and text filters on top of current mode posts
+  // apply user and text filters
   const filteredPosts = useMemo(() => {
     let result = currentPosts;
 
@@ -283,7 +283,7 @@ function HomeFeed() {
     const abortController = new AbortController();
     let isDisposed = false;
 
-    // lazy-load users only when search starts in home mode
+    // lazy-load users when home search starts
     const loadUsersForSearch = async () => {
       setIsUsersLoading(true);
 
@@ -314,7 +314,7 @@ function HomeFeed() {
     };
   }, [isHomeMode, isSearchActive, areUsersLoaded, showFailed]);
 
-  // filter the loaded user list by the current search term
+  // filter users by search term
   const filteredProfiles = useMemo(() => {
     if (!isHomeMode || !isSearchActive) {
       return [];
@@ -399,13 +399,13 @@ function HomeFeed() {
     };
   }, []);
 
-  // go back to ai composer mode and clear the draft
+  // return to ai composer and clear draft
   const resetDraftMode = () => {
     setDraftPayload(null);
     setComposerMode("ai");
   };
 
-  // open draft studio with the ai-generated payload
+  // open draft studio with ai content
   const handleInitialDraftGenerated = (payload: InitialDraftPayload) => {
     setDraftPayload(payload);
     setComposerMode("ai");
@@ -418,13 +418,13 @@ function HomeFeed() {
     }
   };
 
-  // prepend the newly published post and scroll to top
+  // prepend new post and scroll to top
   const handleDraftPublished = (createdPost: Post) => {
     setPosts((prevPosts) => [createdPost, ...prevPosts]);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // update this post across home/saved/liked lists and cache
+  // update this post in all lists and cache
   const handlePostUpdated = (updatedPost: Post) => {
     setPosts(
       (prevPosts) => mergePostIntoList(prevPosts, updatedPost).updatedPosts,
@@ -441,7 +441,7 @@ function HomeFeed() {
     ).updatedPosts;
   };
 
-  // remove the deleted post from the home feed list
+  // remove deleted post from home feed
   const handlePostDeleted = (postId: string) => {
     setPosts((prevPosts) => prevPosts.filter((post) => post._id !== postId));
   };
@@ -450,7 +450,7 @@ function HomeFeed() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // toggle a user filter chip in saved/liked mode
+  // toggle user filter chip in saved and liked modes
   const handleToggleUserFilter = (userId: string) => {
     setSelectedUserFilterIds((prev) =>
       prev.includes(userId)

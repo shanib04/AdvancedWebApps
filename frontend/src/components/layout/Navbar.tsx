@@ -17,7 +17,7 @@ interface NavbarProps {
 }
 
 function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
-  // call logout endpoint and wipe local tokens
+  // call logout endpoint and clear local auth
   const handleLogout = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
 
@@ -30,7 +30,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
         await apiClient.post("/auth/logout", { refreshToken });
       }
     } catch {
-      // Always continue with local logout even if server logout fails.
+      // keep local logout even if server call fails
     } finally {
       clearAuthStateAndRedirect();
     }
@@ -43,16 +43,16 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
   useEffect(() => {
     const syncUser = async () => {
       try {
-        // sync profile data from server on mount
+        // sync profile data on mount
         await syncStoredUserFromWhoAmI(initialUser);
       } catch {
-        // Ignore errors - sessionUser will remain as initial value
+        // ignore errors and keep initial session user
       }
     };
 
     syncUser();
 
-    // propagate storage changes (e.g. from another tab) to session user state
+    // sync session user on storage changes
     const handleStorageChange = (event: StorageEvent) => {
       if (event.key === "user" && event.newValue) {
         try {
@@ -61,7 +61,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
             new CustomEvent("sessionUserUpdated", { detail: updatedUser }),
           );
         } catch {
-          // Ignore invalid JSON
+          // ignore invalid json
         }
       }
     };

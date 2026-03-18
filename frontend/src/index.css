@@ -14,44 +14,44 @@ body {
   background-attachment: fixed;
 }
 
-/* styles for .register-screen-shell */
+/* register shell */
 .register-screen-shell {
   max-width: 380px;
 }
 
-/* styles for .register-form-panel */
+/* register form panel */
 .register-form-panel {
   overflow-y: auto;
 }
 
 .login-form-panel,
-/* styles for .register-form-panel */
+/* register form panel */
 .register-form-panel {
   scrollbar-gutter: stable;
 }
 
 @media (min-width: 992px) {
-/* styles for .register-form-panel */
+/* register form panel */
   .register-form-panel {
     max-height: 100vh;
   }
 
   .login-form-panel,
-/* styles for .register-form-panel */
+/* register form panel */
   .register-form-panel {
     overflow-y: scroll;
   }
 }
 
 @media (max-width: 991.98px) {
-/* styles for .register-form-panel */
+/* register form panel */
   .register-form-panel {
     overflow: auto;
     max-height: none;
   }
 }
 
-/* styles for .login-input */
+/* login input */
 .login-input {
   height: 3.75rem;
   min-height: 3.75rem;
@@ -63,7 +63,7 @@ body {
   line-height: 3.75rem;
 }
 
-/* styles for .login-input::placeholder */
+/* login placeholder */
 .login-input::placeholder {
   color: #98a2b3;
   font-size: 1rem;
@@ -71,7 +71,7 @@ body {
   opacity: 1;
 }
 
-/* styles for .register-input */
+/* register input */
 .register-input {
   height: 4rem !important;
   min-height: 4rem;
@@ -87,7 +87,7 @@ body {
   display: block;
 }
 
-/* styles for .register-input::placeholder */
+/* register placeholder */
 .register-input::placeholder {
   color: #98a2b3;
   font-size: 1rem;
@@ -95,24 +95,24 @@ body {
   opacity: 1;
 }
 
-/* styles for .register-input[type="password"] */
+/* register password */
 .register-input[type="password"] {
   letter-spacing: 0.02em;
 }
 
-/* styles for .register-input:focus */
+/* register input focus */
 .register-input:focus {
   border-color: #9db9ff;
   box-shadow: 0 0 0 0.18rem rgba(59, 130, 246, 0.13) !important;
 }
 
-/* styles for .register-upload-panel */
+/* register upload panel */
 .register-upload-panel {
   padding-top: 0.15rem;
   padding-bottom: 0.1rem;
 }
 
-/* styles for .register-upload-trigger */
+/* register upload trigger */
 .register-upload-trigger {
   min-height: 6.25rem;
   padding: 1rem 1.1rem;
@@ -129,13 +129,13 @@ body {
     transform 0.18s ease;
 }
 
-/* styles for .register-upload-trigger:hover */
+/* register upload hover */
 .register-upload-trigger:hover {
   border-color: rgba(147, 197, 253, 0.95);
   box-shadow: 0 16px 32px rgba(37, 99, 235, 0.08);
 }
 
-/* styles for .register-upload-circle */
+/* register upload circle */
 .register-upload-circle {
   width: 5rem;
   height: 5rem;
@@ -151,7 +151,7 @@ body {
     transform 0.18s ease;
 }
 
-/* styles for .register-upload-trigger:hover .register-upload-circle */
+/* register upload circle hover */
 .register-upload-trigger:hover .register-upload-circle {
   border-color: #93c5fd;
   transform: translateY(-1px);
@@ -160,7 +160,7 @@ body {
     inset 0 0 0 1px rgba(255, 255, 255, 0.9);
 }
 
-/* styles for .register-upload-trigger--filled */
+/* filled upload trigger */
 .register-upload-trigger--filled {
   border-color: rgba(191, 219, 254, 0.95);
   background: linear-gradient(
@@ -170,13 +170,13 @@ body {
   );
 }
 
-/* styles for .register-upload-circle--filled */
+/* filled upload circle */
 .register-upload-circle--filled {
   border-color: transparent;
   box-shadow: none;
 }
 
-/* styles for .register-upload-icon */
+/* register upload icon */
 .register-upload-icon {
   width: 2.35rem;
   height: 2.35rem;
@@ -185,18 +185,18 @@ body {
   transition: opacity 0.18s ease;
 }
 
-/* styles for .register-upload-title */
+/* register upload title */
 .register-upload-title {
   font-size: 1rem;
   letter-spacing: -0.01em;
 }
 
-/* styles for .register-upload-copy */
+/* register upload copy */
 .register-upload-copy {
   min-width: 0;
 }
 
-/* styles for .register-upload-copy-title */
+/* register upload copy title */
 .register-upload-copy-title {
   color: #111827;
   font-size: 0.98rem;
@@ -204,7 +204,7 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* styles for .register-upload-copy-subtitle */
+/* register upload copy subtitle */
 .register-upload-copy-subtitle {
   margin-top: 0.25rem;
   color: #667085;
@@ -212,13 +212,13 @@ body {
   line-height: 1.4;
 }
 
-/* styles for .register-upload-error */
+/* register upload error */
 .register-upload-error {
   min-height: 1rem;
   font-size: 0.78rem;
 }
 
-/* styles for .register-upload-overlay */
+/* register upload overlay */
 .register-upload-overlay {
   background: linear-gradient(
     180deg,
@@ -228,23 +228,23 @@ body {
 }
 
 .google-login-shell > div,
-/* styles for .google-login-shell iframe */
+/* google login iframe */
 .google-login-shell iframe {
   width: 100% !important;
 }
 
 .google-login-shell [role="button"],
-/* styles for .google-login-shell div[style*="height: 40px"] */
+/* google login button */
 .google-login-shell div[style*="height: 40px"] {
   border-radius: 1rem !important;
 }
 
-/* styles for .login-gallery-fade */
+/* login gallery fade */
 .login-gallery-fade {
   display: none;
 }
 
-/* styles for .login-gallery-canvas */
+/* login gallery canvas */
 .login-gallery-canvas {
   height: 130vh;
   margin-top: -15vh;
@@ -262,19 +262,19 @@ body {
 }
 
 @media (min-width: 992px) {
-/* styles for .login-page */
+/* login page */
   .login-page {
     height: 100vh;
     overflow: hidden;
   }
 
   .login-gallery-panel,
-/* styles for .login-form-panel */
+/* login form panel */
   .login-form-panel {
     height: 100vh;
   }
 
-/* styles for .login-form-shell */
+/* login form shell */
   .login-form-shell {
     display: flex;
     flex-direction: column;
@@ -282,7 +282,7 @@ body {
     max-height: calc(100vh - 2rem);
   }
 
-/* styles for .register-form-shell */
+/* register form shell */
   .register-form-shell {
     display: flex;
     flex-direction: column;
@@ -291,85 +291,85 @@ body {
     padding-block: 1.25rem;
   }
 
-/* styles for .login-page-title */
+/* login title */
   .login-page-title {
     font-size: clamp(2.1rem, 3.3vw, 3rem) !important;
   }
 
-/* styles for .register-page-title */
+/* register title */
   .register-page-title {
     font-size: clamp(1.75rem, 2.35vw, 2.2rem) !important;
   }
 
-/* styles for .register-form-panel */
+/* register form panel */
   .register-form-panel {
     overflow-y: auto;
   }
 }
 
 @media (max-width: 991.98px) {
-/* styles for .login-page */
+/* login page */
   .login-page {
     overflow-y: auto;
   }
 }
 
 @media (min-width: 992px) and (max-height: 940px) {
-/* styles for .login-form-shell */
+/* login form shell */
   .login-form-shell {
     max-height: calc(100vh - 1rem);
   }
 
-/* styles for .register-form-shell */
+/* register form shell */
   .register-form-shell {
     max-height: none;
     padding-block: 1rem;
   }
 
-/* styles for .login-brand-row */
+/* login brand row */
   .login-brand-row {
     margin-bottom: 0.45rem !important;
   }
 
-/* styles for .login-heading-block */
+/* login heading */
   .login-heading-block {
     margin-bottom: 1rem !important;
     padding-bottom: 0 !important;
   }
 
-/* styles for .login-page-title */
+/* login title */
   .login-page-title {
     font-size: clamp(1.95rem, 2.8vw, 2.5rem) !important;
     margin-bottom: 0.5rem !important;
   }
 
-/* styles for .login-page-subtitle */
+/* login subtitle */
   .login-page-subtitle {
     font-size: 0.96rem !important;
   }
 
-/* styles for .register-heading-block */
+/* register heading */
   .register-heading-block {
     margin-bottom: 0.85rem !important;
   }
 
-/* styles for .register-page-title */
+/* register title */
   .register-page-title {
     font-size: clamp(1.6rem, 2vw, 1.95rem) !important;
     margin-bottom: 0.3rem !important;
   }
 
-/* styles for .register-page-subtitle */
+/* register subtitle */
   .register-page-subtitle {
     font-size: 0.9rem !important;
   }
 
-/* styles for .register-form-content */
+/* register form content */
   .register-form-content {
     gap: 0.5rem !important;
   }
 
-/* styles for .register-input */
+/* register input */
   .register-input {
     height: 3.2rem !important;
     min-height: 3.2rem;
@@ -379,19 +379,19 @@ body {
     line-height: normal !important;
   }
 
-/* styles for .register-input::placeholder */
+/* register placeholder */
   .register-input::placeholder {
     font-size: 1rem;
     line-height: normal;
   }
 
-/* styles for .register-upload-circle */
+/* register upload circle */
   .register-upload-circle {
     width: 5.1rem;
     height: 5.1rem;
   }
 
-/* styles for .register-submit-button */
+/* register submit button */
   .register-submit-button {
     margin-top: 0.35rem !important;
     padding-top: 0.68rem !important;
@@ -399,34 +399,34 @@ body {
     font-size: 0.94rem !important;
   }
 
-/* styles for .register-separator */
+/* register separator */
   .register-separator {
     margin-top: 0.35rem !important;
     margin-bottom: 0.35rem !important;
   }
 
-/* styles for .register-signin-copy */
+/* register signin copy */
   .register-signin-copy {
     margin-top: 0.3rem !important;
     font-size: 0.88rem !important;
   }
 
-/* styles for .register-upload-trigger .fw-bold */
+/* register upload title */
   .register-upload-trigger .fw-bold {
     font-size: 0.96rem;
   }
 
-/* styles for .register-upload-trigger .small */
+/* register upload subtitle */
   .register-upload-trigger .small {
     font-size: 0.84rem !important;
   }
 
-/* styles for .login-form-content */
+/* login form content */
   .login-form-content {
     gap: 0.5rem !important;
   }
 
-/* styles for .login-input */
+/* login input */
   .login-input {
     height: 3.35rem;
     min-height: 3.35rem;
@@ -435,38 +435,38 @@ body {
     line-height: 3.35rem;
   }
 
-/* styles for .login-input::placeholder */
+/* login placeholder */
   .login-input::placeholder {
     line-height: 3.35rem;
   }
 
-/* styles for .login-submit-button */
+/* login submit button */
   .login-submit-button {
     margin-top: 0.5rem !important;
     padding-top: 0.9rem !important;
     padding-bottom: 0.9rem !important;
   }
 
-/* styles for .login-separator */
+/* login separator */
   .login-separator {
     margin-top: 0.75rem !important;
     margin-bottom: 0.75rem !important;
     padding-top: 0 !important;
   }
 
-/* styles for .login-signup-copy */
+/* login signup copy */
   .login-signup-copy {
     margin-top: 0.875rem !important;
     font-size: 0.94rem !important;
   }
 
-/* styles for .google-login-shell */
+/* google login shell */
   .google-login-shell {
     padding-top: 0.45rem !important;
     padding-bottom: 0.45rem !important;
   }
 
-/* styles for .login-gallery-canvas */
+/* login gallery canvas */
   .login-gallery-canvas {
     height: 130vh;
     margin-top: -15vh;
@@ -474,22 +474,22 @@ body {
 }
 
 @media (min-width: 992px) and (max-height: 820px) {
-/* styles for .register-page-title */
+/* register title */
   .register-page-title {
     font-size: clamp(1.45rem, 1.8vw, 1.75rem) !important;
   }
 
-/* styles for .register-page-subtitle */
+/* register subtitle */
   .register-page-subtitle {
     font-size: 0.82rem !important;
   }
 
-/* styles for .register-form-content */
+/* register form content */
   .register-form-content {
     gap: 0.35rem !important;
   }
 
-/* styles for .register-input */
+/* register input */
   .register-input {
     height: 3rem !important;
     min-height: 3rem;
@@ -499,74 +499,74 @@ body {
     line-height: normal !important;
   }
 
-/* styles for .register-input::placeholder */
+/* register placeholder */
   .register-input::placeholder {
     font-size: 0.96rem;
     line-height: normal;
   }
 
-/* styles for .register-upload-circle */
+/* register upload circle */
   .register-upload-circle {
     width: 4.65rem;
     height: 4.65rem;
   }
 
-/* styles for .register-submit-button */
+/* register submit button */
   .register-submit-button {
     font-size: 0.9rem !important;
     padding-top: 0.58rem !important;
     padding-bottom: 0.58rem !important;
   }
 
-/* styles for .register-separator */
+/* register separator */
   .register-separator {
     margin-top: 0.2rem !important;
     margin-bottom: 0.2rem !important;
   }
 
-/* styles for .register-signin-copy */
+/* register signin copy */
   .register-signin-copy {
     margin-top: 0.15rem !important;
     font-size: 0.8rem !important;
   }
 
-/* styles for .login-brand-row */
+/* login brand row */
   .login-brand-row {
     margin-bottom: 0.55rem !important;
   }
 
-/* styles for .register-heading-block */
+/* register heading */
   .register-heading-block {
     margin-bottom: 0.45rem !important;
   }
 
-/* styles for .register-upload-trigger .fw-bold */
+/* register upload title */
   .register-upload-trigger .fw-bold {
     font-size: 0.88rem;
   }
 
-/* styles for .register-upload-trigger .small */
+/* register upload subtitle */
   .register-upload-trigger .small {
     font-size: 0.78rem !important;
   }
 
-/* styles for .login-page-title */
+/* login title */
   .login-page-title {
     font-size: clamp(1.75rem, 2.4vw, 2.15rem) !important;
     line-height: 0.98 !important;
   }
 
-/* styles for .login-page-subtitle */
+/* login subtitle */
   .login-page-subtitle {
     font-size: 0.9rem !important;
   }
 
-/* styles for .login-form-content */
+/* login form content */
   .login-form-content {
     gap: 0.35rem !important;
   }
 
-/* styles for .login-input */
+/* login input */
   .login-input {
     height: 3.1rem;
     min-height: 3.1rem;
@@ -575,38 +575,38 @@ body {
     line-height: 3.1rem;
   }
 
-/* styles for .login-input::placeholder */
+/* login placeholder */
   .login-input::placeholder {
     line-height: 3.1rem;
   }
 
-/* styles for .login-submit-button */
+/* login submit button */
   .login-submit-button {
     font-size: 1rem !important;
     padding-top: 0.82rem !important;
     padding-bottom: 0.82rem !important;
   }
 
-/* styles for .login-separator */
+/* login separator */
   .login-separator {
     margin-top: 0.5rem !important;
     margin-bottom: 0.5rem !important;
   }
 
-/* styles for .login-signup-copy */
+/* login signup copy */
   .login-signup-copy {
     margin-top: 0.65rem !important;
   }
 }
 
 @media (min-width: 992px) and (max-height: 760px) {
-/* styles for .register-form-shell */
+/* register form shell */
   .register-form-shell {
     padding-block: 0.75rem;
   }
 }
 
-/* styles for .floating-heart */
+/* heart button */
 .floating-heart {
   position: absolute;
   left: 50%;
@@ -618,30 +618,30 @@ body {
   animation: float-heart-up 1s ease-out forwards;
 }
 
-/* styles for .floating-heart-1 */
+/* heart 1 */
 .floating-heart-1 {
   margin-left: -14px;
   animation-delay: 0ms;
 }
 
-/* styles for .floating-heart-2 */
+/* heart 2 */
 .floating-heart-2 {
   margin-left: 0;
   animation-delay: 80ms;
 }
 
-/* styles for .floating-heart-3 */
+/* heart 3 */
 .floating-heart-3 {
   margin-left: 14px;
   animation-delay: 160ms;
 }
 
-/* styles for .save-icon */
+/* save icon */
 .save-icon {
   transform-origin: center;
 }
 
-/* styles for .save-icon-pop */
+/* save icon pop */
 .save-icon-pop {
   animation: save-bookmark-pop 340ms cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -675,12 +675,12 @@ body {
   }
 }
 
-/* styles for .route-transition */
+/* route transition */
 .route-transition {
   animation: route-fade-slide 0.32s ease;
 }
 
-/* styles for .route-transition--none */
+/* no route transition */
 .route-transition--none {
   animation: none;
 }
@@ -698,18 +698,18 @@ body {
 }
 
 .form-switch .form-check-input:not(:disabled),
-/* styles for .form-switch .form-check-label */
+/* switch label */
 .form-switch .form-check-label {
   cursor: pointer;
 }
 
 .form-switch .form-check-input:disabled,
-/* styles for .form-switch .form-check-input:disabled ~ .form-check-label */
+/* disabled switch label */
 .form-switch .form-check-input:disabled ~ .form-check-label {
   cursor: default;
 }
 
-/* styles for .tab-opacity-fade */
+/* tab fade */
 .tab-opacity-fade {
   animation: tabFade 0.5s ease-out forwards;
 }
@@ -722,32 +722,32 @@ body {
   }
 }
 
-/* styles for .icon-action.delete:hover */
+/* delete button hover */
 .icon-action.delete:hover {
   background-color: #dc3545 !important;
   color: white !important;
 }
-/* styles for .icon-action.delete:hover span */
+/* delete button icon */
 .icon-action.delete:hover span {
   color: white !important;
 }
 
-/* styles for .btn-delete-profile:hover */
+/* delete profile hover */
 .btn-delete-profile:hover {
   background-color: #dc3545 !important;
   color: white !important;
 }
 
-/* styles for .btn-delete-profile */
+/* delete profile button */
 .btn-delete-profile {
   transition: all 0.2s ease-in-out !important;
 }
 
-/* styles for .list-group-item */
+/* list item */
 .list-group-item {
   transition: all 0.2s ease-in-out !important;
 }
-/* styles for .list-group-item.active */
+/* active list item */
 .list-group-item.active {
   background-color: #cee4fc !important;
   color: #5289ff !important;
@@ -755,7 +755,7 @@ body {
   font-weight: 600 !important;
   box-shadow: inset 3px 0 0 0 #4e8ff7 !important;
 }
-/* styles for .list-group-item:hover:not(.active) */
+/* list item hover */
 .list-group-item:hover:not(.active) {
   background-color: #f8fafc !important;
   color: #334155 !important;
