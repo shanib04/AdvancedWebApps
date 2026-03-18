@@ -43,6 +43,7 @@ function HomeFeed() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isDraftMode, setIsDraftMode] = useState(false);
+  const [isAiPostGeneratorOpen, setIsAiPostGeneratorOpen] = useState(false);
   const [selectedUserFilterIds, setSelectedUserFilterIds] = useState<string[]>(
     [],
   );
@@ -471,15 +472,40 @@ function HomeFeed() {
               <div className="card border-0 shadow-sm rounded-5 mb-4 create-post-card">
                 <div className="card-body p-4">
                   {!isDraftMode ? (
-                    <CreatePostBox
-                      currentUserPhoto={currentUserPhoto}
-                      onPostCreated={(post) => {
-                        setPosts((prev) => [post, ...prev]);
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      onActionSuccess={showSuccess}
-                      onActionFailed={showFailed}
-                    />
+                    <>
+                      <CreatePostBox
+                        currentUserPhoto={currentUserPhoto}
+                        onPostCreated={(post) => {
+                          setPosts((prev) => [post, ...prev]);
+                          window.scrollTo({ top: 0, behavior: "smooth" });
+                        }}
+                        onActionSuccess={showSuccess}
+                        onActionFailed={showFailed}
+                      />
+
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary btn-sm rounded-pill mt-3 px-3"
+                        onClick={() =>
+                          setIsAiPostGeneratorOpen((previous) => !previous)
+                        }
+                        aria-expanded={isAiPostGeneratorOpen}
+                      >
+                        {isAiPostGeneratorOpen
+                          ? "Hide AI post generator"
+                          : "Generate a post with AI"}
+                      </button>
+
+                      {isAiPostGeneratorOpen && (
+                        <>
+                          <hr className="my-4" />
+                          <RightAIWidget
+                            onInitialDraftGenerated={handleInitialDraftGenerated}
+                            inSection
+                          />
+                        </>
+                      )}
+                    </>
                   ) : (
                     <HomeDraftStudio
                       initialDraft={
@@ -532,15 +558,10 @@ function HomeFeed() {
                   paddingRight: "4px",
                 }}
               >
-                <RightAIWidget
-                  onInitialDraftGenerated={handleInitialDraftGenerated}
+                <AISearchWidget
+                  posts={currentPosts}
+                  currentUserId={currentUserId}
                 />
-                <div className="mt-4">
-                  <AISearchWidget
-                    posts={currentPosts}
-                    currentUserId={currentUserId}
-                  />
-                </div>
               </div>
             )}
             {(isSavedMode || isLikedMode) && currentPosts.length > 0 && (

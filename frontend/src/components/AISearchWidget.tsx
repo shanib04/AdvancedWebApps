@@ -50,6 +50,7 @@ const VISIBLE_SUGGESTIONS = 3;
 type AISearchWidgetProps = {
   posts?: Post[];
   currentUserId?: string;
+  inSection?: boolean;
 };
 
 type SuggestionSignals = {
@@ -65,6 +66,7 @@ type SuggestionSignals = {
 const AISearchWidget: React.FC<AISearchWidgetProps> = ({
   posts = [],
   currentUserId = "",
+  inSection = false,
 }) => {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState("");
@@ -176,13 +178,19 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
     }
   };
 
-  return (
-    <div className="card border-0 shadow-sm rounded-5 ai-widget-card">
-      <div className="card-body p-4">
+  const content = (
+    <>
+      {!inSection && (
         <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
           <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
           AI Insights Assistant
         </h5>
+      )}
+      {inSection && (
+        <p className="small text-dark fw-semibold mb-2">
+          Data Insights
+        </p>
+      )}
 
         <textarea
           className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
@@ -198,7 +206,7 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
             <button
               key={suggestion}
               type="button"
-              className="btn btn-sm btn-outline-primary rounded-pill"
+              className="btn btn-sm rounded-pill ai-suggestion-chip"
               onClick={() => {
                 setQuery(suggestion);
                 setError("");
@@ -247,7 +255,16 @@ const AISearchWidget: React.FC<AISearchWidgetProps> = ({
             <div className="mt-2">{result}</div>
           </div>
         )}
-      </div>
+    </>
+  );
+
+  if (inSection) {
+    return <div>{content}</div>;
+  }
+
+  return (
+    <div className="card border-0 shadow-sm rounded-5 ai-widget-card">
+      <div className="card-body p-4">{content}</div>
     </div>
   );
 };

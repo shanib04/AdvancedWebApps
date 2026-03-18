@@ -154,13 +154,6 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
             <LogOut size={16} strokeWidth={2.2} />
             Logout
           </button>
-          <a
-            className="btn btn-sm btn-primary ms-2"
-            href="/ai-search"
-            style={{ borderRadius: 20 }}
-          >
-            AI Search
-          </a>
         </div>
       </div>
     </nav>
