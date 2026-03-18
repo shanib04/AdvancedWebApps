@@ -131,8 +131,12 @@ router.get("/user/:userId/saved", authMiddleware, controller.getSavedPosts);
  *     responses:
  *       200:
  *         description: Post details
+ *       422:
+ *         description: Invalid post ID format
  *       404:
  *         description: Post not found
+ *       500:
+ *         description: Server error
  */
 router.get("/:id", authMiddleware, controller.getPostById);
 
@@ -164,8 +168,14 @@ router.get("/:id", authMiddleware, controller.getPostById);
  *     responses:
  *       200:
  *         description: Post updated successfully
+ *       422:
+ *         description: Invalid post ID or missing content
+ *       403:
+ *         description: Unauthorized to update this post
  *       404:
  *         description: Post not found
+ *       500:
+ *         description: Server error
  */
 router.put("/:id", authMiddleware, controller.updatePost);
 
@@ -187,8 +197,12 @@ router.put("/:id", authMiddleware, controller.updatePost);
  *     responses:
  *       200:
  *         description: Post like state toggled successfully
+ *       422:
+ *         description: Invalid post ID format
  *       404:
  *         description: Post not found
+ *       500:
+ *         description: Server error
  */
 router.post("/:id/like", authMiddleware, controller.toggleLike);
 
@@ -210,8 +224,12 @@ router.post("/:id/like", authMiddleware, controller.toggleLike);
  *     responses:
  *       200:
  *         description: Post save state toggled successfully
+ *       422:
+ *         description: Invalid post ID format
  *       404:
  *         description: Post not found
+ *       500:
+ *         description: Server error
  */
 router.post("/:id/save", authMiddleware, controller.toggleSave);
 
@@ -233,8 +251,14 @@ router.post("/:id/save", authMiddleware, controller.toggleSave);
  *     responses:
  *       200:
  *         description: Post deleted successfully
+ *       422:
+ *         description: Invalid post ID format
+ *       403:
+ *         description: Unauthorized to delete this post
  *       404:
  *         description: Post not found
+ *       500:
+ *         description: Server error
  */
 router.delete("/:id", authMiddleware, controller.deletePost);
 

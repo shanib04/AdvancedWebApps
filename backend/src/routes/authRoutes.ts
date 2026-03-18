@@ -165,6 +165,8 @@ router.post("/refresh", controller.refresh);
  *         description: Validation error
  *       401:
  *         description: Invalid or unauthorized refresh token
+ *       500:
+ *         description: Server configuration error
  */
 router.post("/logout", controller.logout);
 

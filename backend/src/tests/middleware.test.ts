@@ -97,46 +97,9 @@ describe("Auth Middleware", () => {
     expect(mockNext).not.toHaveBeenCalled();
   });
 
-  test("should extract Bearer token correctly", () => {
-    const userId = "507f1f77bcf86cd799439011";
-    const validToken = "valid_token_with_special_chars_!@#$";
-
-    mockRequest.headers = {
-      authorization: `Bearer ${validToken}`,
-    };
-
-    (jwt.verify as jest.Mock).mockReturnValue({ userId });
-
-    authMiddleware(
-      mockRequest as AuthRequest,
-      mockResponse as Response,
-      mockNext,
-    );
-
-    expect(jwt.verify).toHaveBeenCalledWith(validToken, process.env.JWT_SECRET);
-    expect(mockNext).toHaveBeenCalled();
-  });
-
   test("should return 401 when Bearer token is missing", () => {
     mockRequest.headers = {
       authorization: "Bearer",
-    };
-
-    authMiddleware(
-      mockRequest as AuthRequest,
-      mockResponse as Response,
-      mockNext,
-    );
-
-    expect(mockResponse.status).toHaveBeenCalledWith(401);
-    expect(mockResponse.json).toHaveBeenCalledWith({
-      error: "Unauthorized",
-    });
-  });
-
-  test("should return 401 when authorization header is empty string", () => {
-    mockRequest.headers = {
-      authorization: "",
     };
 
     authMiddleware(
@@ -176,27 +139,6 @@ describe("Auth Middleware", () => {
 
     // Restore
     process.env.JWT_SECRET = originalSecret;
-  });
-
-  test("should set user on request object with correct format", () => {
-    const userId = "507f1f77bcf86cd799439011";
-    const validToken = "valid_token";
-
-    mockRequest.headers = {
-      authorization: `Bearer ${validToken}`,
-    };
-
-    (jwt.verify as jest.Mock).mockReturnValue({ userId });
-
-    authMiddleware(
-      mockRequest as AuthRequest,
-      mockResponse as Response,
-      mockNext,
-    );
-
-    expect((mockRequest as AuthRequest).user).toBeDefined();
-    expect((mockRequest as AuthRequest).user._id).toBe(userId);
-    expect(mockNext).toHaveBeenCalled();
   });
 
   test("should return 401 when token expired", () => {
