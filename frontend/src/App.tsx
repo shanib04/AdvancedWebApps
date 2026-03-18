@@ -27,7 +27,11 @@ function App() {
   return (
     <div
       key={routeContainerKey}
-      className={isAuthRoute ? "route-transition route-transition--none" : "route-transition"}
+      className={
+        isAuthRoute
+          ? "route-transition route-transition--none"
+          : "route-transition"
+      }
     >
       <Routes location={location}>
         <Route path="/login" element={<LoginForm />} />
@@ -53,14 +57,6 @@ function App() {
           element={
             <ProtectedRoute>
               <UserProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/ai-search"
-          element={
-            <ProtectedRoute>
-              <AISearchWidget />
             </ProtectedRoute>
           }
         />
