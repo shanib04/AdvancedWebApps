@@ -1,14 +1,14 @@
-import webLogo from "../assets/web-logo.png";
-import { useEffect, useMemo } from "react";
 import { LogOut, Search } from "lucide-react";
-import { clearFeedCache } from "../utils/feedCache";
+import { useEffect, useMemo } from "react";
+import webLogo from "../assets/web-logo.png";
+import { useSessionUserListener } from "../hooks/useSessionUserListener";
+import apiClient, { clearAuthStateAndRedirect } from "../services/api-client";
+import { defaultUserPhotoUrl, normalizePhotoUrl } from "../utils/photoUtils";
 import {
   getStoredSessionUser,
   syncStoredUserFromWhoAmI,
   type SessionUser,
 } from "../utils/sessionUser";
-import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
-import { useSessionUserListener } from "../hooks/useSessionUserListener";
 
 interface NavbarProps {
   searchValue: string;
@@ -17,12 +17,22 @@ interface NavbarProps {
 }
 
 function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    clearFeedCache();
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    try {
+      if (
+        refreshToken &&
+        refreshToken !== "undefined" &&
+        refreshToken !== "null"
+      ) {
+        await apiClient.post("/auth/logout", { refreshToken });
+      }
+    } catch {
+      // Always continue with local logout even if server logout fails.
+    } finally {
+      clearAuthStateAndRedirect();
+    }
   };
 
   const initialUser = useMemo(() => getStoredSessionUser(), []);
