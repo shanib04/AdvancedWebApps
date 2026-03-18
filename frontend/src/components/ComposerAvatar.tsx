@@ -5,7 +5,7 @@ interface ComposerAvatarProps {
   alt?: string;
 }
 
-function ComposerAvatar({
+function UserAvatar({
   photoUrl = defaultUserPhotoUrl,
   alt = "Your avatar",
 }: ComposerAvatarProps) {
@@ -26,4 +26,4 @@ function ComposerAvatar({
   );
 }
 
-export default ComposerAvatar;
+export default UserAvatar;

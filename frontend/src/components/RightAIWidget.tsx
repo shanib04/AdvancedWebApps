@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import apiClient from "../services/api-client";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
-import ComposerAvatar from "./ComposerAvatar";
+import UserAvatar from "./ComposerAvatar";
 
 type InitialDraftPayload = {
   text: string;
@@ -69,7 +69,7 @@ function RightAIWidget({
       {inSection ? (
         <div className="px-1">
           <div className="d-flex gap-3 mb-3">
-            <ComposerAvatar photoUrl={currentUserPhoto} />
+            <UserAvatar photoUrl={currentUserPhoto} />
             <div className="w-100">
               <div className="create-message-shell">
                 <textarea

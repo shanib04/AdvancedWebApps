@@ -9,7 +9,7 @@ import {
   getUserFriendlyApiError,
 } from "../utils/getUserFriendlyApiError";
 import AiSuggestionBox from "./AiSuggestionBox";
-import ComposerAvatar from "./ComposerAvatar";
+import UserAvatar from "./ComposerAvatar";
 
 const createPostSchema = z.object({
   text: z.string().min(1, "Post text is required."),
@@ -220,7 +220,7 @@ function CreatePostBox({
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
       <div className="d-flex gap-3 mb-2">
-        <ComposerAvatar photoUrl={currentUserPhoto} />
+        <UserAvatar photoUrl={currentUserPhoto} />
         <div className="w-100">
           <div className="create-message-shell">
             <textarea
