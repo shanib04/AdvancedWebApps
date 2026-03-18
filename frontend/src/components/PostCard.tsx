@@ -112,6 +112,9 @@ function PostCard({
   }, [isEditing]);
 
   useEffect(() => {
+    if (location.pathname.startsWith("/post/")) {
+      return;
+    }
     const lastViewed = sessionStorage.getItem("lastViewedPostId");
     if (lastViewed === post._id && postCardRef.current) {
       // Images loading above this post can cause layout shifts, so we poll the scroll a few times
@@ -138,7 +141,7 @@ function PostCard({
 
       return () => clearInterval(interval);
     }
-  }, [post._id]);
+  }, [post._id, location.pathname]);
 
   // Safely extract the populated user object from our strict Post model
   const userObj: User | null =

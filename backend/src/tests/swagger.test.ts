@@ -27,5 +27,21 @@ describe("Swagger API Documentation", () => {
       expect(response.body.components.schemas).toHaveProperty("Post");
       expect(response.body.components.schemas).toHaveProperty("Comment");
     });
+
+    it("should include AI search endpoint documentation", async () => {
+      const response = await request(app).get("/docs.json");
+
+      expect(response.body.paths).toHaveProperty("/api/ai/search");
+      expect(response.body.paths["/api/ai/search"]).toHaveProperty("post");
+      expect(
+        response.body.paths["/api/ai/search"].post.responses,
+      ).toHaveProperty("200");
+      expect(
+        response.body.paths["/api/ai/search"].post.responses,
+      ).toHaveProperty("422");
+      expect(
+        response.body.paths["/api/ai/search"].post.responses,
+      ).toHaveProperty("500");
+    });
   });
 });

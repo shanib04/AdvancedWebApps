@@ -5,6 +5,7 @@ import LoginForm from "./components/LoginForm";
 import HomeFeed from "./components/HomeFeed";
 import PostDetailsPage from "./pages/PostDetailsPage";
 import UserProfilePage from "./pages/UserProfilePage";
+import AISearchWidget from "./components/AISearchWidget";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const accessToken = localStorage.getItem("accessToken");
@@ -26,7 +27,11 @@ function App() {
   return (
     <div
       key={routeContainerKey}
-      className={isAuthRoute ? "route-transition route-transition--none" : "route-transition"}
+      className={
+        isAuthRoute
+          ? "route-transition route-transition--none"
+          : "route-transition"
+      }
     >
       <Routes location={location}>
         <Route path="/login" element={<LoginForm />} />
