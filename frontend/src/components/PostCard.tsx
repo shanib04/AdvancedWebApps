@@ -677,148 +677,152 @@ function PostCard({
           />
         )}
 
-        <div className="d-flex flex-wrap gap-2">
-          <div className="position-relative">
-            {showLikeAnimation && (
-              <>
-                <span className="material-symbols-outlined text-danger floating-heart floating-heart-1">
+        <div className="d-flex flex-wrap align-items-center gap-2">
+          <div className="d-flex flex-wrap align-items-center gap-2">
+            <div className="position-relative">
+              {showLikeAnimation && (
+                <>
+                  <span className="material-symbols-outlined text-danger floating-heart floating-heart-1">
+                    favorite
+                  </span>
+                  <span className="material-symbols-outlined text-danger floating-heart floating-heart-2">
+                    favorite
+                  </span>
+                  <span className="material-symbols-outlined text-danger floating-heart floating-heart-3">
+                    favorite
+                  </span>
+                </>
+              )}
+
+              <button
+                type="button"
+                className="btn btn-sm rounded-pill icon-action like d-flex align-items-center gap-1"
+                onClick={handleLike}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{
+                    fontSize: "18px",
+                    color: isLiked ? "#dc2626" : "#6c757d",
+                    fontVariationSettings: isLiked
+                      ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
+                      : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
+                  }}
+                >
                   favorite
                 </span>
-                <span className="material-symbols-outlined text-danger floating-heart floating-heart-2">
-                  favorite
-                </span>
-                <span className="material-symbols-outlined text-danger floating-heart floating-heart-3">
-                  favorite
-                </span>
-              </>
-            )}
+                <span>{likesCount}</span>
+              </button>
+            </div>
 
             <button
               type="button"
-              className="btn btn-sm rounded-pill icon-action like d-flex align-items-center gap-1"
-              onClick={handleLike}
+              className="btn btn-sm rounded-pill icon-action d-flex align-items-center gap-1 text-secondary"
+              onClick={() => {
+                const postPath = `/post/${post._id}`;
+                const fromPath = `${location.pathname}${location.search}`;
+
+                if (location.pathname === postPath) {
+                  window.dispatchEvent(
+                    new CustomEvent("focusPostCommentInput", {
+                      detail: { postId: post._id },
+                    }),
+                  );
+                  return;
+                }
+
+                sessionStorage.setItem("lastViewedPostId", post._id);
+                navigate(postPath, {
+                  state: { focusCommentInput: true, fromPath },
+                });
+              }}
             >
               <span
-                className="material-symbols-outlined"
+                className="material-symbols-outlined text-secondary"
+                style={{ fontSize: "18px" }}
+              >
+                chat_bubble
+              </span>
+              <span className="text-secondary">
+                {dynamicCommentCount ?? post.comments ?? 0}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-sm rounded-pill icon-action save d-flex align-items-center gap-1"
+              onClick={handleSave}
+            >
+              <span
+                className={`material-symbols-outlined save-icon ${showSaveAnimation ? "save-icon-pop" : ""}`}
                 style={{
                   fontSize: "18px",
-                  color: isLiked ? "#dc2626" : "#6c757d",
-                  fontVariationSettings: isLiked
+                  color: isSaved ? "#2563eb" : "#6c757d",
+                  fontVariationSettings: isSaved
                     ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
                     : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
                 }}
               >
-                favorite
-              </span>
-              <span>{likesCount}</span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-sm rounded-pill icon-action d-flex align-items-center gap-1 text-secondary"
-            onClick={() => {
-              const postPath = `/post/${post._id}`;
-              const fromPath = `${location.pathname}${location.search}`;
-
-              if (location.pathname === postPath) {
-                window.dispatchEvent(
-                  new CustomEvent("focusPostCommentInput", {
-                    detail: { postId: post._id },
-                  }),
-                );
-                return;
-              }
-
-              sessionStorage.setItem("lastViewedPostId", post._id);
-              navigate(postPath, {
-                state: { focusCommentInput: true, fromPath },
-              });
-            }}
-          >
-            <span
-              className="material-symbols-outlined text-secondary"
-              style={{ fontSize: "18px" }}
-            >
-              chat_bubble
-            </span>
-            <span className="text-secondary">
-              {dynamicCommentCount ?? post.comments ?? 0}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            className="btn btn-sm rounded-pill icon-action save d-flex align-items-center gap-1"
-            onClick={handleSave}
-          >
-            <span
-              className={`material-symbols-outlined save-icon ${showSaveAnimation ? "save-icon-pop" : ""}`}
-              style={{
-                fontSize: "18px",
-                color: isSaved ? "#2563eb" : "#6c757d",
-                fontVariationSettings: isSaved
-                  ? '"FILL" 1, "wght" 700, "GRAD" 0, "opsz" 24'
-                  : '"FILL" 0, "wght" 500, "GRAD" 0, "opsz" 24',
-              }}
-            >
                 bookmark
               </span>
             </button>
           </div>
 
-          {isOwner && !isEditing && (
-            <button
-              type="button"
-              className="btn btn-sm rounded-pill icon-action edit d-flex align-items-center gap-1"
-              onClick={() => setIsEditing(true)}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "18px" }}
-              >
-                edit
-              </span>
-              Edit
-            </button>
-          )}
-
-          {isOwner && isEditing && (
-            <>
-              <button
-                type="button"
-                className="btn btn-primary btn-sm rounded-pill"
-                disabled={isSavingEdit}
-                onClick={handleSaveEdit}
-              >
-                {isSavingEdit ? "Saving..." : "Save"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline-secondary btn-sm rounded-pill"
-                onClick={() => setIsEditing(false)}
-              >
-                Cancel
-              </button>
-            </>
-          )}
-
           {isOwner && (
-            <button
-              type="button"
-              className="btn btn-sm rounded-pill icon-action delete text-danger d-flex align-items-center gap-1"
-              onClick={handleDeletePost}
-            >
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: "18px" }}
+            <div className="d-flex flex-wrap align-items-center gap-2 ms-auto">
+              {!isEditing && (
+                <button
+                  type="button"
+                  className="btn btn-sm rounded-pill icon-action edit d-flex align-items-center gap-1"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "18px" }}
+                  >
+                    edit
+                  </span>
+                  Edit
+                </button>
+              )}
+
+              {isEditing && (
+                <>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm rounded-pill"
+                    disabled={isSavingEdit}
+                    onClick={handleSaveEdit}
+                  >
+                    {isSavingEdit ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm rounded-pill"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+
+              <button
+                type="button"
+                className="btn btn-sm rounded-pill icon-action delete text-danger d-flex align-items-center gap-1"
+                onClick={handleDeletePost}
               >
-                delete
-              </span>
-              Delete
-            </button>
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "18px" }}
+                >
+                  delete
+                </span>
+                Delete
+              </button>
+            </div>
           )}
         </div>
+      </div>
     </article>
   );
 }
