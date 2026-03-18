@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import usePosts from "../hooks/usePosts";
-import type { Post } from "../types/models";
+import type { Post, User } from "../types/models";
 import { feedCache } from "../utils/feedCache";
 import useAppToast from "../hooks/useAppToast";
 import {
@@ -49,6 +49,9 @@ function HomeFeed() {
     null,
   );
   const [showGoToTop, setShowGoToTop] = useState(false);
+  const [searchableUsers, setSearchableUsers] = useState<User[]>([]);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
+  const [areUsersLoaded, setAreUsersLoaded] = useState(false);
   const { toasts, removeToast, showFailed, showSuccess } = useAppToast();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const queuedSearchPageRef = useRef(false);
@@ -261,6 +264,59 @@ function HomeFeed() {
   const isSearchFetching = isSearchActive && hasMore;
 
   useEffect(() => {
+    if (!isSearchActive || areUsersLoaded) {
+      return;
+    }
+
+    const abortController = new AbortController();
+    let isDisposed = false;
+
+    const loadUsersForSearch = async () => {
+      setIsUsersLoading(true);
+
+      try {
+        const response = await apiClient.get<User[]>("/user", {
+          signal: abortController.signal,
+        });
+        if (!abortController.signal.aborted) {
+          setSearchableUsers(Array.isArray(response.data) ? response.data : []);
+          setAreUsersLoaded(true);
+        }
+      } catch {
+        if (!abortController.signal.aborted) {
+          showFailed("Failed to load profiles for search.");
+        }
+      } finally {
+        if (!isDisposed) {
+          setIsUsersLoading(false);
+        }
+      }
+    };
+
+    loadUsersForSearch();
+
+    return () => {
+      isDisposed = true;
+      abortController.abort();
+    };
+  }, [isSearchActive, areUsersLoaded]);
+
+  const filteredProfiles = useMemo(() => {
+    if (!isSearchActive) {
+      return [];
+    }
+
+    const normalized = normalizedSearchTerm;
+
+    return searchableUsers.filter((user) => {
+      const username = user.username?.toLowerCase() || "";
+      const displayName = user.displayName?.toLowerCase() || "";
+
+      return username.includes(normalized) || displayName.includes(normalized);
+    });
+  }, [isSearchActive, normalizedSearchTerm, searchableUsers]);
+
+  useEffect(() => {
     if (!isSearchActive) {
       queuedSearchPageRef.current = false;
       return;
@@ -441,6 +497,8 @@ function HomeFeed() {
               isLoading={currentIsLoading}
               posts={currentPosts}
               filteredPosts={filteredPosts}
+              filteredProfiles={filteredProfiles}
+              isProfileSearchLoading={isUsersLoading}
               filterAnimationSeed={filterAnimationSeed}
               currentUserId={currentUserId}
               onPostUpdated={handlePostUpdated}
