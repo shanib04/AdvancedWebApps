@@ -1,6 +1,10 @@
 import type { RefObject } from "react";
+import { Link } from "react-router-dom";
+import { Bookmark, Heart, FilterX } from "lucide-react";
 import type { Post } from "../types/models";
 import PostCard from "./PostCard";
+
+type FeedMode = "home" | "saved" | "liked";
 
 type HomePostsListProps = {
   error: string;
@@ -17,6 +21,7 @@ type HomePostsListProps = {
   isSearchActive: boolean;
   isSearchFetching: boolean;
   hasMore: boolean;
+  feedMode: FeedMode;
 };
 
 function HomePostsList({
@@ -34,7 +39,15 @@ function HomePostsList({
   isSearchActive,
   isSearchFetching,
   hasMore,
+  feedMode,
 }: HomePostsListProps) {
+  const hasNoPosts = !isLoading && !error && posts.length === 0;
+  const hasNoVisiblePosts =
+    !isLoading && !error && posts.length > 0 && filteredPosts.length === 0;
+
+  const isSavedMode = feedMode === "saved";
+  const isLikedMode = feedMode === "liked";
+
   return (
     <>
       {error && <div className="alert alert-danger">{error}</div>}
@@ -58,6 +71,58 @@ function HomePostsList({
           />
         ))}
       </div>
+
+      {hasNoPosts && (isSavedMode || isLikedMode) && (
+        <div className="card border-0 shadow-sm rounded-5 empty-feed-state mt-1 mb-3">
+          <div className="card-body p-4 p-md-5 text-center">
+            <div className="empty-feed-icon-wrap mx-auto mb-3">
+              {isSavedMode ? (
+                <Bookmark
+                  className="empty-feed-icon"
+                  size={28}
+                  strokeWidth={2.2}
+                />
+              ) : (
+                <Heart
+                  className="empty-feed-icon"
+                  size={28}
+                  strokeWidth={2.2}
+                />
+              )}
+            </div>
+            <h5 className="fw-bold mb-2">
+              {isSavedMode ? "No saved posts yet" : "No liked posts yet"}
+            </h5>
+            <p className="text-muted mb-4">
+              {isSavedMode
+                ? "Posts you save will appear here for quick access."
+                : "Posts you like will appear here so you can revisit them later."}
+            </p>
+            <Link
+              to="/home"
+              className="btn rounded-pill px-4 py-2 fw-semibold empty-feed-cta"
+            >
+              Explore feed
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {hasNoVisiblePosts && (
+        <div className="card border-0 shadow-sm rounded-5 empty-filter-state mt-1 mb-3">
+          <div className="card-body p-4 text-center">
+            <FilterX
+              size={22}
+              strokeWidth={2.2}
+              className="text-secondary mb-2"
+            />
+            <h6 className="fw-semibold mb-1">No posts match your filters</h6>
+            <p className="text-muted mb-0 small">
+              Try clearing search text or selected users.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div
         ref={loadMoreRef}

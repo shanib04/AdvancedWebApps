@@ -19,6 +19,7 @@ import RightAIWidget from "./RightAIWidget";
 import UserFilterWidget from "./UserFilterWidget";
 import "../styles/feed-modern.css";
 import { normalizePhotoUrl } from "../utils/photoUtils";
+import { mergePostIntoList } from "../utils/postState";
 import apiClient from "../services/api-client";
 
 type InitialDraftPayload = {
@@ -351,11 +352,19 @@ function HomeFeed() {
   };
 
   const handlePostUpdated = (updatedPost: Post) => {
-    setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post._id === updatedPost._id ? updatedPost : post,
-      ),
+    setPosts(
+      (prevPosts) => mergePostIntoList(prevPosts, updatedPost).updatedPosts,
     );
+    setSavedPosts(
+      (prevPosts) => mergePostIntoList(prevPosts, updatedPost).updatedPosts,
+    );
+    setLikedPosts(
+      (prevPosts) => mergePostIntoList(prevPosts, updatedPost).updatedPosts,
+    );
+    feedCache.posts = mergePostIntoList(
+      feedCache.posts,
+      updatedPost,
+    ).updatedPosts;
   };
 
   const handlePostDeleted = (postId: string) => {
@@ -442,6 +451,7 @@ function HomeFeed() {
               isSearchActive={isSearchActive}
               isSearchFetching={isSearchFetching}
               hasMore={hasMore}
+              feedMode={isSavedMode ? "saved" : isLikedMode ? "liked" : "home"}
             />
           </section>
 

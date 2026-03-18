@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import type { Post, User } from "../types/models";
 import apiClient from "../services/api-client";
-import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
+import {
+  getAiImageSearchErrorMessage,
+  getUserFriendlyApiError,
+} from "../utils/getUserFriendlyApiError";
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
 import { formatDateTimeLocal } from "../utils/dateUtils";
+import { mergePostState } from "../utils/postState";
 
 interface PostCardProps {
   post: Post;
@@ -27,6 +31,7 @@ function PostCard({
   onActionFailed,
 }: PostCardProps) {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(post.content);
@@ -194,7 +199,7 @@ function PostCard({
         imageUrl: updatedImageUrl,
       });
 
-      onPostUpdated(updateResponse.data);
+      onPostUpdated(mergePostState(post, updateResponse.data));
       setIsEditing(false);
       setEditedImageFile(null);
       if (editImageInputRef.current) {
@@ -255,11 +260,7 @@ function PostCard({
       const updatedPost = response.data?.post as Post | undefined;
 
       if (updatedPost && updatedPost._id) {
-        // Keep the existing comment count when updating via like
-        if (post.comments !== undefined && updatedPost.comments === undefined) {
-          updatedPost.comments = post.comments;
-        }
-        onPostUpdated(updatedPost);
+        onPostUpdated(mergePostState(post, updatedPost));
       }
     } catch (error: unknown) {
       setIsLiked(previousIsLiked);
@@ -280,11 +281,7 @@ function PostCard({
       const updatedPost = response.data?.post as Post | undefined;
 
       if (updatedPost && updatedPost._id) {
-        // Keep the existing comment count when updating via save
-        if (post.comments !== undefined && updatedPost.comments === undefined) {
-          updatedPost.comments = post.comments;
-        }
-        onPostUpdated(updatedPost);
+        onPostUpdated(mergePostState(post, updatedPost));
       }
     } catch (error: unknown) {
       setIsSaved(previousIsSaved);
@@ -320,7 +317,7 @@ function PostCard({
         onActionFailed("No images found for this term. Try another keyword.");
       }
     } catch (error: unknown) {
-      onActionFailed(getUserFriendlyApiError(error, "Failed to fetch images."));
+      onActionFailed(getAiImageSearchErrorMessage(error));
     } finally {
       setIsFetchingEditImages(false);
     }
@@ -699,9 +696,21 @@ function PostCard({
             type="button"
             className="btn btn-sm rounded-pill icon-action d-flex align-items-center gap-1 text-secondary"
             onClick={() => {
+              const postPath = `/post/${post._id}`;
+              const fromPath = `${location.pathname}${location.search}`;
+
+              if (location.pathname === postPath) {
+                window.dispatchEvent(
+                  new CustomEvent("focusPostCommentInput", {
+                    detail: { postId: post._id },
+                  }),
+                );
+                return;
+              }
+
               sessionStorage.setItem("lastViewedPostId", post._id);
-              navigate(`/post/${post._id}`, {
-                state: { focusCommentInput: true },
+              navigate(postPath, {
+                state: { focusCommentInput: true, fromPath },
               });
             }}
           >

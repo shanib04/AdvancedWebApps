@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import apiClient from "../services/api-client";
 import { feedCache, clearFeedCache } from "../utils/feedCache";
+import { mergePostState } from "../utils/postState";
 import type { Post } from "../types/models";
 import axios from "axios";
 
@@ -26,11 +27,18 @@ function usePosts(page: number) {
         feedCache.hasMore = newHasMore;
 
         setPosts((prevPosts) => {
-          const merged = [...prevPosts, ...newPosts];
           const uniquePosts = new Map<string, Post>();
 
-          merged.forEach((post) => {
+          prevPosts.forEach((post) => {
             uniquePosts.set(post._id, post);
+          });
+
+          newPosts.forEach((post) => {
+            const existingPost = uniquePosts.get(post._id);
+            uniquePosts.set(
+              post._id,
+              existingPost ? mergePostState(existingPost, post) : post,
+            );
           });
 
           const newlyMerged = Array.from(uniquePosts.values());

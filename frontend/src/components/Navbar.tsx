@@ -1,5 +1,6 @@
 import webLogo from "../assets/web-logo.png";
 import { useEffect, useMemo } from "react";
+import { LogOut, Search } from "lucide-react";
 import { clearFeedCache } from "../utils/feedCache";
 import {
   getStoredSessionUser,
@@ -93,9 +94,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
           >
             <div className="input-group input-group-sm">
               <span className="input-group-text bg-transparent border-0 pe-0">
-                <span className="material-symbols-outlined text-primary">
-                  search
-                </span>
+                <Search size={18} strokeWidth={2.2} className="text-primary" />
               </span>
               <input
                 type="text"
@@ -142,12 +141,7 @@ function Navbar({ searchValue, onSearchChange, hideSearch }: NavbarProps) {
             className="btn btn-sm rounded-pill px-3 d-flex align-items-center gap-1 logout-btn"
             onClick={handleLogout}
           >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: "18px" }}
-            >
-              logout
-            </span>
+            <LogOut size={16} strokeWidth={2.2} />
             Logout
           </button>
         </div>

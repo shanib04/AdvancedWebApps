@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import apiClient from "../services/api-client";
 import type { Post } from "../types/models";
 import PostCard from "../components/PostCard";
@@ -10,6 +11,12 @@ import useAppToast from "../hooks/useAppToast";
 import AppToast from "../components/AppToast";
 import { getUserFriendlyApiError } from "../utils/getUserFriendlyApiError";
 import { feedCache } from "../utils/feedCache";
+import { mergePostState } from "../utils/postState";
+
+type PostNavigationState = {
+  focusCommentInput?: boolean;
+  fromPath?: string;
+};
 
 const PostDetailsPage = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -22,10 +29,46 @@ const PostDetailsPage = () => {
     undefined,
   );
   const { toasts, showSuccess, showFailed, removeToast } = useAppToast();
+  const navigationState =
+    location.state && typeof location.state === "object"
+      ? (location.state as PostNavigationState)
+      : null;
+  const shouldFocusCommentInput = Boolean(navigationState?.focusCommentInput);
+  const fromPath =
+    typeof navigationState?.fromPath === "string"
+      ? navigationState.fromPath
+      : "";
+  const currentPathWithSearch = `${location.pathname}${location.search}`;
+  const canNavigateToSource = Boolean(
+    fromPath && fromPath !== currentPathWithSearch,
+  );
+
+  const returnLabel = fromPath.startsWith("/profile/")
+    ? "Return to Profile"
+    : fromPath.startsWith("/home")
+      ? "Return to Feed"
+      : "Return";
+
+  const handleReturn = () => {
+    if (canNavigateToSource) {
+      navigate(fromPath);
+      return;
+    }
+
+    navigate(-1);
+  };
 
   const storedUserStr = localStorage.getItem("user");
   const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
   const currentUserId = storedUser?._id ?? "";
+
+  useEffect(() => {
+    if (shouldFocusCommentInput) {
+      return;
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [postId, shouldFocusCommentInput]);
 
   useEffect(() => {
     if (!postId) return;
@@ -36,7 +79,10 @@ const PostDetailsPage = () => {
         const { data } = await apiClient.get<Post>(`/post/${postId}`, {
           signal: controller.signal,
         });
-        setPost(data);
+        const cachedPost = feedCache.posts.find(
+          (cached) => cached._id === data._id,
+        );
+        setPost(cachedPost ? mergePostState(cachedPost, data) : data);
         setError("");
         setLoading(false);
       } catch (err: unknown) {
@@ -71,10 +117,12 @@ const PostDetailsPage = () => {
   }, [post, commentCount]);
 
   const handlePostUpdated = (updatedPost: Post) => {
-    setPost(updatedPost);
+    setPost((prevPost) =>
+      prevPost ? mergePostState(prevPost, updatedPost) : updatedPost,
+    );
     const cachedPost = feedCache.posts.find((p) => p._id === updatedPost._id);
     if (cachedPost) {
-      Object.assign(cachedPost, updatedPost);
+      Object.assign(cachedPost, mergePostState(cachedPost, updatedPost));
     }
   };
 
@@ -126,32 +174,11 @@ const PostDetailsPage = () => {
             <div className="position-sticky" style={{ top: "85px" }}>
               <div className="mb-4">
                 <button
-                  className="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-bold shadow-sm bg-white"
-                  onClick={() => navigate(-1)}
-                  style={{ transition: "all 0.2s" }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.classList.replace(
-                      "btn-outline-secondary",
-                      "btn-secondary",
-                    );
-                    e.currentTarget.classList.replace("bg-white", "text-white");
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.classList.replace(
-                      "btn-secondary",
-                      "btn-outline-secondary",
-                    );
-                    e.currentTarget.classList.add("bg-white");
-                    e.currentTarget.classList.remove("text-white");
-                  }}
+                  className="btn w-100 d-flex align-items-center justify-content-center gap-2 rounded-pill fw-semibold back-feed-btn"
+                  onClick={handleReturn}
                 >
-                  <span
-                    className="material-symbols-outlined"
-                    style={{ fontSize: "20px" }}
-                  >
-                    arrow_back
-                  </span>
-                  Back to Feed
+                  <ArrowLeft size={18} strokeWidth={2.2} />
+                  {returnLabel}
                 </button>
               </div>
               <LeftSidebar />
@@ -162,10 +189,11 @@ const PostDetailsPage = () => {
           <div className="col-12 col-md-6">
             <div className="mb-3 d-md-none">
               <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => navigate(-1)}
+                className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-2 back-feed-btn"
+                onClick={handleReturn}
               >
-                &larr; Back to Feed
+                <ArrowLeft size={16} strokeWidth={2.2} />
+                {returnLabel}
               </button>
             </div>
 
@@ -188,7 +216,7 @@ const PostDetailsPage = () => {
                 postId={post._id}
                 postAuthorId={authorId || ""}
                 onCommentsChange={setCommentCount}
-                autoFocusInput={location.state?.focusCommentInput}
+                autoFocusInput={shouldFocusCommentInput}
               />
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { Post } from "../../types/models";
 
 interface ProfilePostGridProps {
@@ -7,6 +7,8 @@ interface ProfilePostGridProps {
 }
 
 const ProfilePostGrid = ({ posts, loading }: ProfilePostGridProps) => {
+  const location = useLocation();
+
   if (loading) {
     return (
       <div className="row g-4 tab-opacity-fade">
@@ -34,7 +36,11 @@ const ProfilePostGrid = ({ posts, loading }: ProfilePostGridProps) => {
     <div className="row g-4 tab-opacity-fade">
       {posts.map((post) => (
         <div key={post._id} className="col-12 col-sm-6 col-md-4">
-          <Link to={`/post/${post._id}`} className="text-decoration-none">
+          <Link
+            to={`/post/${post._id}`}
+            state={{ fromPath: `${location.pathname}${location.search}` }}
+            className="text-decoration-none"
+          >
             <div
               className="bg-light rounded-4 overflow-hidden position-relative"
               style={{ aspectRatio: "1" }}
