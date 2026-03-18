@@ -10,6 +10,9 @@ import {
   InitialDraftResponse,
   ParsedInitialDraft,
 } from "../types/models";
+import Post from "../models/postModel";
+import Comment from "../models/commentModel";
+import User from "../models/userModel";
 
 const getGeminiApiKey = () => normalizeEnvValue(getEnvValue("GEMINI_API_KEY"));
 
@@ -307,5 +310,29 @@ export const getMoreImages = async (
     return res
       .status(500)
       .json({ error: getErrorMessage(error) || "Failed to fetch more images" });
+  }
+};
+
+// AI intelligent app data search endpoint
+export const aiSearchAppData = async (req: Request, res: Response) => {
+  try {
+    const { query } = req.body;
+    if (!query || typeof query !== "string" || !query.trim()) {
+      return res.status(422).json({ error: "Query is required" });
+    }
+
+    // Fetch relevant data from your app
+    const posts = await Post.find().limit(100).lean();
+    const comments = await Comment.find().limit(100).lean();
+    const users = await User.find().limit(100).lean();
+
+    // Construct a prompt for Gemini/AI
+    const prompt = `\n      You are an assistant with access to the following app data:\n      - Posts: ${JSON.stringify(posts)}\n      - Comments: ${JSON.stringify(comments)}\n      - Users: ${JSON.stringify(users)}\n      User question: \"${query}\"\n      Answer intelligently using the app data above.\n    `;
+
+    // Call Gemini/AI as before
+    const aiResponse = await generateWithGemini(prompt);
+    res.json({ result: aiResponse });
+  } catch (err) {
+    res.status(500).json({ error: getErrorMessage(err) });
   }
 };

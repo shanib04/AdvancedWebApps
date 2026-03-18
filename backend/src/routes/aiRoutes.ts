@@ -3,6 +3,7 @@ import {
   generateInitialDraft,
   getMoreImages,
   refineText,
+  aiSearchAppData,
 } from "../controllers/aiController";
 import authMiddleware from "../middleware/authMiddleware";
 
@@ -116,5 +117,42 @@ router.post("/refine-text", authMiddleware, refineText);
  *         description: Unsplash or server error
  */
 router.post("/getMoreImages", authMiddleware, getMoreImages);
+
+/**
+ * @swagger
+ * /api/ai/search:
+ *   post:
+ *     summary: AI-powered search over app data
+ *     tags: [AI]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               query:
+ *                 type: string
+ *                 example: "Which user has the most posts?"
+ *     responses:
+ *       200:
+ *         description: AI search result
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 result:
+ *                   type: string
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       422:
+ *         $ref: '#/components/responses/ValidationError'
+ *       500:
+ *         description: AI provider or server error
+ */
+router.post("/search", authMiddleware, aiSearchAppData);
 
 export default router;

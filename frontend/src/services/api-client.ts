@@ -95,3 +95,6 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
+
+export const aiSearchAppData = (query: string) =>
+  apiClient.post("/api/ai/search", { query });

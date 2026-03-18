@@ -5,6 +5,7 @@ import LoginForm from "./components/LoginForm";
 import HomeFeed from "./components/HomeFeed";
 import PostDetailsPage from "./pages/PostDetailsPage";
 import UserProfilePage from "./pages/UserProfilePage";
+import AISearchWidget from "./components/AISearchWidget";
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
   const accessToken = localStorage.getItem("accessToken");
@@ -52,6 +53,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UserProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-search"
+          element={
+            <ProtectedRoute>
+              <AISearchWidget />
             </ProtectedRoute>
           }
         />

@@ -21,6 +21,7 @@ import "../styles/feed-modern.css";
 import { normalizePhotoUrl } from "../utils/photoUtils";
 import { mergePostIntoList } from "../utils/postState";
 import apiClient from "../services/api-client";
+import AISearchWidget from "./AISearchWidget";
 
 type InitialDraftPayload = {
   text: string;
@@ -463,6 +464,12 @@ function HomeFeed() {
                 isSavedMode ? "saved" : isLikedMode ? "liked" : "home"
               }
             />
+            {/* AI Search Widget below sidebar */}
+            {!isSavedMode && !isLikedMode && (
+              <div className="mt-4">
+                <AISearchWidget />
+              </div>
+            )}
           </aside>
 
           <section className="col-12 col-lg-6">
