@@ -67,6 +67,76 @@ const candidateModels = [
   "gemini-2.0-flash",
 ];
 
+const MAX_AI_SEARCH_QUERY_LENGTH = 500;
+
+const buildAiSearchPrompt = ({
+  posts,
+  comments,
+  users,
+  query,
+}: {
+  posts: unknown[];
+  comments: unknown[];
+  users: unknown[];
+  query: string;
+}) => `You are an assistant answering questions about a social app dataset.
+Use ONLY the provided data.
+
+Output rules:
+- Keep the response concise (maximum 80 words).
+- Prefer one short paragraph or up to 3 bullet points.
+- Include only user-relevant conclusions.
+- Use display names/usernames instead of internal IDs.
+- Do NOT use markdown formatting such as **bold**, _italics_, backticks, or headings.
+- Do NOT include step-by-step calculations unless the user explicitly asks for details.
+- If data is missing, say so briefly.
+
+App data:
+Posts: ${JSON.stringify(posts)}
+Comments: ${JSON.stringify(comments)}
+Users: ${JSON.stringify(users)}
+
+User question: "${query}"`;
+
+const sanitizeAiSearchResponse = (text: string) =>
+  text
+    .replace(/```/g, "")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/__(.*?)__/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/(^|\s)[*_]+(?=\S)/g, "$1")
+    .replace(/(?<=\S)[*_]+(?=\s|$)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const shortenAiSearchResponse = (text: string) =>
+  sanitizeAiSearchResponse(text).slice(0, 320);
+
+const getAiSearchErrorDetails = (error: unknown) => {
+  const message = getErrorMessage(error);
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("gemini_api_key") ||
+    normalized.includes("api key") ||
+    normalized.includes("quota") ||
+    normalized.includes("rate limit") ||
+    normalized.includes("unavailable") ||
+    normalized.includes("timed out") ||
+    normalized.includes("no supported gemini model")
+  ) {
+    return {
+      statusCode: 503,
+      message: "AI search is temporarily unavailable. Please try again in a moment.",
+    };
+  }
+
+  return {
+    statusCode: 500,
+    message: "Failed to search app data with AI.",
+  };
+};
+
 const generateWithGemini = async (prompt: string) => {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
@@ -321,18 +391,42 @@ export const aiSearchAppData = async (req: Request, res: Response) => {
       return res.status(422).json({ error: "Query is required" });
     }
 
+    const normalizedQuery = query.trim();
+    if (normalizedQuery.length > MAX_AI_SEARCH_QUERY_LENGTH) {
+      return res.status(422).json({
+        error: `Query must be ${MAX_AI_SEARCH_QUERY_LENGTH} characters or fewer`,
+      });
+    }
+
     // Fetch relevant data from your app
     const posts = await Post.find().limit(100).lean();
     const comments = await Comment.find().limit(100).lean();
     const users = await User.find().limit(100).lean();
 
-    // Construct a prompt for Gemini/AI
-    const prompt = `\n      You are an assistant with access to the following app data:\n      - Posts: ${JSON.stringify(posts)}\n      - Comments: ${JSON.stringify(comments)}\n      - Users: ${JSON.stringify(users)}\n      User question: \"${query}\"\n      Answer intelligently using the app data above.\n    `;
+    const prompt = buildAiSearchPrompt({
+      posts,
+      comments,
+      users,
+      query: normalizedQuery,
+    });
 
-    // Call Gemini/AI as before
-    const aiResponse = await generateWithGemini(prompt);
-    res.json({ result: aiResponse });
+    let aiResponse = sanitizeAiSearchResponse(await generateWithGemini(prompt));
+
+    if (aiResponse.length > 600) {
+      try {
+        aiResponse = sanitizeAiSearchResponse(
+          await generateWithGemini(
+            `Rewrite the text below as a concise answer in at most 80 words. Keep only the final useful result, use display names/usernames, avoid IDs, avoid long reasoning unless requested, and do not use markdown formatting.\n\n${aiResponse}`,
+          ),
+        );
+      } catch {
+        aiResponse = shortenAiSearchResponse(aiResponse);
+      }
+    }
+
+    return res.json({ result: aiResponse.trim() });
   } catch (err) {
-    res.status(500).json({ error: getErrorMessage(err) });
+    const errorDetails = getAiSearchErrorDetails(err);
+    return res.status(errorDetails.statusCode).json({ error: errorDetails.message });
   }
 };

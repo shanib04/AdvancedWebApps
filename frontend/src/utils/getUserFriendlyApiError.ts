@@ -98,6 +98,10 @@ export const getUserFriendlyApiError = (
     return "Too many requests. Please wait a moment and try again.";
   }
 
+  if (status === 503) {
+    return backendError || "This AI feature is temporarily unavailable. Please try again in a moment.";
+  }
+
   if (status >= 500) {
     return "Something went wrong on our side. Please try again in a moment.";
   }

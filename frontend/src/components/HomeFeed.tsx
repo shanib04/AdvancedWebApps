@@ -464,12 +464,6 @@ function HomeFeed() {
                 isSavedMode ? "saved" : isLikedMode ? "liked" : "home"
               }
             />
-            {/* AI Search Widget below sidebar */}
-            {!isSavedMode && !isLikedMode && (
-              <div className="mt-4">
-                <AISearchWidget />
-              </div>
-            )}
           </aside>
 
           <section className="col-12 col-lg-6">
@@ -529,9 +523,25 @@ function HomeFeed() {
 
           <aside className="col-lg-3 d-none d-lg-block">
             {!isSavedMode && !isLikedMode && (
-              <RightAIWidget
-                onInitialDraftGenerated={handleInitialDraftGenerated}
-              />
+              <div
+                className="position-sticky sidebar-scroll-soft"
+                style={{
+                  top: "85px",
+                  maxHeight: "calc(100vh - 100px)",
+                  overflowY: "auto",
+                  paddingRight: "4px",
+                }}
+              >
+                <RightAIWidget
+                  onInitialDraftGenerated={handleInitialDraftGenerated}
+                />
+                <div className="mt-4">
+                  <AISearchWidget
+                    posts={currentPosts}
+                    currentUserId={currentUserId}
+                  />
+                </div>
+              </div>
             )}
             {(isSavedMode || isLikedMode) && currentPosts.length > 0 && (
               <div className="position-sticky" style={{ top: "85px" }}>

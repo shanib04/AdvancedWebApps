@@ -293,4 +293,116 @@ describe("AI API", () => {
     expect(failure.statusCode).toBe(500);
     expect(failure.body).toHaveProperty("error");
   });
+
+  test("POST /api/ai/search should require auth", async () => {
+    const response = await request(testApp).post("/api/ai/search").send({
+      query: "Which user has the most posts?",
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  test("POST /api/ai/search should validate query", async () => {
+    const response = await request(testApp)
+      .post("/api/ai/search")
+      .set(authHeader(testUser))
+      .send({ query: "   " });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.body).toEqual({ error: "Query is required" });
+  });
+
+  test("POST /api/ai/search should validate excessive query length", async () => {
+    const response = await request(testApp)
+      .post("/api/ai/search")
+      .set(authHeader(testUser))
+      .send({ query: "a".repeat(501) });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.body).toEqual({
+      error: "Query must be 500 characters or fewer",
+    });
+  });
+
+  test("POST /api/ai/search should rewrite very long answers to concise output", async () => {
+    const veryLongAnswer = "A".repeat(700);
+
+    mockGenerateContent
+      .mockResolvedValueOnce({
+        response: {
+          text: () => veryLongAnswer,
+        },
+      })
+      .mockResolvedValueOnce({
+        response: {
+          text: () => "Top users by comments per post: www. Others are currently tied at 0.",
+        },
+      });
+
+    const response = await request(testApp)
+      .post("/api/ai/search")
+      .set(authHeader(testUser))
+      .send({ query: "Which users get the most comments per post?" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty("result");
+    expect(response.body.result).toBe(
+      "Top users by comments per post: www. Others are currently tied at 0.",
+    );
+    expect(mockGenerateContent).toHaveBeenCalledTimes(2);
+  });
+
+  test("POST /api/ai/search should strip markdown formatting characters", async () => {
+    mockGenerateContent.mockResolvedValueOnce({
+      response: {
+        text: () =>
+          "The most active users are: **Shani B** (2 posts), **Itay Ram** (3 posts) and **www** (1 post).",
+      },
+    });
+
+    const response = await request(testApp)
+      .post("/api/ai/search")
+      .set(authHeader(testUser))
+      .send({ query: "Who are the most active users?" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.result).toBe(
+      "The most active users are: Shani B (2 posts), Itay Ram (3 posts) and www (1 post).",
+    );
+  });
+
+  test("POST /api/ai/search should fall back to a shortened answer if rewrite fails", async () => {
+    const veryLongAnswer = `Intro ${"Detailed answer ".repeat(60)}`;
+
+    mockGenerateContent
+      .mockResolvedValueOnce({
+        response: {
+          text: () => veryLongAnswer,
+        },
+      })
+      .mockRejectedValue(new Error("rewrite step failed"));
+
+    const response = await request(testApp)
+      .post("/api/ai/search")
+      .set(authHeader(testUser))
+      .send({ query: "What are the top liked posts?" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.result.length).toBeLessThanOrEqual(320);
+    expect(response.body.result).toContain("Detailed answer");
+  });
+
+  test("POST /api/ai/search should return 503 when AI service is unavailable", async () => {
+    mockGenerateContent.mockRejectedValue(new Error("No supported Gemini model succeeded"));
+
+    const response = await request(testApp)
+      .post("/api/ai/search")
+      .set(authHeader(testUser))
+      .send({ query: "Which user has the most posts?" });
+
+    expect(response.statusCode).toBe(503);
+    expect(response.body).toEqual({
+      error: "AI search is temporarily unavailable. Please try again in a moment.",
+    });
+  });
 });

@@ -58,55 +58,53 @@ function RightAIWidget({ onInitialDraftGenerated }: RightAIWidgetProps) {
   };
 
   return (
-    <aside className="position-sticky" style={{ top: "90px" }}>
-      <div className="card border-0 shadow-sm rounded-5 ai-widget-card">
-        <div className="card-body p-4">
-          <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
-            <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
-            AI Post Assistant
-          </h5>
-          <textarea
-            className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
-            rows={4}
-            placeholder="What should the AI write about?"
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
+    <div className="card border-0 shadow-sm rounded-5 ai-widget-card">
+      <div className="card-body p-4">
+        <h5 className="fw-bold mb-3 d-flex align-items-center gap-2">
+          <Sparkles size={18} strokeWidth={2.2} className="text-primary" />
+          AI Post Assistant
+        </h5>
+        <textarea
+          className="form-control rounded-4 mb-3 app-scrollbar ai-assistant-prompt"
+          rows={4}
+          placeholder="What should the AI write about?"
+          value={prompt}
+          onChange={(event) => setPrompt(event.target.value)}
+        />
+
+        <div className="form-check form-switch mb-3">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="include-ai-images"
+            checked={includeImages}
+            onChange={(event) => setIncludeImages(event.target.checked)}
           />
-
-          <div className="form-check form-switch mb-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              role="switch"
-              id="include-ai-images"
-              checked={includeImages}
-              onChange={(event) => setIncludeImages(event.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="include-ai-images">
-              Include images from the internet
-            </label>
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-primary w-100 rounded-pill"
-            disabled={isLoading}
-            onClick={handleGenerate}
-          >
-            {isLoading ? (
-              <span className="d-inline-flex align-items-center gap-2">
-                <span className="spinner-border spinner-border-sm" />
-                Generating...
-              </span>
-            ) : (
-              "Generate Post"
-            )}
-          </button>
-
-          {error && <p className="text-danger small mt-2 mb-0">{error}</p>}
+          <label className="form-check-label" htmlFor="include-ai-images">
+            Include images from the internet
+          </label>
         </div>
+
+        <button
+          type="button"
+          className="btn btn-primary w-100 rounded-pill"
+          disabled={isLoading}
+          onClick={handleGenerate}
+        >
+          {isLoading ? (
+            <span className="d-inline-flex align-items-center gap-2">
+              <span className="spinner-border spinner-border-sm" />
+              Generating...
+            </span>
+          ) : (
+            "Generate Post"
+          )}
+        </button>
+
+        {error && <p className="text-danger small mt-2 mb-0">{error}</p>}
       </div>
-    </aside>
+    </div>
   );
 }
 
