@@ -10,6 +10,7 @@ import {
 import { normalizePhotoUrl, defaultUserPhotoUrl } from "../utils/photoUtils";
 import { formatDateTimeLocal } from "../utils/dateUtils";
 import { mergePostState } from "../utils/postState";
+import AiSuggestionBox from "./AiSuggestionBox";
 
 interface PostCardProps {
   post: Post;
@@ -35,6 +36,8 @@ function PostCard({
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(post.content);
+  const [isRefiningEditText, setIsRefiningEditText] = useState(false);
+  const [editSuggestedText, setEditSuggestedText] = useState("");
   const [editedImageFile, setEditedImageFile] = useState<File | null>(null);
   const [editImageSearchText, setEditImageSearchText] = useState("");
   const [editFetchedImages, setEditFetchedImages] = useState<string[]>([]);
@@ -342,6 +345,38 @@ function PostCard({
     }
   };
 
+  const handleRefineEditText = async () => {
+    const currentText = editedContent.trim();
+
+    if (!currentText) {
+      return;
+    }
+
+    setIsRefiningEditText(true);
+
+    try {
+      const response = await apiClient.post("/api/ai/refine-text", {
+        text: currentText,
+      });
+
+      const nextSuggestedText =
+        typeof response.data?.text === "string"
+          ? response.data.text.trim()
+          : "";
+
+      if (!nextSuggestedText) {
+        onActionFailed("AI did not return a refined text suggestion.");
+        return;
+      }
+
+      setEditSuggestedText(nextSuggestedText);
+    } catch (error: unknown) {
+      onActionFailed(getUserFriendlyApiError(error, "Failed to refine text."));
+    } finally {
+      setIsRefiningEditText(false);
+    }
+  };
+
   const handleToggleEditInternetImageMode = () => {
     if (isEditInternetImageMode) {
       setIsClosingEditInternetPanel(true);
@@ -446,6 +481,18 @@ function PostCard({
               onChange={(event) => setEditedContent(event.target.value)}
             />
 
+            {editSuggestedText && (
+              <AiSuggestionBox
+                text={editSuggestedText}
+                wrapperClassName="mt-1 mb-2 px-1"
+                onApply={() => {
+                  setEditedContent(editSuggestedText);
+                  setEditSuggestedText("");
+                }}
+                onDiscard={() => setEditSuggestedText("")}
+              />
+            )}
+
             <input
               type="file"
               accept="image/*"
@@ -522,6 +569,23 @@ function PostCard({
                         <span className="visually-hidden">Image attached</span>
                       </span>
                     )}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-outline-primary btn-sm rounded-pill d-inline-flex align-items-center gap-2 ai-refine-btn"
+                  onClick={handleRefineEditText}
+                  disabled={
+                    !editedContent.trim() || isRefiningEditText || isSavingEdit
+                  }
+                >
+                  <span
+                    className="material-symbols-outlined"
+                    style={{ fontSize: "18px" }}
+                  >
+                    auto_awesome
+                  </span>
+                  {isRefiningEditText ? "Refining..." : "Refine text using AI"}
                 </button>
               </div>
             </div>

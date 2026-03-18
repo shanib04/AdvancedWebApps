@@ -9,6 +9,7 @@ import {
   getUserFriendlyApiError,
 } from "../utils/getUserFriendlyApiError";
 import { defaultUserPhotoUrl } from "../utils/photoUtils";
+import AiSuggestionBox from "./AiSuggestionBox";
 
 const createPostSchema = z.object({
   text: z.string().min(1, "Post text is required."),
@@ -32,6 +33,8 @@ function CreatePostBox({
 }: CreatePostBoxProps) {
   const [createImageSearchText, setCreateImageSearchText] = useState("");
   const [createImages, setCreateImages] = useState<string[]>([]);
+  const [isRefining, setIsRefining] = useState(false);
+  const [suggestedText, setSuggestedText] = useState("");
   const [selectedCreateImage, setSelectedCreateImage] = useState<string | null>(
     null,
   );
@@ -67,6 +70,38 @@ function CreatePostBox({
       }
     };
   }, [selectedImagePreview]);
+
+  const handleRefineText = async () => {
+    const currentText = watch("text")?.trim() || "";
+
+    if (!currentText) {
+      return;
+    }
+
+    setIsRefining(true);
+
+    try {
+      const response = await apiClient.post("/api/ai/refine-text", {
+        text: currentText,
+      });
+
+      const nextSuggestedText =
+        typeof response.data?.text === "string"
+          ? response.data.text.trim()
+          : "";
+
+      if (!nextSuggestedText) {
+        onActionFailed("AI did not return a refined text suggestion.");
+        return;
+      }
+
+      setSuggestedText(nextSuggestedText);
+    } catch (error: unknown) {
+      onActionFailed(getUserFriendlyApiError(error, "Failed to refine text."));
+    } finally {
+      setIsRefining(false);
+    }
+  };
 
   const handleFetchCreateImages = async () => {
     if (!isCreateInternetImageMode) {
@@ -167,6 +202,7 @@ function CreatePostBox({
       }
 
       onActionSuccess("Post created successfully.");
+      setSuggestedText("");
       setCreateImageSearchText("");
       setCreateImages([]);
       setSelectedCreateImage(null);
@@ -209,12 +245,28 @@ function CreatePostBox({
           </div>
           <p
             className="text-danger small mt-1 mb-0 ms-2"
-            style={{ minHeight: "1.25rem" }}
+            style={{ minHeight: errors.text?.message ? "1.25rem" : "0.35rem" }}
           >
-            {errors.text?.message || "\u00A0"}
+            {errors.text?.message || ""}
           </p>
         </div>
       </div>
+      {suggestedText && (
+        <div className="mb-4 mt-2 px-2">
+          <AiSuggestionBox
+            text={suggestedText}
+            wrapperClassName="mt-1"
+            onApply={() => {
+              setValue("text", suggestedText, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+              setSuggestedText("");
+            }}
+            onDiscard={() => setSuggestedText("")}
+          />
+        </div>
+      )}
 
       <input
         id="image"
@@ -436,6 +488,21 @@ function CreatePostBox({
                   <span className="visually-hidden">Image attached</span>
                 </span>
               )}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm rounded-pill d-inline-flex align-items-center gap-2 ai-refine-btn"
+            onClick={handleRefineText}
+            disabled={!watch("text")?.trim() || isRefining || isSubmitting}
+          >
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: "18px" }}
+            >
+              auto_awesome
+            </span>
+            {isRefining ? "Refining..." : "Refine text using AI"}
           </button>
         </div>
 

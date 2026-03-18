@@ -164,21 +164,39 @@ describe("AI API", () => {
     });
   });
 
-  test("POST /api/ai/refineText should validate fields and return refined text", async () => {
-    const missingCurrent = await request(testApp)
-      .post("/api/ai/refineText")
+  test("POST /api/ai/refine-text should require auth", async () => {
+    const response = await request(testApp)
+      .post("/api/ai/refine-text")
+      .send({ text: "Improve this text" });
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  test("POST /api/ai/refine-text should validate input and refine quick text", async () => {
+    const missingText = await request(testApp)
+      .post("/api/ai/refine-text")
       .set(authHeader(testUser))
       .send({ instruction: "shorten" });
 
-    expect(missingCurrent.statusCode).toBe(422);
+    expect(missingText.statusCode).toBe(422);
+    expect(missingText.body).toEqual({ error: "text is required" });
 
-    const missingInstruction = await request(testApp)
-      .post("/api/ai/refineText")
+    mockGenerateContent.mockResolvedValueOnce({
+      response: {
+        text: () => "```Refined post text```",
+      },
+    });
+
+    const refined = await request(testApp)
+      .post("/api/ai/refine-text")
       .set(authHeader(testUser))
-      .send({ currentText: "hello world" });
+      .send({ text: "today i learned hooks" });
 
-    expect(missingInstruction.statusCode).toBe(422);
+    expect(refined.statusCode).toBe(200);
+    expect(refined.body).toEqual({ text: "Refined post text" });
+  });
 
+  test("POST /api/ai/refine-text should refine instruction-based text", async () => {
     mockGenerateContent
       .mockRejectedValueOnce(new Error("first model failed"))
       .mockResolvedValueOnce({
@@ -187,25 +205,8 @@ describe("AI API", () => {
         },
       });
 
-    const recovered = await request(testApp)
-      .post("/api/ai/refineText")
-      .set(authHeader(testUser))
-      .send({
-        currentText: "This is a long sentence",
-        instruction: "Make it short",
-      });
-
-    expect(recovered.statusCode).toBe(200);
-    expect(recovered.body).toEqual({ text: "Recovered refined text" });
-
-    mockGenerateContent.mockResolvedValueOnce({
-      response: {
-        text: () => "```Refined text```",
-      },
-    });
-
     const refined = await request(testApp)
-      .post("/api/ai/refineText")
+      .post("/api/ai/refine-text")
       .set(authHeader(testUser))
       .send({
         currentText: "This is a long sentence",
@@ -213,19 +214,16 @@ describe("AI API", () => {
       });
 
     expect(refined.statusCode).toBe(200);
-    expect(refined.body).toEqual({ text: "Refined text" });
+    expect(refined.body).toEqual({ text: "Recovered refined text" });
   });
 
-  test("POST /api/ai/refineText should return 500 when all Gemini models fail", async () => {
+  test("POST /api/ai/refine-text should return 500 when Gemini fails", async () => {
     mockGenerateContent.mockRejectedValue(new Error("all models failed"));
 
     const response = await request(testApp)
-      .post("/api/ai/refineText")
+      .post("/api/ai/refine-text")
       .set(authHeader(testUser))
-      .send({
-        currentText: "Long sentence",
-        instruction: "Shorten it",
-      });
+      .send({ text: "hello world" });
 
     expect(response.statusCode).toBe(500);
     expect(response.body).toHaveProperty("error", "all models failed");

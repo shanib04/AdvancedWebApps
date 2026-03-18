@@ -63,7 +63,7 @@ function HomeDraftStudio({
     setIsRefiningDraft(true);
 
     try {
-      const response = await apiClient.post("/api/ai/refineText", {
+      const response = await apiClient.post("/api/ai/refine-text", {
         currentText: draftText,
         instruction: refineInstruction,
       });
@@ -193,9 +193,7 @@ function HomeDraftStudio({
       onActionSuccess("Post published successfully.");
       onClose();
     } catch (error: unknown) {
-      onActionFailed(
-        getUserFriendlyApiError(error, "Failed to publish post."),
-      );
+      onActionFailed(getUserFriendlyApiError(error, "Failed to publish post."));
     } finally {
       setIsPublishingDraft(false);
     }
